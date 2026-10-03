@@ -1,3 +1,4 @@
+#if DEBUG
 import Foundation
 
 /// Imports mail passwords from a dotenv file:
@@ -33,3 +34,4 @@ enum EnvImport {
         return imported
     }
 }
+#endif

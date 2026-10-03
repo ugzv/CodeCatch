@@ -15,10 +15,6 @@ enum Entry {
             MainActor.assumeIsolated { Snapshot.run(to: args[i + 1]) }
             exit(0)
         }
-        #endif
-        // Snapshots must never migrate real credentials; imports must follow migration.
-        Secrets.migrateFile()
-        #if DEBUG
         if let i = args.firstIndex(of: "--import-env") {
             guard i + 1 < args.count else { print("Usage: CodeCatch --import-env <path/to/.env>"); exit(1) }
             var accounts = MailAccount.load()

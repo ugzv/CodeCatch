@@ -31,8 +31,6 @@ struct CodeItem: Identifiable, Equatable {
     var isLink: Bool { code.isEmpty }
     /// What Copy puts on the clipboard.
     var copyValue: String { isLink ? link?.absoluteString ?? "" : code }
-    /// Matches old dismissals after their code or link has been removed.
-    var legacyDismissKey: String { "legacy:\(sender.lowercased())|\(Int(received.timeIntervalSince1970))" }
 
     func shouldAnnounce(at date: Date) -> Bool {
         date.timeIntervalSince(received) < 180 && date < expires

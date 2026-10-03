@@ -25,16 +25,4 @@ enum Prefs {
     }
 
     static subscript(_ key: String) -> Bool { UserDefaults.standard.bool(forKey: key) }
-
-    /// Old records contained the code or full sign-in URL between sender and date.
-    static func migrateDismissals(in defaults: UserDefaults = .standard) {
-        guard let saved = defaults.stringArray(forKey: dismissed) else { return }
-        let migrated = saved.compactMap { key -> String? in
-            if key.hasPrefix("message:") || key.hasPrefix("legacy:") { return key }
-            let parts = key.split(separator: "|", omittingEmptySubsequences: false)
-            guard parts.count >= 3, let timestamp = parts.last, Int(timestamp) != nil else { return nil }
-            return "legacy:\(parts[0])|\(timestamp)"
-        }
-        if migrated != saved { defaults.set(migrated, forKey: dismissed) }
-    }
 }

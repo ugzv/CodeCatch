@@ -7,7 +7,9 @@ struct SourcesTab: View {
     @AppStorage(Prefs.appleMail) private var appleMailEnabled = false
     @Local private var editing: MailAccount?
     @Local private var adding = false
+    #if DEBUG
     @Local private var importResult: String?
+    #endif
     @Local private var bitwarden = false
     @Local private var vaultError: String?
 
@@ -65,6 +67,7 @@ struct SourcesTab: View {
                     }
                 }
                 HStack {
+                    #if DEBUG
                     Menu {
                         Button("Add Mail Account…") { adding = true }
                         Button("Import from .env…", action: importEnv)
@@ -76,6 +79,10 @@ struct SourcesTab: View {
                     .fixedSize()
                     Spacer()
                     if let importResult { Text(importResult).font(.caption).foregroundStyle(.secondary) }
+                    #else
+                    Button("Add Account…") { adding = true }
+                    Spacer()
+                    #endif
                 }
             }
 
@@ -171,6 +178,7 @@ struct SourcesTab: View {
         }
     }
 
+    #if DEBUG
     private func importEnv() {
         let panel = NSOpenPanel()
         panel.showsHiddenFiles = true
@@ -185,4 +193,5 @@ struct SourcesTab: View {
             importResult = error.localizedDescription
         }
     }
+    #endif
 }

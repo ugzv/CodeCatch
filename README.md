@@ -94,10 +94,9 @@ provider. On a fresh install, Google offers an app-password setup with the serve
 filled in. [Google app passwords](https://support.google.com/accounts/answer/185833)
 require 2-Step Verification and are unavailable for some managed accounts and
 Advanced Protection accounts. **Sign in with Google** (IMAP XOAUTH2) appears when
-a Google OAuth client has been configured. To import passwords
+a Google OAuth client has been configured. Debug builds can import passwords
 from a `.env` file (every `X_USER=<email>` + `X_PASS` pair, plus
-`GOOGLE_CLIENT_ID/SECRET` for Google sign-in), use *Import from .env…*.
-Developer builds also accept:
+`GOOGLE_CLIENT_ID/SECRET` for Google sign-in) with *Import from .env…* or:
 
 ```bash
 .build/debug/CodeCatch --import-env path/to/.env
@@ -172,7 +171,7 @@ Bitwarden CLI installation and login; it is optional for Messages and mail.
 
 Received codes live in memory and are re-read from the sources on launch.
 Dismissed messages are remembered by source identifiers, without their code or
-sign-in link; older dismissal records have those secrets removed on launch.
+sign-in link.
 Service logos load through Google's favicon service and are on by default.
 Google receives your IP address and the requested service domain; CodeCatch does
 not contact service websites for logos. Turn off **Show Service Logos** in
@@ -181,8 +180,7 @@ Settings → Privacy to stop logo requests. Cached logos stay on this Mac. An ex
 On disk are the settings (UserDefaults), cached service logos
 (`~/Library/Caches/CodeCatch/Icons`) and the mail credentials, in the login
 Keychain (service `com.uros.codecatch`). Builds signed by the same team read them
-without asking; any other binary gets a Keychain prompt. An older
-`passwords.json` is moved into the Keychain on launch and deleted. Imported
+without asking; any other binary gets a Keychain prompt. Imported
 Bitwarden TOTP secrets are one more login-Keychain item; CodeCatch gates access
 with macOS authentication for each session. This is an app session lock, not a
 new biometric access-control policy on the Keychain item. *Remove* in Settings

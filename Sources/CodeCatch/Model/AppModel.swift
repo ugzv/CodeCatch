@@ -79,7 +79,6 @@ final class AppModel: ObservableObject {
     }
 
     func start() {
-        Prefs.migrateDismissals(in: defaults)
         Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.tick() }
         }
@@ -223,7 +222,7 @@ final class AppModel: ObservableObject {
         let detectedLink = message.isMail ? SignInLink.find(in: message.links, subject: message.subject ?? "") : nil
         let link = monitoring(Prefs.signInLinks) ? detectedLink : nil
         let item = CodeItem(message, code: code, link: link)
-        guard !dismissed.contains(item.dismissKey), !dismissed.contains(item.legacyDismissKey) else { return }
+        guard !dismissed.contains(item.dismissKey) else { return }
         if code != nil || detectedLink != nil { recovery.remove(messageKey: message.dismissKey) }
         guard code != nil || link != nil else {
             if monitoring(Prefs.receivedCodes), detectedLink == nil { recovery.record(message) }

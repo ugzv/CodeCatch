@@ -16,21 +16,6 @@ private func message(_ text: String, at date: Date) -> IncomingMessage {
     #expect(CodeItem(first, code: "482913", link: nil).dismissKey != CodeItem(second, code: "482913", link: nil).dismissKey)
 }
 
-@Test func upgradingDismissalsRemovesOldSecretsAndKeepsSuppression() throws {
-    let suite = "CodeCatchTests.\(UUID())"
-    let defaults = try #require(UserDefaults(suiteName: suite))
-    defer { defaults.removePersistentDomain(forName: suite) }
-    let item = CodeItem(message("Your code is 482913", at: Date(timeIntervalSince1970: 1_700_000_000)), code: "482913", link: nil)
-    defaults.set(["sender@example.com|482913|1700000000", "sender@example.com|https://example.com/?token=private-token|1700000001"], forKey: Prefs.dismissed)
-    Prefs.migrateDismissals(in: defaults)
-    let saved = try #require(defaults.stringArray(forKey: Prefs.dismissed))
-    #expect(saved.contains(item.legacyDismissKey))
-    #expect(!saved.joined().contains("482913"))
-    #expect(!saved.joined().contains("private-token"))
-    Prefs.migrateDismissals(in: defaults)
-    #expect(defaults.stringArray(forKey: Prefs.dismissed) == saved)
-}
-
 @Test func dismissalDoesNotPersistCodesOrSignInTokens() {
     let date = Date(timeIntervalSince1970: 1_700_000_000)
     let code = CodeItem(message("Your code is 482913", at: date), code: "482913", link: nil)

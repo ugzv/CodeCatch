@@ -57,16 +57,4 @@ enum Secrets {
         let status = SecItemDelete(query(account) as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else { throw Failure(status: status) }
     }
-
-    /// Older builds kept secrets in a 0600 JSON file: move them into the Keychain,
-    /// deleting the file only once every one reads back.
-    static func migrateFile() {
-        let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("CodeCatch/passwords.json")
-        guard let data = try? Data(contentsOf: url), let all = try? JSONDecoder().decode([String: String].self, from: data) else { return }
-        guard (try? all.forEach { try set($0.value, for: $0.key) }) != nil, all.allSatisfy({ get($0.key) == $0.value }) else {
-            return NSLog("CodeCatch: moving passwords.json into the Keychain failed; retrying at next launch")
-        }
-        try? FileManager.default.removeItem(at: url)
-    }
 }
