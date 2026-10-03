@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>About | CodeCatch</title>
-<meta name="description" content="Who makes CodeCatch, what it stands for and how to get in touch.">
-<link rel="canonical" href="https://codecatch.app/about/">
+<title>How to get text messages on your Mac (SMS and iMessage)</title>
+<meta name="description" content="Set up your Mac to get the SMS and iMessage texts your iPhone gets, fix messages that do not sync, and see what works with an Android phone.">
+<link rel="canonical" href="https://codecatch.app/guides/text-messages-on-mac/">
 <meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#100d0e" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:site_name" content="CodeCatch">
-<meta property="og:url" content="https://codecatch.app/about/">
-<meta property="og:title" content="About | CodeCatch">
-<meta property="og:description" content="Who makes CodeCatch, what it stands for and how to get in touch.">
+<meta property="og:url" content="https://codecatch.app/guides/text-messages-on-mac/">
+<meta property="og:title" content="How to get text messages on your Mac (SMS and iMessage)">
+<meta property="og:description" content="Set up your Mac to get the SMS and iMessage texts your iPhone gets, fix messages that do not sync, and see what works with an Android phone.">
 <meta property="og:image" content="https://codecatch.app/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
@@ -23,18 +23,28 @@
  "@context": "https://schema.org",
  "@graph": [
   {
-   "@type": "AboutPage",
-   "@id": "https://codecatch.app/about/#page",
-   "name": "A small Mac app, made in the open",
-   "description": "Who makes CodeCatch, what it stands for and how to get in touch.",
-   "url": "https://codecatch.app/about/",
-   "inLanguage": "en",
+   "@type": "TechArticle",
+   "@id": "https://codecatch.app/guides/text-messages-on-mac/#article",
+   "headline": "How to get text messages on your Mac (SMS and iMessage)",
+   "name": "How to get text messages on your Mac",
+   "description": "Set up your Mac to get the SMS and iMessage texts your iPhone gets, fix messages that do not sync, and see what works with an Android phone.",
+   "image": "https://codecatch.app/assets/og.png",
+   "datePublished": "2026-10-03",
    "dateModified": "2026-10-03",
-   "mainEntity": {
+   "inLanguage": "en",
+   "author": {
     "@id": "https://codecatch.app/about/#author"
    },
    "publisher": {
     "@id": "https://codecatch.app/#org"
+   },
+   "mainEntityOfPage": "https://codecatch.app/guides/text-messages-on-mac/",
+   "about": {
+    "@type": "SoftwareApplication",
+    "name": "CodeCatch",
+    "operatingSystem": "macOS",
+    "applicationCategory": "UtilitiesApplication",
+    "url": "https://codecatch.app/"
    }
   },
   {
@@ -73,10 +83,55 @@
     {
      "@type": "ListItem",
      "position": 2,
-     "name": "About",
-     "item": "https://codecatch.app/about/"
+     "name": "How to get text messages on your Mac (SMS and iMessage)",
+     "item": "https://codecatch.app/guides/text-messages-on-mac/"
     }
    ]
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+ {
+  "@type": "Question",
+  "name": "Why do some texts reach my Mac and others don’t?",
+  "acceptedAnswer": {
+   "@type": "Answer",
+   "text": "Blue messages are iMessage and reach your Mac by themselves. Green messages are SMS or RCS. They go to your iPhone first, and reach your Mac only when Messages in iCloud or Text Message Forwarding is on."
+  }
+ },
+ {
+  "@type": "Question",
+  "name": "Does my iPhone have to be near my Mac?",
+  "acceptedAnswer": {
+   "@type": "Answer",
+   "text": "No. It has to be switched on and online, on Wi-Fi or mobile data. It does not need to be on the same network as your Mac."
+  }
+ },
+ {
+  "@type": "Question",
+  "name": "Can I get text messages on a Mac without an iPhone?",
+  "acceptedAnswer": {
+   "@type": "Answer",
+   "text": "You can get iMessages with only an Apple Account. SMS texts need an iPhone to receive them. With an Android phone, use Google Messages for web in your browser."
+  }
+ },
+ {
+  "@type": "Question",
+  "name": "Why do verification codes not show up on my Mac?",
+  "acceptedAnswer": {
+   "@type": "Answer",
+   "text": "Most codes are sent by SMS, so they need Messages in iCloud or Text Message Forwarding. Check that your Mac is switched on in the forwarding list on your iPhone."
+  }
+ },
+ {
+  "@type": "Question",
+  "name": "Is it free?",
+  "acceptedAnswer": {
+   "@type": "Answer",
+   "text": "Yes. Both ways are built into the iPhone and the Mac. Your carrier may still charge for the SMS itself."
+  }
+ }
+]
   }
  ]
 }
@@ -99,89 +154,84 @@
 </header>
 
 <main>
-<section class="vs-hero about-hero">
-  <p class="eyebrow">About</p>
-  <h1>A small Mac app, made in the open</h1>
-  <p class="lede">CodeCatch reads your messages to find sign-in codes. An app like that should tell you who makes it, how it is built and what it never will do.</p>
-</section>
+<article class="article">
+  <header class="vs-hero">
+    <p class="eyebrow">Guide</p>
+    <h1>How to get text messages on your Mac</h1>
+    <p class="lede">Two ways to get the texts your iPhone gets on your Mac, what to check when they don’t arrive, and what works with Android.</p>
+    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/about/" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-03">Published 3 October 2026</time></span></p>
+  </header>
+  <div class="prose">
+    <p>Your Mac can show the same text messages as your iPhone. iMessages (blue) arrive by themselves. SMS texts (green) need one switch turned on. This guide covers both.</p>
 
-<section class="features about-blocks">
-  <article class="feature">
-    <div class="feature-copy">
-      <p class="eyebrow">Who makes it</p>
-      <h2>One person, working in public</h2>
-      <p>CodeCatch is built and maintained by Uros Gazvoda. Every change is on GitHub, with the reason for it.</p>
-      <div class="actions">
-        <a class="button quiet" href="https://github.com/ugzv" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>github.com/ugzv</a>
-        <a class="button quiet" href="/changelog/">Changelog</a>
-      </div>
-    </div>
-    <div class="feature-art" aria-hidden="true">
-      <div class="cc">
-        <div class="popover floating">
-          <div class="popover-head"><svg class="mark" viewBox="208 208 608 608"><use href="#mark"/></svg><b>CodeCatch</b></div>
-          <div class="section-title"><span>Recent changes</span><span>October 2026</span></div>
-          <ul class="rows">
-            <li class="row"><div class="tile s32 brandtile"><svg class="mark mono" viewBox="208 208 608 608"><use href="#mark"/></svg></div><div class="row-who"><b>Apple Mail <i>3 Oct</i></b><span>Codes from the Mail app, no sign-in</span></div></li>
-            <li class="row"><div class="tile s32 brandtile"><svg class="mark mono" viewBox="208 208 608 608"><use href="#mark"/></svg></div><div class="row-who"><b>One lock for every code <i>3 Oct</i></b><span>Touch ID or your Mac password</span></div></li>
-            <li class="row"><div class="tile s32 brandtile"><svg class="mark mono" viewBox="208 208 608 608"><use href="#mark"/></svg></div><div class="row-who"><b>New app icon <i>30 Sep</i></b><span></span></div></li>
-            <li class="row"><div class="tile s32 brandtile"><svg class="mark mono" viewBox="208 208 608 608"><use href="#mark"/></svg></div><div class="row-who"><b>First version <i>29 Sep</i></b><span>Messages, mail, sign-in links, Bitwarden</span></div></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </article>
+    <p class="callout"><b>Short answer:</b> on your iPhone, open <b>Settings → Apps → Messages → Text Message Forwarding</b> and switch on your Mac. Both devices must use the same Apple Account.</p>
 
-  <article class="feature flip">
-    <div class="feature-copy">
-      <p class="eyebrow">How it is built</p>
-      <h2>Nothing hidden inside</h2>
-      <p>A native Mac app, written in Swift. The only third-party code is Sparkle, which installs updates. There are no analytics.</p>
-      <ul class="ticks">
-        <li>Every code it misses becomes a test</li>
-        <li>Signed with a Developer ID, so macOS knows who made it</li>
-        <li>One build for Apple silicon and Intel</li>
-      </ul>
-    </div>
-    <div class="feature-art" aria-hidden="true">
-      <div class="cc">
-        <div class="settings floating about-facts">
-          <p class="set-title">CodeCatch in numbers</p>
-          <ul class="set-group">
-            <li><span class="icon-tile" style="--c:#30b0c7"><svg viewBox="0 0 24 24"><use href="#i-globe"/></svg></span><span class="set-text"><b>Languages read</b><span>From English to Japanese and Arabic</span></span><span class="value">35</span></li>
-            <li><span class="icon-tile" style="--c:#34c759"><svg viewBox="0 0 24 24"><use href="#i-bubble"/></svg></span><span class="set-text"><b>Sample messages</b><span>What code detection is tested on</span></span><span class="value">380+</span></li>
-            <li><span class="icon-tile" style="--c:#8e8e93"><svg viewBox="0 0 24 24"><use href="#i-box"/></svg></span><span class="set-text"><b>Third-party libraries</b><span>Sparkle, for updates</span></span><span class="value">1</span></li>
-            <li><span class="icon-tile" style="--c:#0a7aff"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span><span class="set-text"><b>Accounts, servers, trackers</b><span>Your codes stay on your Mac</span></span><span class="value">0</span></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </article>
-</section>
+    <h2>Blue and green messages</h2>
+    <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">What it is</th><th scope="col">Reaches your Mac</th></tr></thead><tbody>
+<tr><th scope="row">Blue</th><td>iMessage, sent over the internet</td><td>Yes, once you sign in to Messages</td></tr>
+<tr><th scope="row">Green</th><td>SMS, MMS or RCS, sent through your carrier</td><td>Only with one of the two ways below</td></tr>
+</tbody></table></div>
+    <p>Bank alerts, delivery updates and most verification codes are green. That is why they often show up on the phone but not on the Mac.</p>
 
-<section class="principles">
-  <p class="eyebrow">What it stands for</p>
-  <h2>Four promises</h2>
-  <dl class="points">
-    <div><dt>Your codes stay on your Mac</dt><dd>No account, no server, no analytics. The <a href="/privacy/">privacy page</a> lists everything it reads, keeps and connects to.</dd></div>
-    <div><dt>Open source</dt><dd>An app that reads your messages should be open to inspection. <a href="https://github.com/ugzv/CodeCatch" rel="noopener">Read the code</a>.</dd></div>
-    <div><dt>You stay in control</dt><dd>Nothing is opened or typed for you unless you ask. You paste the code yourself, on a page you chose.</dd></div>
-    <div><dt>It stays small</dt><dd>It will not add a cloud or tracking, and it will not read anything beyond Messages, your mail and the Bitwarden logins you import.</dd></div>
-  </dl>
-  <p class="fine">We also say where other tools are the better choice: <a href="/vs/2fhey/">CodeCatch vs 2FHey</a>, <a href="/vs/messauto/">CodeCatch vs MessAuto</a>.</p>
-</section>
+    <h2>1. Sign in to Messages on your Mac</h2>
+    <p>Open the Messages app. Choose <b>Messages → Settings → iMessage</b> and sign in with the Apple Account you use on your iPhone. Blue messages now arrive on your Mac.</p>
 
+    <h2>2. Turn on Text Message Forwarding</h2>
+    <p>This sends green messages from your iPhone to your Mac.</p>
+    <ol class="numbered">
+      <li>On your iPhone, open <b>Settings → Apps → Messages</b>.</li>
+      <li>Tap <b>Text Message Forwarding</b>.</li>
+      <li>Switch on your Mac in the list.</li>
+    </ol>
+    <p>If you don’t see Text Message Forwarding, turn iMessage off and on again on the iPhone, then tap <b>Send &amp; Receive</b> and sign in. These steps follow <a href="https://support.apple.com/en-us/102545" rel="noopener">Apple’s support page</a>.</p>
+
+    <h2>Or: use Messages in iCloud</h2>
+    <p>Messages in iCloud keeps your whole message history the same on every device. It includes forwarding, so you can skip step 2.</p>
+    <ul class="ticks">
+      <li><b>iPhone:</b> Settings → your name → iCloud → Messages, then switch it on.</li>
+      <li><b>Mac:</b> Messages → Settings → iMessage, then tick <b>Enable Messages in iCloud</b>.</li>
+    </ul>
+    <p>The trade-off: your messages take up iCloud storage, and deleting a message on one device deletes it everywhere.</p>
+
+    <h2>Messages not showing up or not syncing</h2>
+    <p>Check these in order:</p>
+    <ul class="ticks">
+      <li><b>Same Apple Account.</b> On the Mac, Messages → Settings → iMessage shows the account. It must match the iPhone.</li>
+      <li><b>The iPhone is on and online.</b> It receives the SMS and passes it on. Wi-Fi or mobile data both work.</li>
+      <li><b>Your Mac is switched on in the forwarding list.</b> Switch it off and on again if it already is.</li>
+      <li><b>Your phone number is ticked on the Mac.</b> Messages → Settings → iMessage, under “You can be reached for messages at”.</li>
+      <li><b>Sync by hand.</b> With Messages in iCloud on, click <b>Sync Now</b> in the same window.</li>
+      <li><b>Restart Messages.</b> Quit the app on the Mac and open it again.</li>
+    </ul>
+
+    <h2>With an Android phone</h2>
+    <p>The Messages app on a Mac only works with an iPhone. With Android, use <a href="https://messages.google.com/web" rel="noopener">Google Messages for web</a>: open it in your browser and scan the QR code with the Google Messages app on your phone. Your texts then appear in that browser tab.</p>
+
+    <h2>Verification codes on your Mac</h2>
+    <p>Once texts reach your Mac, the codes in them do too. Safari can offer a code in some sign-in fields. In other browsers it often does not, as the <a href="/guides/verification-code-autofill-chrome-mac/">autofill guide</a> explains.</p>
+    <p>CodeCatch reads each new text on your Mac, finds the verification code and copies it. You press <kbd>⌘</kbd><kbd>V</kbd> in any browser or app. It does the same for codes sent by email.</p>
+    <h2>Questions</h2>
+    <div class="faq-list">
+      <details><summary>Why do some texts reach my Mac and others don’t?</summary><p>Blue messages are iMessage and reach your Mac by themselves. Green messages are SMS or RCS. They go to your iPhone first, and reach your Mac only when Messages in iCloud or Text Message Forwarding is on.</p></details>
+      <details><summary>Does my iPhone have to be near my Mac?</summary><p>No. It has to be switched on and online, on Wi-Fi or mobile data. It does not need to be on the same network as your Mac.</p></details>
+      <details><summary>Can I get text messages on a Mac without an iPhone?</summary><p>You can get iMessages with only an Apple Account. SMS texts need an iPhone to receive them. With an Android phone, use Google Messages for web in your browser.</p></details>
+      <details><summary>Why do verification codes not show up on my Mac?</summary><p>Most codes are sent by SMS, so they need Messages in iCloud or Text Message Forwarding. Check that your Mac is switched on in the forwarding list on your iPhone.</p></details>
+      <details><summary>Is it free?</summary><p>Yes. Both ways are built into the iPhone and the Mac. Your carrier may still charge for the SMS itself.</p></details>
+    </div>
+  </div>
+</article>
 <section class="cta">
   <img src="/assets/icon-256.png" width="96" height="96" alt="CodeCatch app icon" loading="lazy">
-  <h2>Found a code it missed?</h2>
-  <p>Send the message with the code replaced by another number. It becomes a test.</p>
+  <h2>Texts on your Mac. Codes on your clipboard.</h2>
+  <p>CodeCatch copies each verification code as it arrives.</p>
   <div class="actions">
-    <a class="button" href="https://github.com/ugzv/CodeCatch/issues" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>Open an issue</a>
+    <a class="button" href="/download/CodeCatch.dmg" data-download>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
+    </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">CodeCatch is independent. It is not affiliated with Apple, Google or Bitwarden. Updated <time datetime="2026-10-03">3 October 2026</time>.</p>
+  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
 </section>
-
 </main>
 
 <footer class="footer">
@@ -220,7 +270,7 @@
   </div>
   <div class="footer-bottom">
     <p>© 2026 CodeCatch</p>
-    <p>Made for the Mac.</p>
+    <p>Chrome is a trademark of Google LLC. CodeCatch is not affiliated with Apple or Google.</p>
   </div>
 </footer>
 
@@ -230,8 +280,6 @@
     <linearGradient id="brand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa20f"/><stop offset="1" stop-color="#ff2d55"/></linearGradient>
     <path id="mark" d="M428.0 732.0 L428.0 292.0 A84 84 0 0 1 596.0 292.0 L596.0 732.0 A84 84 0 0 1 428.0 732.0 Z M279.5 549.3 L660.5 329.3 A84 84 0 0 1 744.5 474.7 L363.5 694.7 A84 84 0 0 1 279.5 549.3 Z M363.5 329.3 L744.5 549.3 A84 84 0 0 1 660.5 694.7 L279.5 474.7 A84 84 0 0 1 363.5 329.3 Z"/>
     <symbol id="i-github" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"/></symbol>
-    <g id="i-globe" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.800 2.500 4 5.500 4 9s-1.200 6.500-4 9c-2.800-2.500-4-5.500-4-9s1.200-6.500 4-9Z"/></g>
-    <g id="i-box" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v10l8 4 8-4V7l-8-4ZM4 7l8 4 8-4M12 11v10"/></g>
     <g id="i-download" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.500-4.500M12 15l4.500-4.500M5 19h14"/></g>
     <g id="i-copy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.500"/><path d="M5.500 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.500"/></g>
     <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 4.500 4.500L19 7"/></g>
