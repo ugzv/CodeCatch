@@ -1,0 +1,88 @@
+import AppKit
+import SwiftUI
+
+/// Each provider opens the same editor, with its server filled in.
+struct AddAccountSheet: View {
+    let edit: (MailAccount) -> Void
+    @ObservedObject private var icons = IconStore.shared
+    @Environment(\.dismiss) private var dismiss
+    @Local private var googleConfigured = false
+
+    private struct Provider {
+        let name: String, label: String, detail: String, host: String, symbol: String, color: Color
+    }
+
+    private let others = [
+        Provider(name: "iCloud Mail", label: "iCloud", detail: "With an app-specific password from account.apple.com",
+                 host: "imap.mail.me.com", symbol: "icloud.fill", color: .blue),
+        Provider(name: "Yahoo Mail", label: "Yahoo", detail: "With an app password from Yahoo account security",
+                 host: "imap.mail.yahoo.com", symbol: "y.circle.fill", color: .purple),
+        Provider(name: "Other IMAP Account", label: "", detail: "Any server, with a password",
+                 host: "", symbol: "envelope.fill", color: .gray),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Add a Mail Account").font(.title3.weight(.semibold))
+                Text("CodeCatch watches the inbox for codes and sign-in links. Your mail stays on the server.")
+                    .font(.callout).foregroundStyle(.secondary)
+            }
+            VStack(spacing: 0) {
+                row(icon: AnyView(googleLogo), name: "Google", detail: googleConfigured
+                    ? "Gmail and Google Workspace · Sign in with Google"
+                    : "Gmail and Google Workspace · App password") {
+                    dismiss()
+                    edit(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: ""))
+                }
+                ForEach(others, id: \.name) { provider in
+                    Divider().padding(.leading, 52)
+                    row(icon: AnyView(IconTile(symbol: provider.symbol, color: provider.color).scaleEffect(1.3)),
+                        name: provider.name, detail: provider.detail) {
+                        dismiss()
+                        edit(MailAccount(label: provider.label, host: provider.host, user: ""))
+                    }
+                }
+            }
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.primary.opacity(0.04)))
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) { dismiss() }.keyboardShortcut(.cancelAction)
+            }
+        }
+        .padding(20)
+        .frame(width: 460)
+        .onAppear { googleConfigured = GoogleOAuth.isConfigured }
+    }
+
+    private var googleLogo: some View {
+        Group {
+            if let logo = icons.icon(for: "google.com") {
+                Image(nsImage: logo.image).resizable().interpolation(.high).scaledToFit().padding(4)
+                    .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(.white))
+            } else {
+                IconTile(symbol: "g.circle.fill", color: .red).scaleEffect(1.3)
+            }
+        }
+        .frame(width: 28, height: 28)
+    }
+
+    private func row(icon: AnyView, name: String, detail: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                icon.frame(width: 28, height: 28)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(name).font(.body.weight(.medium))
+                    Text(detail).font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+}

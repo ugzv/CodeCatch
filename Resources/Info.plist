@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key><string>com.uros.codecatch</string>
+    <key>CFBundleName</key><string>CodeCatch</string>
+    <key>CFBundleDisplayName</key><string>CodeCatch</string>
+    <key>CFBundleExecutable</key><string>CodeCatch</string>
+    <key>CFBundleIconFile</key><string>AppIcon</string>
+    <key>CFBundlePackageType</key><string>APPL</string>
+    <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundleVersion</key><string>1</string>
+    <key>LSMinimumSystemVersion</key><string>15.0</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key><string>com.uros.codecatch</string>
+            <key>CFBundleURLSchemes</key><array><string>codecatch</string></array>
+        </dict>
+    </array>
+    <key>LSUIElement</key><true/>
+    <key>SUFeedURL</key><string>https://codecatch.app/appcast.xml</string>
+    <key>SUPublicEDKey</key><string>MG9tbdMX6jZD/piLqeKytwBvnEiN64r/OjilaaurqRw=</string>
+    <key>SUEnableAutomaticChecks</key><true/>
+    <key>SUAutomaticallyUpdate</key><true/>
+    <key>NSHighResolutionCapable</key><true/>
+    <key>NSHumanReadableCopyright</key><string>Uros Gazvoda</string>
+</dict>
+</plist>

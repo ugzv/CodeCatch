@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them</title>
+<meta name="description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
+<link rel="canonical" href="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
+<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#100d0e" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CodeCatch">
+<meta property="og:url" content="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
+<meta property="og:title" content="Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them">
+<meta property="og:description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
+<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "TechArticle",
+   "@id": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/#article",
+   "headline": "Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them",
+   "name": "Bitwarden TOTP codes in your Mac menu bar",
+   "description": "Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.",
+   "image": "https://codecatch.app/assets/og.png",
+   "datePublished": "2026-10-03",
+   "dateModified": "2026-10-03",
+   "inLanguage": "en",
+   "author": {
+    "@id": "https://codecatch.app/about/#author"
+   },
+   "publisher": {
+    "@id": "https://codecatch.app/#org"
+   },
+   "mainEntityOfPage": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/",
+   "about": {
+    "@type": "SoftwareApplication",
+    "name": "CodeCatch",
+    "operatingSystem": "macOS",
+    "applicationCategory": "UtilitiesApplication",
+    "url": "https://codecatch.app/"
+   }
+  },
+  {
+   "@type": "Person",
+   "@id": "https://codecatch.app/about/#author",
+   "name": "Uros Gazvoda",
+   "url": "https://codecatch.app/about/",
+   "sameAs": [
+    "https://github.com/ugzv"
+   ]
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://codecatch.app/#org",
+   "name": "CodeCatch",
+   "url": "https://codecatch.app/",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://codecatch.app/assets/icon-512.png",
+    "width": 512,
+    "height": 512
+   },
+   "founder": {
+    "@id": "https://codecatch.app/about/#author"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "CodeCatch",
+     "item": "https://codecatch.app/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Bitwarden TOTP codes in your Mac menu bar",
+     "item": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/"
+    }
+   ]
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "Does CodeCatch save my Bitwarden master password?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Do the codes work without an internet connection?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is it safe to keep codes next to my passwords?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Why is the code different from the one on my phone?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on Set time and date automatically in System Settings → General → Date &amp; Time."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "A login is missing from CodeCatch. Why?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use Refresh… in CodeCatch."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "I use Bitwarden’s EU server. Does it work?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs bw logout first."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="/" aria-label="CodeCatch home">
+    <svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>
+    <span>CodeCatch</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="/#features">Features</a>
+    <a href="/#privacy">Privacy</a>
+    <a href="/#compare">Compare</a>
+    <a href="/#faq">FAQ</a>
+  </nav>
+  <a class="button small" href="/download/CodeCatch.dmg" data-download>Download</a>
+</header>
+
+<main>
+<article class="article">
+  <header class="vs-hero">
+    <p class="eyebrow">Guide</p>
+    <h1>Bitwarden TOTP codes in your Mac menu bar</h1>
+    <p class="lede">Four ways to get your Bitwarden two-step codes on a Mac, from the simplest to the fastest.</p>
+    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/about/" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-03">Published 3 October 2026</time></span></p>
+  </header>
+  <div class="feature-art article-art" aria-hidden="true">
+    <div class="cc">
+      <div class="popover floating">
+        <div class="popover-head"><svg class="mark" viewBox="208 208 608 608"><use href="#mark"/></svg><b>CodeCatch</b></div>
+        <div class="search"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg><span class="typed">git</span></div>
+        <ul class="rows">
+          <li class="row"><div class="tile s32"><img src="/assets/services/github.svg" alt="" loading="lazy"><img class="badge" src="/assets/services/bitwarden.png" alt="" loading="lazy"></div><div class="row-who"><b>GitHub <svg class="pin" viewBox="0 0 24 24"><use href="#i-pin"/></svg></b><span>you@example.com · Bitwarden</span></div><svg class="ring s14" viewBox="0 0 22 22" style="--p:.6"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg><span class="row-code">318 842</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="prose">
+    <p>Bitwarden can hold the keys for your two-step codes and make the six-digit codes for you. On a Mac there are four ways to get at them. The first three need nothing but Bitwarden.</p>
+    <p class="callout">Bitwarden stores authenticator keys on every plan. Showing the codes needs Premium or a paid organisation plan, according to <a href="https://bitwarden.com/help/integrated-authenticator/" rel="noopener">Bitwarden’s help page</a>.</p>
+
+    <h2>At a glance</h2>
+    <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">Extension</th><th scope="col">Desktop app</th><th scope="col">Command line</th><th scope="col">CodeCatch</th></tr></thead><tbody>
+<tr><th scope="row">Works in</th><td>The browser</td><td>Any app</td><td>Terminal</td><td>Any app</td></tr>
+<tr><th scope="row">Steps per code</th><td>None, it copies as it fills</td><td>Open app, find login, copy</td><td>Type a command</td><td>Shortcut, type a name, Return</td></tr>
+<tr><th scope="row">Where the keys live</th><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden and your Mac’s Keychain</td></tr>
+<tr><th scope="row">Works offline</th><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>Yes</td></tr>
+</tbody></table></div>
+
+    <h2>How these codes work</h2>
+    <p>When you turn on two-step sign-in, the service gives you a secret key, usually as a QR code. An authenticator mixes that key with the current time and gets a six-digit code that changes every 30 seconds. Anything that holds the key can make the code: your phone, Bitwarden, or CodeCatch.</p>
+
+    <h2>1. The browser extension</h2>
+    <p>This is the least work. When the extension fills your username and password, it also copies the code. Press <kbd>⌘</kbd><kbd>V</kbd> in the code field.</p>
+    <p>If nothing is copied, open the extension and check <b>Settings → Autofill → Copy TOTP automatically</b>. Bitwarden says it is on by default.</p>
+
+    <h2>2. The desktop app</h2>
+    <p>Open the login in the Bitwarden app. The code is shown inside the item, counting down. Click it to copy.</p>
+    <p>This works for sign-ins outside the browser, but it means switching apps and searching each time.</p>
+
+    <h2>3. The command line</h2>
+    <p>With the <a href="https://bitwarden.com/help/cli/" rel="noopener">Bitwarden CLI</a> installed and unlocked:</p>
+    <pre><code>bw get totp github.com</code></pre>
+    <p>It prints the current code. Useful in scripts, less so when a code expires in 30 seconds.</p>
+
+    <h2>4. The menu bar, with CodeCatch</h2>
+    <p>CodeCatch puts your Bitwarden codes in the menu bar next to the codes you get by text and email. Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>F</kbd>, type a name, press Return, and the code is copied.</p>
+    <ol class="numbered">
+      <li>Install the Bitwarden CLI: <code>brew install bitwarden-cli</code></li>
+      <li>Sign in once in Terminal: <code>bw login</code></li>
+      <li>In CodeCatch, open <b>Settings → Sources → Bitwarden → Set Up…</b> It checks each step for you.</li>
+      <li>Enter your master password, review the list of logins, and save.</li>
+    </ol>
+    <p>After you change two-step logins in Bitwarden, use <b>Refresh…</b> in the same place.</p>
+
+    <p>Once it is set up:</p>
+    <ul class="ticks">
+      <li><b>Search</b> by service, account or site.</li>
+      <li><b>Pin</b> the logins you use most, so they sit at the top.</li>
+      <li><b>See the time left</b> on each code before it changes.</li>
+      <li><b>Steam codes</b> work too.</li>
+    </ul>
+
+    <h2>If setup gets stuck</h2>
+    <ul class="ticks">
+      <li><b>“bw: command not found”.</b> The Bitwarden CLI is not installed. Run <code>brew install bitwarden-cli</code>, or get it from Bitwarden’s site.</li>
+      <li><b>“You are not logged in”.</b> Run <code>bw login</code> in Terminal. It also handles your two-step login for Bitwarden itself.</li>
+      <li><b>Wrong server.</b> If your account is on bitwarden.eu, pick it in the server step. Switching needs <code>bw logout</code> first.</li>
+      <li><b>Changed something in Bitwarden?</b> Use <b>Refresh…</b> You see what was added, changed and removed before it is saved.</li>
+    </ul>
+
+    <h2>What CodeCatch keeps, and the trade-off</h2>
+    <ul class="ticks">
+      <li>It saves each login’s name, username, site and authenticator key in your Mac’s login Keychain.</li>
+      <li>Codes are made on your Mac. No connection is needed.</li>
+      <li>Codes stay hidden until you unlock with Touch ID or your Mac password, and lock again on sleep.</li>
+      <li><b>Remove Saved Import</b> deletes the saved keys.</li>
+    </ul>
+    <p>The trade-off is plain: a copy of your authenticator keys now lives on this Mac, outside Bitwarden. If you would rather keep them only in your vault, use one of the first three ways.</p>
+
+    <h2>Which one to use</h2>
+    <ul class="ticks">
+      <li><b>Mostly in the browser:</b> the extension.</li>
+      <li><b>Now and then, anywhere:</b> the desktop app.</li>
+      <li><b>In scripts:</b> the command line.</li>
+      <li><b>All day, in any app, with your text and email codes in one place:</b> CodeCatch.</li>
+    </ul>
+    <h2>Questions</h2>
+    <div class="faq-list">
+      <details><summary>Does CodeCatch save my Bitwarden master password?</summary><p>No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards.</p></details>
+      <details><summary>Do the codes work without an internet connection?</summary><p>Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online.</p></details>
+      <details><summary>Is it safe to keep codes next to my passwords?</summary><p>It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest.</p></details>
+      <details><summary>Why is the code different from the one on my phone?</summary><p>Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on <b>Set time and date automatically</b> in System Settings → General → Date &amp; Time.</p></details>
+      <details><summary>A login is missing from CodeCatch. Why?</summary><p>Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use <b>Refresh…</b> in CodeCatch.</p></details>
+      <details><summary>I use Bitwarden’s EU server. Does it work?</summary><p>Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs <code>bw logout</code> first.</p></details>
+    </div>
+  </div>
+</article>
+<section class="cta">
+  <img src="/assets/icon-256.png" width="96" height="96" alt="CodeCatch app icon" loading="lazy">
+  <h2>Try CodeCatch.</h2>
+  <p>Your next code, ready to paste.</p>
+  <div class="actions">
+    <a class="button" href="/download/CodeCatch.dmg" data-download>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
+    </a>
+    <a class="button quiet" href="/">See how it works</a>
+  </div>
+  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="brand" href="/"><svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg><span>CodeCatch</span></a>
+      <p>Sign-in codes, caught the moment they arrive.</p>
+      <a class="footer-gh" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>Open source on GitHub</a>
+    </div>
+    <nav aria-label="Footer">
+      <div>
+        <h2>Product</h2>
+        <a href="/#features">Features</a>
+        <a href="/#privacy">Privacy settings</a>
+        <a href="/#compare">Compare</a>
+        <a href="/#faq">FAQ</a>
+      </div>
+      <div>
+        <h2>Guides</h2>
+        <a href="/guides/bitwarden-codes-mac-menu-bar/">Bitwarden codes on Mac</a>
+        <a href="/guides/verification-code-autofill-chrome-mac/">Code autofill in Chrome</a>
+      </div>
+      <div>
+        <h2>Compare</h2>
+        <a href="/vs/2fhey/">CodeCatch vs 2FHey</a>
+        <a href="/vs/messauto/">CodeCatch vs MessAuto</a>
+      </div>
+      <div>
+        <h2>About</h2>
+        <a href="/about/">Who makes it</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/changelog/">Changelog</a>
+      </div>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CodeCatch</p>
+    <p>Bitwarden is a trademark of Bitwarden Inc. CodeCatch is not affiliated with it.</p>
+  </div>
+</footer>
+
+<!-- The mark is Resources/AppIcon.icon/Assets/asterisk.svg; icons are drawn for this page. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa20f"/><stop offset="1" stop-color="#ff2d55"/></linearGradient>
+    <path id="mark" d="M428.0 732.0 L428.0 292.0 A84 84 0 0 1 596.0 292.0 L596.0 732.0 A84 84 0 0 1 428.0 732.0 Z M279.5 549.3 L660.5 329.3 A84 84 0 0 1 744.5 474.7 L363.5 694.7 A84 84 0 0 1 279.5 549.3 Z M363.5 329.3 L744.5 549.3 A84 84 0 0 1 660.5 694.7 L279.5 474.7 A84 84 0 0 1 363.5 329.3 Z"/>
+    <symbol id="i-github" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"/></symbol>
+    <g id="i-download" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.500-4.500M12 15l4.500-4.500M5 19h14"/></g>
+    <g id="i-copy" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.500"/><path d="M5.500 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v.500"/></g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 4.500 4.500L19 7"/></g>
+    <g id="i-link" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4.500 4.500 0 0 0 6.400 0l3-3a4.500 4.500 0 0 0-6.400-6.400l-1 1"/><path d="M14 10a4.500 4.500 0 0 0-6.400 0l-3 3a4.500 4.500 0 0 0 6.400 6.400l1-1"/></g>
+    <g id="i-lock" fill="currentColor"><path d="M7 10V8a5 5 0 0 1 10 0v2h.500A2.500 2.500 0 0 1 20 12.500v6a2.500 2.500 0 0 1-2.500 2.500h-11A2.500 2.500 0 0 1 4 18.500v-6A2.500 2.500 0 0 1 6.500 10H7Zm2.200 0h5.600V8a2.800 2.800 0 0 0-5.600 0v2Z"/></g>
+    <g id="i-search" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"><circle cx="10.500" cy="10.500" r="6.500"/><path d="m20 20-4.800-4.800"/></g>
+    <g id="i-warning" fill="currentColor"><path d="M10.300 3.900a2 2 0 0 1 3.400 0l8 13.600a2 2 0 0 1-1.700 3H4a2 2 0 0 1-1.700-3l8-13.600ZM12 8.500a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0v-4a1 1 0 0 0-1-1Zm0 7.500a1.150 1.150 0 1 0 0 2.300 1.150 1.150 0 0 0 0-2.300Z"/></g>
+    <g id="i-compass" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.500 8.500-2 5-5 2 2-5 5-2Z"/></g>
+    <g id="i-bubble" fill="currentColor"><path d="M12 3.500c5 0 9 3.400 9 7.700s-4 7.700-9 7.700c-.9 0-1.800-.1-2.600-.3-1.100.9-2.600 1.600-4.300 1.800-.4 0-.6-.4-.4-.7.700-.9 1.100-1.900 1.200-2.800C4.100 15.500 3 13.500 3 11.200c0-4.300 4-7.700 9-7.700Z"/></g>
+    <g id="i-mail" fill="currentColor"><path d="M4.500 5h15A2.500 2.500 0 0 1 22 7.300l-10 5.600L2 7.300A2.500 2.500 0 0 1 4.500 5ZM2 9.600V16.500A2.500 2.500 0 0 0 4.500 19h15a2.500 2.500 0 0 0 2.500-2.500V9.600l-9.500 5.300a1 1 0 0 1-1 0L2 9.600Z"/></g>
+    <g id="i-tray" fill="currentColor"><path d="M6.200 4h11.600a2 2 0 0 1 1.900 1.400l2.200 7V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.600l2.300-7A2 2 0 0 1 6.200 4Zm.2 2-1.900 6H8a1 1 0 0 1 1 .8 3 3 0 0 0 6 0 1 1 0 0 1 1-.8h3.500l-1.900-6H6.400Z"/></g>
+    <g id="i-key" fill="currentColor"><path d="M15.500 2a6.500 6.500 0 0 0-6.200 8.500L2.600 17.200a1 1 0 0 0-.3.700V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1.500H9a1 1 0 0 0 1-1V17h1.200a1 1 0 0 0 .7-.3l1.600-1.600A6.500 6.500 0 1 0 15.500 2Zm1.700 3.800a1.900 1.900 0 1 1 0 3.800 1.900 1.900 0 0 1 0-3.800Z"/></g>
+    <g id="i-pin" fill="currentColor"><path d="M9 3h6l-.6 6.200 3.100 3.300V14H13v6l-1 2-1-2v-6H6.500v-1.500l3.100-3.300L9 3Z"/></g>
+    <g id="i-record" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3" stroke-dasharray="3.500 3"/><circle cx="12" cy="12" r="2.800" fill="currentColor" stroke="none"/></g>
+    <g id="i-history" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.500-5.800M4 5v4h4M12 8v4.500l3 1.800"/></g>
+    <g id="i-updown" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9.500 4-4 4 4M8 14.500l4 4 4-4"/></g>
+    <g id="i-clock" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.200 2"/></g>
+    <g id="i-eye-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.600 6.200A9.800 9.800 0 0 1 12 6c5.500 0 9 6 9 6a15.600 15.600 0 0 1-2.800 3.500M6.500 7.600A15 15 0 0 0 3 12s3.500 6 9 6a9 9 0 0 0 3.600-.8M9.900 9.900a3 3 0 0 0 4.200 4.200"/></g>
+  </defs>
+</svg>
+</body>
+</html>

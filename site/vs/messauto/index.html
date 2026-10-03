@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MessAuto alternative for Mac: CodeCatch vs MessAuto compared</title>
+<meta name="description" content="CodeCatch and MessAuto both catch verification codes from Messages and Mail on a Mac. See how they differ on Gmail, sign-in links, history, permissions and auto-paste.">
+<link rel="canonical" href="https://codecatch.app/vs/messauto/">
+<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#100d0e" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="CodeCatch">
+<meta property="og:url" content="https://codecatch.app/vs/messauto/">
+<meta property="og:title" content="MessAuto alternative for Mac: CodeCatch vs MessAuto compared">
+<meta property="og:description" content="CodeCatch and MessAuto both catch verification codes from Messages and Mail on a Mac. See how they differ on Gmail, sign-in links, history, permissions and auto-paste.">
+<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/styles.css">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Article",
+   "@id": "https://codecatch.app/vs/messauto/#article",
+   "headline": "MessAuto alternative for Mac: CodeCatch vs MessAuto compared",
+   "name": "CodeCatch vs MessAuto",
+   "description": "CodeCatch and MessAuto both catch verification codes from Messages and Mail on a Mac. See how they differ on Gmail, sign-in links, history, permissions and auto-paste.",
+   "image": "https://codecatch.app/assets/og.png",
+   "datePublished": "2026-10-03",
+   "dateModified": "2026-10-03",
+   "inLanguage": "en",
+   "author": {
+    "@id": "https://codecatch.app/about/#author"
+   },
+   "publisher": {
+    "@id": "https://codecatch.app/#org"
+   },
+   "mainEntityOfPage": "https://codecatch.app/vs/messauto/",
+   "about": {
+    "@type": "SoftwareApplication",
+    "name": "CodeCatch",
+    "operatingSystem": "macOS",
+    "applicationCategory": "UtilitiesApplication",
+    "url": "https://codecatch.app/"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "@id": "https://codecatch.app/vs/messauto/#faq",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "What is MessAuto?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "MessAuto is a free, open-source Mac app that finds verification codes in the Messages and Mail apps and puts them where you need them. It can copy the code, paste it for you, and press Return."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Is MessAuto free?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. MessAuto is free and open source under the MIT licence. You download it from its GitHub page."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does MessAuto work with Gmail?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Only if your Gmail account is set up in the Mac’s Mail app. MessAuto reads the Mail app, not Gmail itself, and its README lists other mail clients as not yet supported. CodeCatch reads the Mail app too, and can also connect to Gmail and other accounts directly."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Does MessAuto work in Chrome?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes. Like CodeCatch, it works through the clipboard and keyboard, so the browser does not matter. Both work in Chrome, Arc, Firefox, Edge and any other app."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Which permissions does each app need?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Both need Full Disk Access, because macOS requires it before any app can read Messages and Mail. MessAuto’s README also lists Accessibility access, which lets an app type into other apps. CodeCatch asks for Accessibility only if you turn on typing codes for you."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Can I use MessAuto and CodeCatch together?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "You can, but both will react to the same code. If you run both, leave pasting to one of them: keep MessAuto’s Auto Paste on and CodeCatch’s typing off, or the other way round."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What is a good MessAuto alternative?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "If you want what MessAuto does plus Gmail, sign-in links, a searchable history and Bitwarden codes, try CodeCatch. If you only get codes by text message, 2FHey is another open-source option."
+     }
+    }
+   ]
+  },
+  {
+   "@type": "Person",
+   "@id": "https://codecatch.app/about/#author",
+   "name": "Uros Gazvoda",
+   "url": "https://codecatch.app/about/",
+   "sameAs": [
+    "https://github.com/ugzv"
+   ]
+  },
+  {
+   "@type": "Organization",
+   "@id": "https://codecatch.app/#org",
+   "name": "CodeCatch",
+   "url": "https://codecatch.app/",
+   "logo": {
+    "@type": "ImageObject",
+    "url": "https://codecatch.app/assets/icon-512.png",
+    "width": 512,
+    "height": 512
+   },
+   "founder": {
+    "@id": "https://codecatch.app/about/#author"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "CodeCatch",
+     "item": "https://codecatch.app/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "CodeCatch vs MessAuto",
+     "item": "https://codecatch.app/vs/messauto/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="/" aria-label="CodeCatch home">
+    <svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>
+    <span>CodeCatch</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="/#features">Features</a>
+    <a href="/#privacy">Privacy</a>
+    <a href="/#compare">Compare</a>
+    <a href="/#faq">FAQ</a>
+  </nav>
+  <a class="button small" href="/download/CodeCatch.dmg" data-download>Download</a>
+</header>
+
+<main>
+
+<section class="vs-hero">
+  <p class="eyebrow">Comparison</p>
+  <h1>CodeCatch vs MessAuto</h1>
+  <p class="lede">Both catch verification codes from Messages and Mail on a Mac, in any browser. MessAuto is free and can paste the code and press Return for you. CodeCatch also reads Gmail, catches sign-in links and keeps a history.</p>
+  <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/about/" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-03">Published 3 October 2026</time></span></p>
+</section>
+
+<section class="compare first" style="padding-bottom:48px !important">
+  <h2 class="sr-only">Feature comparison</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th scope="col"><span class="sr-only">Feature</span></th>
+          <th scope="col" class="us"><svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>CodeCatch</th>
+          <th scope="col">MessAuto</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Text message codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>iMessage and SMS</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>iMessage and SMS</td></tr>
+        <tr><th scope="row">Works in</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td></tr>
+        <tr><th scope="row">Email codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail, Gmail, other mail</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail only</td></tr>
+        <tr><th scope="row">Sign-in links</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, and shows where they lead</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Code history</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>7 days, searchable</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Authenticator codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Bitwarden</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Touch ID lock</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Types the code for you</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Optional</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, and can press Return</td></tr>
+        <tr><th scope="row">Needs Accessibility access</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Only to type for you</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td></tr>
+        <tr><th scope="row">Needs Full Disk Access</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td></tr>
+        <tr><th scope="row">Custom rules</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Ignore a sender</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Your own patterns</td></tr>
+        <tr><th scope="row">Open source</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, and free</td></tr>
+        <tr><th scope="row">Opens without a warning</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, signed with a Developer ID</td><td class="no" data-label="MessAuto">No, macOS asks you to confirm</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="fine">MessAuto’s column comes from <a href="https://github.com/LeeeSe/MessAuto" rel="noopener">its README</a>, version 1.3.0, checked October 2026. “No” means not listed there.</p>
+</section>
+
+<section class="article">
+  <div class="feature-art article-art" aria-hidden="true">
+    <div class="cc">
+      <div class="card floating">
+        <div class="card-head"><div class="tile "><img src="/assets/services/github.svg" alt="" loading="lazy"><img class="badge" src="/assets/services/gmail.png" alt="" loading="lazy"></div><div class="card-who"><b>GitHub</b><span>Gmail · noreply@github.com</span></div><span class="card-age">now</span></div>
+        <div class="well"><span class="code">482 913</span><span class="well-time">9:41<svg class="ring " viewBox="0 0 22 22" style="--p:.97"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg></span></div>
+        <div class="card-actions"><span class="pill prominent"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg><span>Copied</span></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="prose">
+    <p class="callout"><b>Short answer:</b> MessAuto is the better pick if you want a free tool that pastes the code and presses Return. CodeCatch is the better pick if your codes arrive in Gmail, if you get sign-in links, or if you want to find a code again later.</p>
+
+    <h2 id="what-is-messauto">What is MessAuto?</h2>
+    <p><a href="https://github.com/LeeeSe/MessAuto" rel="noopener">MessAuto</a> is a free, open-source menu bar app for the Mac, written in Rust by LeeeSe. It watches the Messages and Mail apps. When a message contains a verification code, MessAuto copies it, and can paste it into the field you are in and press Return.</p>
+    <p>It is a well-liked project: about 1,600 stars on GitHub in October 2026, under the MIT licence. The latest release, 1.3.0, came out in October 2025.</p>
+
+    <h2 id="same">What the two apps share</h2>
+    <ul class="ticks">
+      <li><b>They work in any app.</b> Neither depends on browser autofill, so Chrome, Arc, Firefox and Edge all work. If that is your problem, see <a href="/guides/verification-code-autofill-chrome-mac/">why code autofill fails in Chrome on Mac</a>.</li>
+      <li><b>They read Messages and the Mail app.</b> SMS codes reach either app only after you turn on Text Message Forwarding on your iPhone.</li>
+      <li><b>They need Full Disk Access.</b> macOS requires it before any app can read Messages and Mail.</li>
+      <li><b>They are open source</b> and run on your Mac, with no account.</li>
+    </ul>
+
+    <h2 id="messauto-better">Where MessAuto is stronger</h2>
+    <ul class="ticks">
+      <li><b>It is free.</b></li>
+      <li><b>Hands-off entry.</b> Auto Paste puts the code in the field, and Auto Return submits it. You do not touch the keyboard.</li>
+      <li><b>It can leave your clipboard alone.</b> In its “Don’t Occupy Clipboard” mode, MessAuto types the code directly, so what you copied earlier stays put.</li>
+      <li><b>A window by your cursor.</b> Its floating window shows the code next to the pointer.</li>
+      <li><b>Your own rules.</b> A config file lets you edit the keywords and patterns MessAuto uses to spot a code.</li>
+    </ul>
+
+    <h2 id="codecatch-better">Where CodeCatch is stronger</h2>
+    <ul class="ticks">
+      <li><b>Gmail and other mail, directly.</b> MessAuto reads the Mail app only, and its README lists other mail clients as not yet supported. CodeCatch reads the Mail app, and also connects to Gmail and other accounts with an app password. Mail stays read-only.</li>
+      <li><b>Sign-in links.</b> Many services now send a link in place of a code. CodeCatch shows the link next to your codes, tells you where it goes, and warns you if it leads to a different site than the sender’s.</li>
+      <li><b>History.</b> Codes and links stay in the menu for seven days. Type a name, press Return, and the code is copied again.</li>
+      <li><b>Authenticator codes.</b> CodeCatch shows your <a href="/guides/bitwarden-codes-mac-menu-bar/">Bitwarden codes in the menu bar</a>, locked with Touch ID.</li>
+      <li><b>Fewer permissions by default.</b> CodeCatch asks for Accessibility access only if you want it to type codes for you.</li>
+      <li><b>A normal install.</b> CodeCatch is signed with a Developer ID, so it opens like any other app.</li>
+    </ul>
+
+    <h2 id="permissions">Permissions compared</h2>
+    <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">CodeCatch</th><th scope="col">MessAuto</th></tr></thead><tbody>
+<tr><th scope="row">Full Disk Access</th><td>Required</td><td>Required</td></tr>
+<tr><th scope="row">Accessibility</th><td>Only if it types for you</td><td>Listed as required</td></tr>
+<tr><th scope="row">Network</th><td>Mail, Google and Bitwarden (as enabled); update checks</td><td>In-app updates</td></tr>
+</tbody></table></div>
+    <p>Accessibility access lets an app press keys in other apps. That is what makes auto-paste possible, and it is why CodeCatch leaves it off until you ask for it.</p>
+
+    <h2 id="install">Installing each one</h2>
+    <p>Both are a download from GitHub. MessAuto is not signed by an identified developer, so macOS refuses to open it the first time. Its README gives two ways around that: right-click the app and choose Open, or switch off the check for all apps in Terminal.</p>
+    <p class="callout">If you install MessAuto, use the right-click route. Switching off the check with <code>spctl --master-disable</code> removes that protection for every app on your Mac, not just one.</p>
+
+    <h2 id="switch">Switching from MessAuto to CodeCatch</h2>
+    <ul class="ticks">
+      <li><b>Quit MessAuto</b> from its menu bar icon, so two apps do not react to the same code.</li>
+      <li><b><a href="/download/CodeCatch.dmg" data-download>Download CodeCatch</a></b> and open it. It sits in the menu bar.</li>
+      <li><b>Allow Full Disk Access.</b> CodeCatch opens the setting for you.</li>
+      <li><b>Add mail.</b> Switch on Apple Mail, or add Gmail with an app password.</li>
+      <li><b>Miss auto-paste?</b> Turn on typing codes for you in Settings. macOS will then ask for Accessibility access.</li>
+    </ul>
+
+    <h2 id="questions">Questions</h2>
+    <div class="faq-list">
+      <details><summary>What is MessAuto?</summary><p>MessAuto is a free, open-source Mac app that finds verification codes in the Messages and Mail apps and puts them where you need them. It can copy the code, paste it for you, and press Return.</p></details>
+      <details><summary>Is MessAuto free?</summary><p>Yes. MessAuto is free and open source under the MIT licence. You download it from its GitHub page.</p></details>
+      <details><summary>Does MessAuto work with Gmail?</summary><p>Only if your Gmail account is set up in the Mac’s Mail app. MessAuto reads the Mail app, not Gmail itself, and its README lists other mail clients as not yet supported. CodeCatch reads the Mail app too, and can also connect to Gmail and other accounts directly.</p></details>
+      <details><summary>Does MessAuto work in Chrome?</summary><p>Yes. Like CodeCatch, it works through the clipboard and keyboard, so the browser does not matter. Both work in Chrome, Arc, Firefox, Edge and any other app.</p></details>
+      <details><summary>Which permissions does each app need?</summary><p>Both need Full Disk Access, because macOS requires it before any app can read Messages and Mail. MessAuto’s README also lists Accessibility access, which lets an app type into other apps. CodeCatch asks for Accessibility only if you turn on typing codes for you.</p></details>
+      <details><summary>Can I use MessAuto and CodeCatch together?</summary><p>You can, but both will react to the same code. If you run both, leave pasting to one of them: keep MessAuto’s Auto Paste on and CodeCatch’s typing off, or the other way round.</p></details>
+      <details><summary>What is a good MessAuto alternative?</summary><p>If you want what MessAuto does plus Gmail, sign-in links, a searchable history and Bitwarden codes, try CodeCatch. If you only get codes by text message, <a href="/vs/2fhey/">2FHey</a> is another open-source option.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="picks">
+  <div>
+    <h2>Choose MessAuto if</h2>
+    <ul class="ticks plain">
+      <li>You want a free tool</li>
+      <li>You want the code pasted and Return pressed for you</li>
+      <li>You like writing your own detection rules</li>
+      <li>You only use Apple Mail</li>
+    </ul>
+    <p class="fine"><a href="https://github.com/LeeeSe/MessAuto" rel="noopener">MessAuto’s own page</a></p>
+  </div>
+  <div class="ours">
+    <h2>Choose CodeCatch if</h2>
+    <ul class="ticks">
+      <li>Your codes arrive in Gmail, not only Apple Mail</li>
+      <li>You get sign-in links, not only codes</li>
+      <li>You want code history and Bitwarden codes in one place</li>
+      <li>You prefer to paste the code yourself</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta">
+  <img src="/assets/icon-256.png" width="96" height="96" alt="CodeCatch app icon" loading="lazy">
+  <h2>Try CodeCatch.</h2>
+  <p>Codes and sign-in links from Messages and mail, one ⌘V away.</p>
+  <div class="actions">
+    <a class="button" href="/download/CodeCatch.dmg" data-download>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
+    </a>
+    <a class="button quiet" href="/">See how it works</a>
+  </div>
+  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a class="brand" href="/"><svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg><span>CodeCatch</span></a>
+      <p>Sign-in codes, caught the moment they arrive.</p>
+      <a class="footer-gh" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>Open source on GitHub</a>
+    </div>
+    <nav aria-label="Footer">
+      <div>
+        <h2>Product</h2>
+        <a href="/#features">Features</a>
+        <a href="/#privacy">Privacy settings</a>
+        <a href="/#compare">Compare</a>
+        <a href="/#faq">FAQ</a>
+      </div>
+      <div>
+        <h2>Guides</h2>
+        <a href="/guides/bitwarden-codes-mac-menu-bar/">Bitwarden codes on Mac</a>
+        <a href="/guides/verification-code-autofill-chrome-mac/">Code autofill in Chrome</a>
+      </div>
+      <div>
+        <h2>Compare</h2>
+        <a href="/vs/2fhey/">CodeCatch vs 2FHey</a>
+        <a href="/vs/messauto/">CodeCatch vs MessAuto</a>
+      </div>
+      <div>
+        <h2>About</h2>
+        <a href="/about/">Who makes it</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="/changelog/">Changelog</a>
+      </div>
+    </nav>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 CodeCatch</p>
+    <p>MessAuto is a trademark of its owner. CodeCatch is not affiliated with it.</p>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa20f"/><stop offset="1" stop-color="#ff2d55"/></linearGradient>
+    <path id="mark" d="M428.0 732.0 L428.0 292.0 A84 84 0 0 1 596.0 292.0 L596.0 732.0 A84 84 0 0 1 428.0 732.0 Z M279.5 549.3 L660.5 329.3 A84 84 0 0 1 744.5 474.7 L363.5 694.7 A84 84 0 0 1 279.5 549.3 Z M363.5 329.3 L744.5 549.3 A84 84 0 0 1 660.5 694.7 L279.5 474.7 A84 84 0 0 1 363.5 329.3 Z"/>
+    <symbol id="i-github" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M16 0C7.16 0 0 7.16 0 16C0 23.08 4.58 29.06 10.94 31.18C11.74 31.32 12.04 30.84 12.04 30.42C12.04 30.04 12.02 28.78 12.02 27.44C8 28.18 6.96 26.46 6.64 25.56C6.46 25.1 5.68 23.68 5 23.3C4.44 23 3.64 22.26 4.98 22.24C6.24 22.22 7.14 23.4 7.44 23.88C8.88 26.3 11.18 25.62 12.1 25.2C12.24 24.16 12.66 23.46 13.12 23.06C9.56 22.66 5.84 21.28 5.84 15.16C5.84 13.42 6.46 11.98 7.48 10.86C7.32 10.46 6.76 8.82 7.64 6.62C7.64 6.62 8.98 6.2 12.04 8.26C13.32 7.9 14.68 7.72 16.04 7.72C17.4 7.72 18.76 7.9 20.04 8.26C23.1 6.18 24.44 6.62 24.44 6.62C25.32 8.82 24.76 10.46 24.6 10.86C25.62 11.98 26.24 13.4 26.24 15.16C26.24 21.3 22.5 22.66 18.94 23.06C19.52 23.56 20.02 24.52 20.02 26.02C20.02 28.16 20 29.88 20 30.42C20 30.84 20.3 31.34 21.1 31.18C27.42 29.06 32 23.06 32 16C32 7.16 24.84 0 16 0V0Z"/></symbol>
+    <g id="i-download" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4.500-4.500M12 15l4.500-4.500M5 19h14"/></g>
+    <g id="i-check" fill="none" stroke="currentColor" stroke-width="2.600" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.500 4.500 4.500L19 7"/></g>
+  </defs>
+</svg>
+
+</body>
+</html>

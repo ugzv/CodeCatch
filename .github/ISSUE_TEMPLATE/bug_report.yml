@@ -1,0 +1,46 @@
+name: Bug report
+description: A code was missed, misread, or CodeCatch did something unexpected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove real codes, links, addresses and phone numbers from everything you paste.
+        A flaw that exposes any of those belongs in a private report: see SECURITY.md.
+  - type: input
+    id: build
+    attributes:
+      label: CodeCatch build
+      description: Finder → CodeCatch → Get Info shows it.
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac
+      placeholder: macOS 15.5, MacBook Air M2
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options:
+        - Messages
+        - Apple Mail
+        - Gmail or other IMAP
+        - Bitwarden
+        - Not source-specific
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample message
+      description: For a missed or misread code, paste the message with the code replaced by digits of the same length.
