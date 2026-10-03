@@ -104,7 +104,7 @@ enum Probe {
                     let codeLike = (m.subject ?? "").range(of: #"code|verif|sign|log ?in|password|confirm|one-time|otp|magic|koda|prijav|potrd"#,
                                                            options: [.regularExpression, .caseInsensitive]) != nil
                     let masked = code.map { String(repeating: "•", count: max(0, $0.count - 2)) + $0.suffix(2) } ?? "—"
-                    let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.absoluteString)" } ?? ""
+                    let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.host ?? "")" } ?? ""
                     guard code != nil || !link.isEmpty || codeLike else { continue }
                     // Subjects often carry a code ("…verification code: 884 720", "…is SZBPM"): mask every
                     // digit and every capitals-only word of 4+ letters.
