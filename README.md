@@ -95,10 +95,10 @@ marks, moves or changes a message.
 **Sign in with Google** is not public yet. It needs Google's verification first.
 The button appears only when a Google OAuth client is set up.
 
-### Bitwarden authenticator codes
+### Bitwarden codes
 
-CodeCatch can show the two-step (TOTP) codes from your Bitwarden vault, so you
-don't need a separate authenticator app on your Mac.
+If you keep two-step codes in Bitwarden, CodeCatch can show them next to the
+codes you receive.
 
 1. Install the [Bitwarden CLI](https://bitwarden.com/help/cli/): `brew install bitwarden-cli`.
 2. Sign in once in Terminal: `bw login`.
