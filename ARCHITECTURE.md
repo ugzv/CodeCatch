@@ -64,8 +64,7 @@ prove real macOS permission grants, hardware support or notarization. A release
 still needs signed-bundle checks and a fresh-account smoke test for source setup,
 authentication, lock/sleep/wake, clipboard cleanup and updating an existing install.
 
-When moving the repository to CodeCatch, preserve Git history or explicitly
-choose a build number above the last shipped one. Keep the bundle identifier,
-Keychain service, signing identity, URL scheme, Sparkle key and update feed stable
-for existing installations. Update repository links separately after the move,
-enable private vulnerability reporting and require the CI checks before merging.
+Keep the bundle identifier, Keychain service, signing identity, URL scheme,
+Sparkle key and update feed stable for existing installations. Build numbers must
+keep increasing; the public history restarted after build 52, so builds are the
+commit count plus 100.
