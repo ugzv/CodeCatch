@@ -6,14 +6,15 @@
   --bg: #fbfaf8;
   --surface: #ffffff;
   --text: #1d1d1f;
-  --muted: #6e6e73;
-  --faint: #a1a1a6;
+  --muted: #636366;
+  --faint: #737378;
   --line: rgba(0, 0, 0, 0.09);
   --tint: rgba(0, 0, 0, 0.05);
   --accent: #0a7aff;
   --orange: #f08a00;
   --brand-1: #ffa20f;
   --brand-2: #ff2d55;
+  --red: #d70f42;
   --glass: rgba(250, 250, 250, 0.78);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 14px 40px rgba(60, 20, 30, 0.14);
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, "Helvetica Neue", sans-serif;
@@ -24,11 +25,12 @@
     --surface: #1c1819;
     --text: #f5f5f7;
     --muted: #a1a1a6;
-    --faint: #6e6e73;
+    --faint: #8e8e93;
     --line: rgba(255, 255, 255, 0.12);
     --tint: rgba(255, 255, 255, 0.08);
     --accent: #2f8dff;
     --orange: #ff9f0a;
+    --red: #ff2d55;
     --glass: rgba(44, 40, 41, 0.78);
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 18px 50px rgba(0, 0, 0, 0.5);
   }
@@ -70,7 +72,7 @@ kbd {
 
 .mark { fill: url(#brand); }
 .mark.mono { fill: currentColor; }
-.eyebrow { color: var(--brand-2); font-size: 14px; font-weight: 650; letter-spacing: 0.01em; }
+.eyebrow { color: var(--red); font-size: 14px; font-weight: 650; letter-spacing: 0.01em; }
 .lede { color: var(--muted); font-size: 20px; line-height: 1.5; }
 .fine { color: var(--faint); font-size: 14px; }
 
@@ -533,7 +535,7 @@ section[id] { scroll-margin-top: 60px; }
     var(--tint);
 }
 .step-art .cc { zoom: 1; width: 100%; max-width: 300px; }
-.step-n { color: var(--brand-2); font-size: 13px; font-weight: 650; }
+.step-n { color: var(--red); font-size: 13px; font-weight: 650; }
 .steps h3 { font-size: 20px; letter-spacing: -0.015em; }
 .steps ol p:not(.step-n) { color: var(--muted); font-size: 16px; }
 .menubar.mini { justify-content: flex-end; height: 30px; padding: 0 10px; border-radius: 10px; background: var(--surface); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); font-size: 12px; color: var(--text); }
@@ -596,7 +598,7 @@ section[id] { scroll-margin-top: 60px; }
   .compare tbody th { padding: 0 0 8px; font-size: 17px; }
   .compare tbody td, .compare tbody td.us { padding: 8px 0 0; background: none; }
   .compare td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--faint); }
-  .compare td.us::before { color: var(--brand-2); }
+  .compare td.us::before { color: var(--red); }
   .compare .yes { display: none; }
   .privacy { padding-bottom: 72px !important; }
   .nav nav { display: none; }
