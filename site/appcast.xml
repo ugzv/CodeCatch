@@ -4,6 +4,15 @@
         <title>CodeCatch</title>
         <item>
             <title>1.0</title>
+            <pubDate>Sat, 03 Oct 2026 17:17:42 +0200</pubDate>
+            <sparkle:fullReleaseNotesLink>https://codecatch.app/changelog/</sparkle:fullReleaseNotesLink>
+            <sparkle:version>117</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/ugzv/CodeCatch/releases/download/v1.0.117/CodeCatch.dmg" length="4164398" type="application/octet-stream" sparkle:edSignature="B8DipB7O6So+t66a5Bm/EIh5Xl8uXnH1MkTXMOpWQ70yNIzKKXS9lUcIPNdaPBxQjuSqsS4SAkhHsFYzku/IAQ=="/>
+        </item>
+        <item>
+            <title>1.0</title>
             <pubDate>Sat, 03 Oct 2026 16:52:35 +0200</pubDate>
             <sparkle:fullReleaseNotesLink>https://codecatch.app/changelog/</sparkle:fullReleaseNotesLink>
             <sparkle:version>110</sparkle:version>
