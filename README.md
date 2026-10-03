@@ -175,12 +175,14 @@ limits are.
 
 ```bash
 scripts/test.sh    # run all tests
-swift build && .build/debug/CodeCatch --snapshot /tmp/snap -autoCopy NO -showHUD NO -material    # render the UI to PNGs
+scripts/debug.sh --snapshot /tmp/snap -autoCopy NO -showHUD NO -material    # render the UI to PNGs
 swift scripts/make-icon.swift /tmp/AppIcon.icns /tmp/icon-preview.png    # redraw the fallback icon
 ```
 
-Debug builds have extra command-line tools. Release builds leave them out, so a
-shipped app can never print inbox data.
+Debug builds have extra command-line tools. Run them with `scripts/debug.sh <flag>`;
+it signs the build like a release, so the Keychain doesn't ask for your password
+after every rebuild. Release builds leave these tools out, so a shipped app can
+never print inbox data.
 
 | Flag | What it does |
 |---|---|
@@ -233,7 +235,7 @@ without Touch ID, and through Messages, mail and password unlock setup.
 | `Tests/CodeCatchCoreTests` | One file per Core type; `code-samples.txt` is the extraction corpus — add a line for every new format or false positive |
 | `Tests/CodeCatchTests` | App regressions: dismissal privacy, clipboard, mail retries and Keychain error handling |
 | `Resources` | `Info.plist`, `AppIcon.icon` (Icon Composer layers, compiled when Xcode is present) — the fallback `.icns` is generated into the build directory |
-| `scripts` | `install.sh` (test, build, sign, install, release), `test.sh`, `make-icon.swift`, the DMG's `dmg-settings.py` and `make-dmg-background.swift` |
+| `scripts` | `install.sh` (test, build, sign, install, release), `test.sh`, `debug.sh` (build, sign, run debug tools), `make-icon.swift`, the DMG's `dmg-settings.py` and `make-dmg-background.swift` |
 | `site` | The codecatch.app landing page: static HTML, CSS and one script, no build step. Preview with `python3 -m http.server --directory site` |
 
 A new source hands `IncomingMessage`s to `AppModel.ingest`. Everything after that

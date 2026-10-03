@@ -49,7 +49,7 @@ enum Probe {
     /// Texts from businesses (named senders and short codes of up to 6 digits, never a person's
     /// number or address) over the last 180 days, each with the code it yields, for finding misses.
     /// Unmasked, so debug builds only: a released app must not hand its Full Disk Access to
-    /// whoever launches it. Run `.build/debug/CodeCatch --probe-messages` from a terminal that has the access.
+    /// whoever launches it. Run `scripts/debug.sh --probe-messages` from a terminal that has the access.
     static func messages() async {
         var read: [IncomingMessage] = []
         let watcher = LocalWatcher(MessagesStore())
