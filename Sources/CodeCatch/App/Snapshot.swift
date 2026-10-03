@@ -15,9 +15,16 @@ enum Snapshot {
         Secrets.offline = true
         UserDefaults.standard.removeObject(forKey: Prefs.clearedAt)  // the empty-state render below clears history
         Glass.useMaterial = CommandLine.arguments.contains("-material")
+        // A working setup: one live mail account and an unlocked session, through the same seams the tests use.
+        let account = MailAccount(label: "Work", host: "imap.example.com", user: "you@example.com")
+        let monitor = SourceMonitor(watchMail: { _, callbacks in callbacks.status(.live) }, hasCredential: { _ in true })
+        let session = VaultSession(authenticate: {}, read: { [] }, write: { _ in }, remove: {})
+        AppModel.shared = AppModel(vaultSession: session, monitor: monitor, accounts: [account])
+        monitor.restartMail([account])
+        Task { try? await session.unlock() }
         let model = AppModel.shared
         let samples: [(String, String, String, TimeInterval, Bool)] = [
-            ("G-482913 is your Google verification code.", "", "22000", 30, false),
+            ("G-482913 is your Google verification code.", "", "22000", 5, false),
             ("Your Booking.com verification code is 889687", "Booking.com", "noreply@booking.com", 1200, true),
             ("307182 is your Instagram code. Don't share it.", "Instagram", "security@mail.instagram.com", 5400, true),
             ("Revolut: Your code is 771 204. Never share it", "", "Revolut", 11000, false),
@@ -33,7 +40,7 @@ enum Snapshot {
                                      date: Date().addingTimeInterval(-40), isMail: true,
                                      links: [MailLink(url: "https://app.slack.com/verify-yourself/example-token", label: "Sign in with a verified link")]))
         model.ingest(IncomingMessage(text: "Confirm it was you.", subject: "Verify your sign-in", senderName: "Acme", senderID: "security@acme.com",
-                                     sourceKey: "m", sourceLabel: "Personal", date: Date().addingTimeInterval(-10), isMail: true,
+                                     sourceKey: "m", sourceLabel: "Personal", date: Date().addingTimeInterval(-90), isMail: true,
                                      links: [MailLink(url: "https://acme-secure-login.net/verify?t=1", label: "Verify sign-in")]))
         for item in model.items { _ = IconStore.shared.icon(for: item.domain) }
         RunLoop.main.run(until: Date().addingTimeInterval(10))  // let the logos arrive

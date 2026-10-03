@@ -4,7 +4,12 @@ import Combine
 
 @MainActor
 final class AppModel: ObservableObject {
+    #if DEBUG
+    /// `--snapshot` swaps in a model with sample sources that needs no Touch ID.
+    static var shared = AppModel()
+    #else
     static let shared = AppModel()
+    #endif
     /// Lifetime when the message doesn't state one; also the duplicate window.
     nonisolated static let defaultValidity: TimeInterval = 600
     /// Sign-in links usually live longer than codes.
