@@ -36,12 +36,12 @@ OJPIBYXGR | <#> OJPIBYXGR is your Instagram code. Don't share it. SIYRxKrru1t
 457552 | [BN] Your Binance verification code: 457552. Do not share this code with anyone. Anti-Phishing: 112*776
 F2DBB | Steam: Use code F2DBB to change credentials for your account
 349404 | Your Discord verification code is: 349404
-482913 | Your one-time password for EUR 49.99 at AMAZON EU SARL with card ending 4821 is 482913. Valid 5 min. Never share it.
+482913 | Your one-time password for EUR 49.99 at AMAZON EU SARL with card ending 7305 is 482913. Valid 5 min. Never share it.
 739104 | 739104 is your code to confirm payment of USD 1,250.00 to BOOKING.COM (card *7732). Do not share.
 591204 | Your verification code is 591 204. It expires in 10 minutes.
-48219375 | NLB Klik: enkratno geslo za potrditev placila 125,40 EUR je 48219375. Geslo velja 3 minute.
+48219375 | NLB Klik: enkratno geslo za potrditev placila 10,00 EUR je 48219375. Geslo velja 3 minute.
 735102 | NLB Klik: Vasa koda za prijavo je 735102. Kode ne posredujte nikomur.
-318842 | OTP banka: Enkratno geslo za nakup pri ZALANDO SE v znesku 89,90 EUR s kartico *4821 je 318842.
+318842 | OTP banka: Enkratno geslo za nakup pri IKEA SLOVENIJA v znesku 10,00 EUR s kartico *7305 je 318842.
 604719 | Varnostna koda za Bank@Net: 604719. Banka vas nikoli ne bo prosila zanjo.
 2291 | SKB: Vasa potrditvena koda je 2291.
 847366 | Intesa Sanpaolo: Vase enkratno geslo je 847366. Velja 5 minut.
@@ -72,7 +72,7 @@ G7K2P | Your Steam account: Access from new computer\nLogin Code\nG7K2P
 192837 | Your login code: 192837
 604815 | Your verification code is 604815. Enter it to complete sign-in.
 48291365 | Koda za prijavo v NLB Klik: 48291365
-20553106 | Koda za prijavo v naročniški center Moj Zabec: 20553106
+30718264 | Koda za prijavo v naročniški center Moj A1: 30718264
 482913 | Vaša enkratna koda je 482913.
 482913 | Use 482913 to sign in to Slack. Expires in 10 minutes.
 123456 | Your code is 123456 and expires at 12:30 on 2026-09-29
@@ -87,7 +87,7 @@ NONE | Invoice INV-2026-0419 for EUR 1.240,00 is due on 15.10.2026.
 NONE | Your PIN has been changed. If this wasn't you, call 080 17 70.
 NONE | Posta Slovenije: Posiljka RR123456789SI bo dostavljena 30.9. med 8:00 in 12:00.
 NONE | Reminder: dentist appointment Tue 14:30, Celovska 108, 1000 Ljubljana.
-NONE | Purchase EUR 58.20 at SPAR SI with card ending 4821. Balance: 1.203,44 EUR.
+NONE | Purchase EUR 10.00 at LIDL SI with card ending 7305. Balance: 1.000,00 EUR.
 NONE | Use code SAVE20 for 20% off. Ends 23:59.
 NONE | Ref: 482913 - your transfer has been received.
 NONE | Ticket #48291 has been updated by support.
@@ -105,9 +105,9 @@ NONE | SUPPORT CENTER\nAbout Us | Support | Account Login\n4600 East Washington 
 NONE | KYC Review – UNETA / M-605351\nHi Andy,\n\nI’m writing to confirm that the details you have on file are correct.
 NONE | I hereby declare acceptance of your offer Quote Number: 11874 and confirm that we accept the terms.
 NONE | Your verification is complete. Ref: 482913
-NONE | Security alert: card ending 4821 was used for a login
-NONE | Odliv 08.12.2025; Iz racuna: SI56***********4102; Prejemnik: JAVNO PODJETJE MARPR; Namen: JAVNO PODJETJE MARPROM D.O.O.;PLACILO 482913; Znesek: 18,70 EUR OTP banka d.d.
-NONE | Odliv 38,00 EUR; Prejemnik: OTP BANKA D.D.; Namen: OBDELAVA PREJETEGA SKLEPA:1233-4889/2026; Racun: SI56***********4102
+NONE | Security alert: card ending 7305 was used for a login
+NONE | Odliv 01.01.2025; Iz racuna: SI56***********0000; Prejemnik: PETROL D.D.; Namen: PETROL D.D.;PLACILO 482913; Znesek: 10,00 EUR OTP banka d.d.
+NONE | Odliv 10,00 EUR; Prejemnik: OTP BANKA D.D.; Namen: OBDELAVA PREJETEGA SKLEPA:1111-2222/2026; Racun: SI56***********0000
 jh7112 | Your portal verification code is : jh7112 Msg&Data rates may apply.
 AB12C | Your code is AB12C.
 0ACE2A | GEICO: Your verification code is: 0ACE2A. It expires in 10 minutes. Please do not reply to this message.
@@ -182,7 +182,7 @@ NONE | code: 4155552671
 NONE | Your payment of 1234.56 was confirmed at 10:30 on 12/25/2025.
 NONE | Verify at https://example.com/session/12345678
 NONE | 您的订单已确认，取件码请查看快递柜
-NONE | New sign-in to your Ahrefs account\nHi, We've detected an unusual sign-in to your Ahrefs account. If not, please reset your password immediately.\nDate | May 19 2026 at 07:24:24 PM UTC\nIP address | 172.216.151.XXX\n© 2026 Ahrefs Pte Ltd. 16 Raffles Quay, #33-03 Hong Leong Building, Singapore 048581
+NONE | New sign-in to your Slack account\nHi, We've detected an unusual sign-in to your Slack account. If not, please reset your password immediately.\nDate | Jan 1 2026 at 09:00:00 PM UTC\nIP address | 172.216.151.XXX\n© 2026 Slack Pte Ltd. 16 Raffles Quay, #33-03 Hong Leong Building, Singapore 048581
 T3DQ | Verifikacijska koda za aplikacijo dozdravnika.si: T3DQ
 NONE | Your verification reference: AB1234
 NONE | Status of your verification: APPROVED

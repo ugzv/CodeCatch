@@ -88,11 +88,6 @@ struct CodeCard: View {
         let live = model.isFresh(item)
         return HStack(spacing: 10) {
             if item.isLink, let link = item.link {
-                Image(systemName: "link")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.accentColor)
-                    .frame(width: 32, height: 32)
-                    .background(Circle().fill(Color.accentColor.opacity(0.13)))
                 VStack(alignment: .leading, spacing: 1) {
                     // The site, never truncated: it is what a phishing check reads.
                     Text(ServiceIdentity.registrable(link.host ?? "")).font(.system(size: 16, weight: .semibold))

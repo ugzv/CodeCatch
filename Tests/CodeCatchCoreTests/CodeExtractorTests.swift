@@ -25,7 +25,7 @@ import Testing
     ("Your Epic Games security code is: K7PX2Q", "Epic Games"),
     ("Use 482913 to sign in to Slack.", "Slack"),
     ("Koda za prijavo v NLB Klik: 48291365", "NLB Klik"),
-    ("OTP banka: Enkratno geslo za nakup pri ZALANDO SE v znesku 89,90 EUR je 318842.", "OTP banka"),
+    ("OTP banka: Enkratno geslo za nakup pri IKEA SLOVENIJA v znesku 10,00 EUR je 318842.", "OTP banka"),
     ("Your verification code: 482913", nil),
 ] as [(String, String?)])
 func namesService(text: String, expected: String?) {

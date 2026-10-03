@@ -83,7 +83,9 @@ public enum MIME {
             if label.isEmpty, let alt = altText.firstMatch(in: inner, range: NSRange(location: 0, length: (inner as NSString).length)) {
                 label = (inner as NSString).substring(with: alt.range(at: 1))
             }
-            return MailLink(url: ns.substring(with: m.range(at: 1)).replacingOccurrences(of: "&amp;", with: "&"), label: label)
+            // Browsers drop tabs and newlines anywhere in a URL.
+            let url = decodeEntities(ns.substring(with: m.range(at: 1))).replacingOccurrences(of: #"[\t\r\n]"#, with: "", options: .regularExpression)
+            return MailLink(url: url, label: label)
         }
     }
 
@@ -92,7 +94,7 @@ public enum MIME {
         text.split(separator: "\n").flatMap { line -> [MailLink] in
             let l = String(line), ns = l as NSString
             return bareURL.matches(in: l, range: NSRange(location: 0, length: ns.length)).map { m in
-                let url = ns.substring(with: m.range)
+                let url = ns.substring(with: m.range).replacingOccurrences(of: #"[.,;:!?]+$"#, with: "", options: .regularExpression)
                 return MailLink(url: url, label: l.replacingOccurrences(of: url, with: "").trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)))
             }
         }
@@ -131,7 +133,9 @@ public enum MIME {
         let bytes = Data(body.unicodeScalars.map { UInt8(truncatingIfNeeded: $0.value) })
         switch encoding {
         case "base64":
-            return Data(base64Encoded: body.filter { !$0.isWhitespace }, options: .ignoreUnknownCharacters) ?? bytes
+            // Whole groups only: a part cut at the read limit would otherwise not decode at all.
+            let b64 = body.filter { !$0.isWhitespace }
+            return Data(base64Encoded: String(b64.prefix(b64.count / 4 * 4)), options: .ignoreUnknownCharacters) ?? bytes
         case "quoted-printable":
             return quotedPrintable(bytes, underscoreIsSpace: false)
         default:
@@ -206,12 +210,17 @@ public enum MIME {
         ] {
             s = s.replacingOccurrences(of: pattern, with: template, options: .regularExpression)
         }
-        for (entity, char) in entities { s = s.replacingOccurrences(of: entity, with: char, options: .caseInsensitive) }
-        s = decodeNumericEntities(s)
-        return s.split(separator: "\n")
+        return decodeEntities(s).split(separator: "\n")
             .map { $0.split(whereSeparator: { $0 == " " || $0 == "\t" || $0 == "\r" }).joined(separator: " ") }
             .filter { !$0.isEmpty }
             .joined(separator: "\n")
+    }
+
+    /// Numeric entities before "&amp;", so "&amp;#61;" stays the text "&#61;".
+    private static func decodeEntities(_ s: String) -> String {
+        var s = s
+        for (entity, char) in entities.dropLast() { s = s.replacingOccurrences(of: entity, with: char, options: .caseInsensitive) }
+        return decodeNumericEntities(s).replacingOccurrences(of: "&amp;", with: "&", options: .caseInsensitive)
     }
 
     private static func decodeNumericEntities(_ s: String) -> String {

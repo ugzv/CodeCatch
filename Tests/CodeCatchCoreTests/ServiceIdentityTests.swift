@@ -4,7 +4,7 @@ import Testing
 
 /// Mail titles: a "noreply" display name must fall back to the text, then to the sender's domain.
 @Test(arguments: [
-    ("Scrape.do Team", "noreply@scrape.do", "Your login code: 889687", "Scrape.do Team"),
+    ("Fly.io Team", "noreply@fly.io", "Your login code: 889687", "Fly.io Team"),
     ("No-Reply", "no-reply@accounts.google.com", "Your code: 482913", "Google"),
     ("Notifications", "alerts@mail.bank.co.uk", "Your code: 482913", "Bank"),
     ("noreply", "noreply@x.com", "Use 482913 to sign in to Slack.", "Slack"),

@@ -5,8 +5,8 @@ import Testing
 /// Sign-in link mails: the action button must win over unsubscribe, help,
 /// "not you?" and social links; course enrollment must not count as signing in.
 @Test(arguments: [
-    ("Confirm your sign-in", [("https://ahrefs.com/help", "Help"), ("https://app.ahrefs.com/verify-yourself/T6xH", "Sign in with a verified link"),
-                              ("https://ahrefs.com/unsubscribe?u=1", "Unsubscribe")], "https://app.ahrefs.com/verify-yourself/T6xH"),
+    ("Confirm your sign-in", [("https://slack.com/help", "Help"), ("https://app.slack.com/verify-yourself/T6xH", "Sign in with a verified link"),
+                              ("https://slack.com/unsubscribe?u=1", "Unsubscribe")], "https://app.slack.com/verify-yourself/T6xH"),
     ("Your Slack sign-in link", [("https://slack.com/z-app-123-magic?token=abc", "Sign in to Slack"), ("https://twitter.com/slackhq", "")],
      "https://slack.com/z-app-123-magic?token=abc"),
     ("Verify your email address", [("https://example.com/not-you", "This wasn't me"), ("https://example.com/account/verify?t=9", "Verify email")],

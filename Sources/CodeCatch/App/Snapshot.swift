@@ -18,20 +18,20 @@ enum Snapshot {
         let model = AppModel.shared
         let samples: [(String, String, String, TimeInterval, Bool)] = [
             ("G-482913 is your Google verification code.", "", "22000", 30, false),
-            ("Your Scrape.do Login Verification Code: 889687", "Scrape.do Team", "noreply@scrape.do", 1200, true),
-            ("Koda za prijavo v naročniški center Moj Zabec: 20553106", "Zabec.net", "info@zabec.net", 5400, true),
+            ("Your Fly.io Login Verification Code: 889687", "Fly.io Team", "noreply@fly.io", 1200, true),
+            ("Koda za prijavo v naročniški center Moj A1: 30718264", "A1 Slovenija", "info@a1.si", 5400, true),
             ("Revolut: Your code is 771 204. Never share it", "", "Revolut", 11000, false),
-            ("OTP banka: Enkratno geslo za nakup pri ZALANDO SE v znesku 89,90 EUR s kartico *4821 je 318842.", "", "OTPbanka", 26 * 3600, false),
-            ("OTP banka: Enkratno geslo za nakup pri BOLT.EU v znesku 12,40 EUR s kartico *4821 je 604719.", "", "OTPbanka", 28 * 3600, false),
+            ("OTP banka: Enkratno geslo za nakup pri IKEA SLOVENIJA v znesku 10,00 EUR s kartico *7305 je 318842.", "", "OTPbanka", 26 * 3600, false),
+            ("OTP banka: Enkratno geslo za nakup pri WOLT.COM v znesku 20,00 EUR s kartico *7305 je 604719.", "", "OTPbanka", 28 * 3600, false),
         ]
         for (text, name, sender, age, mail) in samples {
             model.ingest(IncomingMessage(text: text, senderName: name, senderID: sender, sourceKey: mail ? "m" : MessagesStore.sourceKey,
                                          sourceLabel: mail ? "Work" : "Messages", date: Date().addingTimeInterval(-age), isMail: mail))
         }
-        model.ingest(IncomingMessage(text: "We've detected an unusual sign-in to your Ahrefs account.", subject: "Confirm your sign-in",
-                                     senderName: "Ahrefs Support", senderID: "support@ahrefs.com", sourceKey: "m", sourceLabel: "Work",
+        model.ingest(IncomingMessage(text: "We've detected an unusual sign-in to your Slack account.", subject: "Confirm your sign-in",
+                                     senderName: "Slack Support", senderID: "support@slack.com", sourceKey: "m", sourceLabel: "Work",
                                      date: Date().addingTimeInterval(-40), isMail: true,
-                                     links: [MailLink(url: "https://app.ahrefs.com/verify-yourself/example-token", label: "Sign in with a verified link")]))
+                                     links: [MailLink(url: "https://app.slack.com/verify-yourself/example-token", label: "Sign in with a verified link")]))
         model.ingest(IncomingMessage(text: "Confirm it was you.", subject: "Verify your sign-in", senderName: "Acme", senderID: "security@acme.com",
                                      sourceKey: "m", sourceLabel: "Personal", date: Date().addingTimeInterval(-10), isMail: true,
                                      links: [MailLink(url: "https://acme-secure-login.net/verify?t=1", label: "Verify sign-in")]))

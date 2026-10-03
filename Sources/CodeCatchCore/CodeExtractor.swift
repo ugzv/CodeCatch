@@ -44,7 +44,7 @@ public enum CodeExtractor {
                 // manages that booking; it isn't one-time.
                 if matches(pinLabel, String(before)), matches(bookingNumber, text) { continue }
                 let explicit = matches(explicitBefore, String(before)) || matches(explicitAfter, String(after))
-                // Introduced on the keyword's line ("… Moj Zabec: 20553106", "Enkratno geslo … je 318842"),
+                // Introduced on the keyword's line ("… Moj A1: 30718264", "Enkratno geslo … je 318842"),
                 // or on the line above a code standing alone ("… Steam Guard code you need …:" over "6VCC5").
                 let alone = aloneOnLine(range, in: ns)
                 let leadStart = alone ? previousLineStart(line.location, in: ns) : line.location
@@ -194,7 +194,7 @@ public enum CodeExtractor {
         return letters.count >= 5 && letters.allSatisfy(\.isUppercase)
     }
 
-    /// The code is introduced on its own line: "…Moj Zabec: 2055", "…s kartico *4821 je 318842".
+    /// The code is introduced on its own line: "…Moj A1: 3071", "…s kartico *7305 je 318842".
     private static let introducer = rx(#"(?:[:=]|\b(?:is|je|ist|lautet|glasi|est|es|è|é))\s*$"#, .caseInsensitive)
 
     /// Marketing words: a letter "code" near them is a coupon.
@@ -203,7 +203,7 @@ public enum CodeExtractor {
     private static let explicitBefore = rx(
         "(?:" + codeWord + #"|kod[aoe]?|passcode|pin|otp|geslo|token|código|codice)\s*(?:is|je|ist|es|est|lautet)?\s*[:=\-–]?\s*$"#,
         .caseInsensitive)
-    /// "Quote Number: 11874", "Ref: 482913", "card ending 4821", "text HELP to 466453": a labelled reference, not a code.
+    /// "Quote Number: 11874", "Ref: 482913", "card ending 7305", "text HELP to 466453": a labelled reference, not a code.
     private static let referenceLabel = rx(
         #"\b(?:number|no|nr|št|stevilka|številka|ref\w*|id|order|invoice|quote|ticket|case|account|customer|client|member|phone|tel|mobile|fax|iban|card|ending(?: in)?|postal|zip|račun\w*|naročil\w*|pošiljk\w*|tracking|parcel|booking|reservation)\s*[.:#]?\s*(?:no\.?\s*)?[:#]?\s*$|\bref\w*\s+(?:code|kod\w*)\s*[:#]?\s*$|\b(?:text|txt|reply|send)\s+\w+\s+to\s*$"#,
         .caseInsensitive)

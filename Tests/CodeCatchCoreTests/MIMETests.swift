@@ -6,7 +6,14 @@ import Testing
 @Test func collectsLinks() {
     #expect(MIME.anchors(#"<a href="https://a.com/verify?x=1&amp;y=2"><b>Verify</b></a> <a href='https://a.com/u'><img alt="Unsubscribe"></a>"#)
         == [MailLink(url: "https://a.com/verify?x=1&y=2", label: "Verify"), MailLink(url: "https://a.com/u", label: "Unsubscribe")])
+    // AlternativeTo writes "=" as "&#x3D;": left encoded, its "#" turned the token into a URL fragment.
+    #expect(MIME.anchors(#"<a href="https://a.com/verify?token&#x3D;ab&amp;next&#61;%2Fme">Verify</a>"#)
+        == [MailLink(url: "https://a.com/verify?token=ab&next=%2Fme", label: "Verify")])
+    // Browsers drop tabs and newlines in an href; kept, the link would not parse and the button was lost.
+    #expect(MIME.anchors("<a href=\"\nhttps://a.com/log\tin?t=1\n\">Log in</a>") == [MailLink(url: "https://a.com/login?t=1", label: "Log in")])
     #expect(MIME.bareLinks("Sign in here: https://t.me/login/27635\nThanks") == [MailLink(url: "https://t.me/login/27635", label: "Sign in here")])
+    // The sentence's full stop is not part of the token.
+    #expect(MIME.bareLinks("Sign in: https://a.com/login?t=abc.").map(\.url) == ["https://a.com/login?t=abc"])
 }
 
 /// Codes arrive in multipart, quoted-printable, base64 and encoded-word
@@ -33,6 +40,10 @@ import Testing
 
     let qp = "Content-Type: text/plain; charset=iso-8859-2\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nVa=B9a koda je 4829=\r\n13"
     #expect(MIME.parse(Data(qp.utf8)).text == "Vaša koda je 482913")
+
+    // Mails are read up to 256 KB: a base64 part cut mid-group must still decode up to the cut.
+    let cut = "Content-Type: text/plain\r\nContent-Transfer-Encoding: base64\r\n\r\n" + Data("Your code: 482913. Thanks!".utf8).base64EncodedString().dropLast(3)
+    #expect(MIME.parse(Data(cut.utf8)).text.hasPrefix("Your code: 482913"))
 
     let bare = "Subject: Vaša koda\r\nContent-Type: multipart/mixed; boundary=XX\r\n\r\n--XX\r\n\r\nYour code: 482913\r\n--XX--"
     #expect(MIME.parse(Data(bare.utf8)) == MailMessage(fromName: "", fromAddress: "", subject: "Vaša koda", text: "Your code: 482913\n"))
