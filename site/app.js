@@ -1,10 +1,10 @@
 // The hero plays what the app does: a code arrives, the banner slides in with the code
-// already copied, ⌘V pastes it into the page. With reduced motion it shows the end state, still.
+// already copied, ⌘V pastes it into the page. Then a sign-in link arrives. With reduced motion it shows the end state, still.
 (() => {
   const $ = (id) => document.getElementById(id);
   const banner = $("banner"), code = $("banner-code"), left = $("banner-left"), menubar = $("menubar-code");
   const copy = $("banner-copy"), keys = $("keys"), field = $("otp"), typed = $("otp-text");
-  const ring = banner.querySelector(".ring");
+  const ring = banner.querySelector(".ring"), linkBanner = $("banner-link");
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const grouped = (digits) => digits.slice(0, 3) + " " + digits.slice(3);
   let timers = [], digits = "482913", seconds = 598;
@@ -32,6 +32,7 @@
     typed.textContent = "";
     field.classList.remove("on");
     banner.classList.remove("on");
+    linkBanner.classList.remove("on");
     keys.classList.remove("on");
     menubar.textContent = "";
     setCopied(false);
@@ -40,8 +41,10 @@
     after(2600, () => keys.classList.add("on"));
     after(3100, paste);
     after(4300, () => keys.classList.remove("on"));
-    after(8200, () => banner.classList.remove("on"));
-    after(9200, play);
+    after(7000, () => { banner.classList.remove("on"); menubar.textContent = ""; });
+    after(7700, () => linkBanner.classList.add("on"));
+    after(12200, () => linkBanner.classList.remove("on"));
+    after(13200, play);
   }
 
   if (still) {

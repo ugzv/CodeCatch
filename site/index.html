@@ -165,7 +165,7 @@
   <div class="hero-copy">
     <p class="eyebrow">For macOS</p>
     <h1>Sign-in codes, caught the moment they arrive.</h1>
-    <p class="lede">A menu bar app that copies sign-in codes from your texts and email the moment they arrive. Press <kbd>⌘</kbd><kbd>V</kbd> and you’re in, in any browser or app.</p>
+    <p class="lede">A menu bar app that copies sign-in codes from your texts and email the moment they arrive, and shows sign-in links too. Press <kbd>⌘</kbd><kbd>V</kbd> and you’re in, in any browser or app.</p>
     <div class="actions">
       <a class="button" href="/download/CodeCatch.dmg" data-download>
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
@@ -176,7 +176,7 @@
   </div>
 
   <!-- The app's own banner and menu bar label, ported from CodeCard.swift and MenuBarLabel.swift. -->
-  <div class="stage" id="stage" role="img" aria-label="A Google verification code arrives by text message, CodeCatch shows it in a banner, and Command-V pastes it into the sign-in page">
+  <div class="stage" id="stage" role="img" aria-label="A Google verification code arrives by text message, CodeCatch shows it in a banner, and Command-V pastes it into the sign-in page. Then a Slack sign-in link arrives by email and CodeCatch shows where it leads">
     <div class="menubar" aria-hidden="true">
       <span class="menubar-app">Chrome</span><span>File</span><span>Edit</span><span>View</span><span>History</span>
       <span class="menubar-right">
@@ -214,6 +214,24 @@
         </div>
         <div class="card-actions">
           <button class="pill prominent" id="banner-copy" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><use href="#i-copy"/></svg><span>Copy</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cc banner" id="banner-link" aria-hidden="true">
+      <div class="card">
+        <div class="card-head">
+          <div class="tile  bleed"><img src="/assets/services/slack.png" alt=""><img class="badge" src="/assets/services/mail.png" alt="" loading="lazy"></div>
+          <div class="card-who"><b>Slack</b><span>Work</span></div>
+          <span class="card-age">now</span>
+        </div>
+        <div class="well">
+          <span class="link-text"><b>slack.com</b><span>app.slack.com/x-p482…/magic-login</span></span>
+          <span class="well-time">29:51<svg class="ring " viewBox="0 0 22 22" style="--p:.99"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg></span>
+        </div>
+        <div class="card-actions">
+          <button class="pill prominent" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg><span>Open Link</span></button>
+          <button class="pill" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg><span>Copy Link</span></button>
         </div>
       </div>
     </div>

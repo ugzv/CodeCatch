@@ -18,11 +18,11 @@ enum Snapshot {
         let model = AppModel.shared
         let samples: [(String, String, String, TimeInterval, Bool)] = [
             ("G-482913 is your Google verification code.", "", "22000", 30, false),
-            ("Your Fly.io Login Verification Code: 889687", "Fly.io Team", "noreply@fly.io", 1200, true),
-            ("Koda za prijavo v naročniški center Moj A1: 30718264", "A1 Slovenija", "info@a1.si", 5400, true),
+            ("Your Booking.com verification code is 889687", "Booking.com", "noreply@booking.com", 1200, true),
+            ("307182 is your Instagram code. Don't share it.", "Instagram", "security@mail.instagram.com", 5400, true),
             ("Revolut: Your code is 771 204. Never share it", "", "Revolut", 11000, false),
-            ("OTP banka: Enkratno geslo za nakup pri IKEA SLOVENIJA v znesku 10,00 EUR s kartico *7305 je 318842.", "", "OTPbanka", 26 * 3600, false),
-            ("OTP banka: Enkratno geslo za nakup pri WOLT.COM v znesku 20,00 EUR s kartico *7305 je 604719.", "", "OTPbanka", 28 * 3600, false),
+            ("318842 is your Facebook confirmation code", "", "Facebook", 26 * 3600, false),
+            ("[TikTok] 604719 is your verification code, valid for 5 minutes.", "", "TikTok", 28 * 3600, false),
         ]
         for (text, name, sender, age, mail) in samples {
             model.ingest(IncomingMessage(text: text, senderName: name, senderID: sender, sourceKey: mail ? "m" : MessagesStore.sourceKey,
