@@ -4,7 +4,7 @@
 #   scripts/install.sh --no-launch  test + build + install only
 #   scripts/install.sh --build-only test + build a universal app without installing
 #   scripts/install.sh --release    test + build + notarized drag-to-Applications CodeCatch.dmg
-#   scripts/install.sh --publish    --release, then upload the DMG as a GitHub release
+#   scripts/install.sh --publish    --release, then upload the DMG as a GitHub release and push the feed
 set -euo pipefail
 cd "$(dirname "$0")/.."
 case "${1:-}" in
@@ -14,6 +14,13 @@ esac
 # Published artifacts must correspond to a committed, reviewable source tree.
 if [[ "${1:-}" = --release || "${1:-}" = --publish ]] && [ -n "$(git status --porcelain)" ]; then
     echo "Commit or remove local changes before releasing." >&2; exit 1
+fi
+# The release tags HEAD and the feed is pushed on top of it, so HEAD must be the pushed main.
+if [ "${1:-}" = --publish ]; then
+    git fetch --quiet origin main
+    if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+        echo "Check out main and push it before publishing." >&2; exit 1
+    fi
 fi
 # The public history restarted at one commit after build 52 shipped; 100 keeps builds increasing.
 VERSION="${CODECATCH_BUILD_NUMBER:-$(( $(git rev-list --count HEAD) + 100 ))}"
@@ -100,7 +107,10 @@ if [ "${1:-}" = "--release" ] || [ "${1:-}" = "--publish" ]; then
     fi
     gh release create "$TAG" "$DMG" --repo ugzv/CodeCatch --target "$(git rev-parse HEAD)" \
         --title "CodeCatch $TAG" --notes "https://codecatch.app/changelog/"
-    echo "Published $TAG; commit and push site/appcast.xml to offer it as an update"
+    # Installed copies see the update once CI deploys the pushed feed.
+    git commit --quiet -m "chore(release): $TAG" -- site/appcast.xml
+    git push --quiet origin HEAD:main
+    echo "Published $TAG"
     exit 0
 fi
 

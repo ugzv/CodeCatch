@@ -196,11 +196,10 @@ shipped app can never print inbox data.
 |---|---|
 | `scripts/install.sh --build-only` | Tests, then builds a signed universal app in `.build-release/`. Does not install it |
 | `scripts/install.sh --release` | Also makes `CodeCatch.dmg`, notarizes it, and writes the update feed to `site/appcast.xml` |
-| `scripts/install.sh --publish` | Also uploads the DMG as a GitHub release |
+| `scripts/install.sh --publish` | Also uploads the DMG as a GitHub release, then commits and pushes `site/appcast.xml` |
 
-After `--publish`, commit and push `site/appcast.xml`. CI then deploys `site/` to
-Cloudflare Pages, and installed copies update themselves from
-`https://codecatch.app/appcast.xml`.
+CI then deploys `site/` to Cloudflare Pages, and installed copies update
+themselves from `https://codecatch.app/appcast.xml`.
 
 A release needs:
 
@@ -209,7 +208,7 @@ A release needs:
 - a `notarytool` Keychain profile named `codecatch` (or set `CODECATCH_NOTARY_PROFILE`)
 - Sparkle's EdDSA key in the Keychain
 - `uvx`, for `dmgbuild`
-- `gh` with push access, and the commit already pushed
+- `gh` and push access to `main`, with `main` checked out and already pushed
 
 The working tree must be clean. The build number is the commit count plus 100
 (`CODECATCH_BUILD_NUMBER` overrides it) and must be higher than the last one in
