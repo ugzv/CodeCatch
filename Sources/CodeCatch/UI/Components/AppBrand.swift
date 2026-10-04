@@ -43,6 +43,29 @@ enum AppBrand {
         NSApp.activate()
         NSApp.orderFrontStandardAboutPanel(options: [.applicationName: name])
     }
+
+    enum Issue: String { case bug = "bug_report.yml", feature = "feature_request.yml" }
+
+    /// Opens a GitHub issue form; a bug report arrives with the build and Mac already filled in.
+    static func openIssue(_ issue: Issue) {
+        var url = URLComponents(string: "https://github.com/ugzv/CodeCatch/issues/new")!
+        url.queryItems = [URLQueryItem(name: "template", value: issue.rawValue)]
+        if issue == .bug {
+            let os = ProcessInfo.processInfo.operatingSystemVersion
+            url.queryItems! += [URLQueryItem(name: "build", value: version),
+                                URLQueryItem(name: "macos", value: "macOS \(os.majorVersion).\(os.minorVersion).\(os.patchVersion), "
+                                    + "\(sysctl("machdep.cpu.brand_string")) (\(sysctl("hw.model")))")]
+        }
+        NSWorkspace.shared.open(url.url!)
+    }
+
+    private static func sysctl(_ name: String) -> String {
+        var size = 0
+        sysctlbyname(name, nil, &size, nil, 0)
+        var value = [CChar](repeating: 0, count: size)
+        sysctlbyname(name, &value, &size, nil, 0)
+        return String(cString: value)
+    }
 }
 
 /// The app icon at IconTile size, for the row that stands for CodeCatch itself.

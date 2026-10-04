@@ -299,6 +299,10 @@ struct MenuContent: View {
                     openWindow(id: WelcomeView.windowID)
                 }
                 Button("About CodeCatch", action: AppBrand.showAbout)
+                Divider()
+                Button("Report a Bug…") { AppBrand.openIssue(.bug) }
+                Button("Suggest a Feature…") { AppBrand.openIssue(.feature) }
+                Divider()
                 Button("Check for Updates…") {
                     NSApp.activate()
                     Updater.controller?.checkForUpdates(nil)

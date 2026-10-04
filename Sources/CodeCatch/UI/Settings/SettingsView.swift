@@ -31,9 +31,18 @@ private struct SettingsBrandFooter: ViewModifier {
             HStack {
                 BrandHeading()
                 Spacer()
-                Button("About", action: AppBrand.showAbout)
-                    .buttonStyle(.plain).foregroundStyle(.secondary)
-                    .help("About CodeCatch")
+                Menu {
+                    Button("About CodeCatch", action: AppBrand.showAbout)
+                    Divider()
+                    Button("Report a Bug…") { AppBrand.openIssue(.bug) }
+                    Button("Suggest a Feature…") { AppBrand.openIssue(.feature) }
+                } label: {
+                    Image(systemName: "questionmark.circle").font(.system(size: 15)).foregroundStyle(.secondary)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .help("About and feedback")
             }
             .bottomBar()
         }
