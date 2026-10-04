@@ -3,7 +3,7 @@ name: Site
 on:
   push:
     branches: [main]
-    paths: [site/**, .github/workflows/site.yml]
+    paths: [site/**, functions/**, .github/workflows/site.yml]
 
 permissions:
   contents: read
@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+      # Run from the repo root: wrangler deploys ./functions (install counting) with site/.
       - name: Deploy to Cloudflare Pages
         run: npx --yes wrangler@4.147.0 pages deploy site --project-name codecatch --branch main
         env:

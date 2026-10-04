@@ -47,14 +47,14 @@ CodeCatch. Auto-type is opt-in; sign-in links open only after a user action.
 | `GoogleOAuth` | Google authorization/token endpoints; optional sign-in |
 | `BitwardenCLI` | User's configured Bitwarden service; explicit sync/import |
 | `IconStore` | Google favicon service only; receives the inferred domain, never message text or codes |
-| `Updater` | codecatch.app for the Sparkle feed and signed release downloads |
+| `Updater` | codecatch.app for the Sparkle feed (with a random install ID, build, macOS version and Mac model, counted by `functions/_middleware.js`) and signed release downloads |
 
 Logos are on by default and can be disabled in Privacy. Only Google favicon
 hosts are allowed; redirects to service websites are rejected. Google receives
 the requesting IP address and domain. Other servers receive ordinary connection
 metadata for their respective features. Opening a
-sign-in link also sends its token to the chosen destination. There is no app
-analytics or crash-upload pipeline. The public [privacy page](site/privacy/index.html)
+sign-in link also sends its token to the chosen destination. Apart from that install count, there is
+no app analytics or crash-upload pipeline. The public [privacy page](site/privacy/index.html)
 must stay consistent with implementation changes.
 
 ## Verification and releases
