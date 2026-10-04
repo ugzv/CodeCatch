@@ -15,21 +15,30 @@ struct SourcesTab: View {
 
     var body: some View {
         Form {
-            if !model.receiving {
-                Label("Messages and mail are paused. Choose what to catch in Monitoring to resume.", systemImage: "pause.circle")
-                    .font(.callout).foregroundStyle(.secondary)
+            Section {
+                SettingRow(symbol: "number", color: .blue, title: "Verification Codes", subtitle: "From Messages and mail",
+                           info: "Turning this off stops reading Messages. Turning it back on reads recent history again.",
+                           isOn: setting(Prefs.receivedCodes))
+                SettingRow(symbol: "link", color: .teal, title: "Sign-In Links", subtitle: "From mail",
+                           info: "Links open only when you click them, after you unlock CodeCatch.",
+                           isOn: setting(Prefs.signInLinks))
+            } header: {
+                Text("What to Catch")
+            } footer: {
+                if !model.receiving {
+                    Text("Messages and mail are paused.").font(.caption).foregroundStyle(.secondary)
+                }
             }
             Section("Messages") {
                 let status = model.status[MessagesStore.sourceKey] ?? .off
-                SettingRow(symbol: "message.fill", color: .green, title: "Messages", subtitle: "iMessage and forwarded SMS", status: status) {
+                let codes = model.monitoring(Prefs.receivedCodes)
+                SettingRow(symbol: "message.fill", color: .green, title: "Messages",
+                           subtitle: codes ? "iMessage and forwarded SMS" : "Paused while Verification Codes is off", status: status) {
                     sourceInfo(MessagesStore.sourceKey, title: "Messages",
-                               detail: "Reads verification codes from Messages on this Mac. Requires Full Disk Access and Verification Codes enabled in Monitoring.",
-                               enabled: messagesEnabled && model.monitoring(Prefs.receivedCodes))
+                               detail: "Reads codes from Messages on this Mac. Needs Full Disk Access.",
+                               enabled: messagesEnabled && codes)
                     Toggle("Messages", isOn: $messagesEnabled).labelsHidden()
                         .onChange(of: messagesEnabled) { model.restartMessages() }
-                }
-                if model.receiving, !model.monitoring(Prefs.receivedCodes) {
-                    Text("Enable Verification Codes in Monitoring to read Messages.").font(.caption).foregroundStyle(.secondary)
                 }
                 if messagesEnabled { diskAccessRow(status) }
             }
@@ -38,7 +47,7 @@ struct SourcesTab: View {
                 let appleMail = model.status[AppleMailStore.sourceKey] ?? .off
                 SettingRow(symbol: "tray.fill", color: .cyan, title: "Apple Mail", subtitle: "Inboxes in the Mail app, no sign-in needed", status: appleMail) {
                     sourceInfo(AppleMailStore.sourceKey, title: "Apple Mail",
-                               detail: "Reads new mail in the inboxes of the Mail app on this Mac, without changing it or marking it as read. Mail fetches while it is open. Requires Full Disk Access. An account added below as well is read twice; each code still appears once.",
+                               detail: "Reads new mail in the Mail app on this Mac. Nothing is changed or marked as read. Mail fetches new mail only while it is open. Needs Full Disk Access.",
                                enabled: appleMailEnabled && model.receiving)
                     Toggle("Apple Mail", isOn: $appleMailEnabled).labelsHidden()
                         .onChange(of: appleMailEnabled) { model.restartAppleMail() }
@@ -49,7 +58,7 @@ struct SourcesTab: View {
                     SettingRow(symbol: "envelope.fill", color: account.isGmail ? .red : .blue,
                                title: account.label, subtitle: account.user, status: status) {
                         sourceInfo(account.id.uuidString, title: account.label,
-                                   detail: "Mail is read without changing it or marking it as read. Credentials are kept in your login Keychain.",
+                                   detail: "Nothing is changed or marked as read. Your password stays in your Keychain.",
                                    enabled: account.enabled && model.receiving)
                         Menu {
                             Button("Edit Account…") { editing = account }
@@ -86,29 +95,24 @@ struct SourcesTab: View {
                 }
             }
 
-            Section("Authenticator") {
+            Section("Bitwarden") {
                 SettingRow(symbol: "key.fill", color: .blue, title: "Bitwarden", subtitle: vaultSubtitle) {
-                    if model.hasVault {
-                        Button(model.vaultSession.isUnlocked ? "Lock" : "Unlock") {
-                            vaultError = nil
-                            if model.vaultSession.isUnlocked { model.vaultSession.lock() }
-                            else { Task { do { try await model.vaultSession.unlock() } catch { vaultError = error.localizedDescription } } }
-                        }.disabled(model.vaultSession.isBusy || (!model.vaultSession.isUnlocked && !model.monitoring(Prefs.bitwarden)))
-                    } else {
-                        Button("Set Up…") { bitwarden = true }
-                            .disabled(!model.monitoring(Prefs.bitwarden))
-                    }
                     SettingInfo(title: "Bitwarden") {
-                        Text("Generate authenticator codes from your saved Bitwarden import. Unlock with \(DeviceAuthentication.unlockMethods); use Refresh to review changes from Bitwarden.")
-                        Text("Turn Bitwarden on or off in Monitoring. Turning it off keeps your saved import.")
+                        Text("Shows two-step codes for your saved Bitwarden logins. Codes are made on this Mac and stay hidden until you unlock with \(DeviceAuthentication.unlockMethods).")
+                        Text("Turning this off hides the codes and keeps your import. It also locks CodeCatch.")
                             .foregroundStyle(.secondary)
                     }
                     if model.hasVault {
                         Menu {
+                            Button(model.vaultSession.isUnlocked ? "Lock" : "Unlock") {
+                                vaultError = nil
+                                if model.vaultSession.isUnlocked { model.vaultSession.lock() }
+                                else { Task { do { try await model.vaultSession.unlock() } catch { vaultError = error.localizedDescription } } }
+                            }.disabled(model.vaultSession.isBusy || (!model.vaultSession.isUnlocked && !model.monitoring(Prefs.bitwarden)))
                             Button("Refresh…") { bitwarden = true }
                                 .disabled(!model.monitoring(Prefs.bitwarden))
                             Divider()
-                            Button("Remove Saved Import", role: .destructive) {
+                            Button("Remove Import", role: .destructive) {
                                 vaultError = nil
                                 Task { do { try await model.removeVault() } catch { vaultError = error.localizedDescription } }
                             }.disabled(model.vaultSession.isBusy)
@@ -118,6 +122,12 @@ struct SourcesTab: View {
                         .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
                         .accessibilityLabel("Bitwarden options")
                         .help("Bitwarden options")
+                        Toggle("Bitwarden", isOn: setting(Prefs.bitwarden)).labelsHidden()
+                    } else {
+                        Button("Set Up…") {
+                            model.setMonitoring(Prefs.bitwarden, enabled: true)
+                            bitwarden = true
+                        }
                     }
                 }
                 if let vaultError { Text(vaultError).font(.caption).foregroundStyle(.orange) }
@@ -134,7 +144,7 @@ struct SourcesTab: View {
                     HStack {
                         Text("Ignored Senders")
                         SettingInfo(title: "Ignored Senders") {
-                            Text("Messages from these senders are skipped. Ignore a sender from a code's right-click menu, or restore one here.")
+                            Text("Codes from these senders are skipped. To ignore a sender, right-click one of their codes.")
                         }
                     }
                 }
@@ -147,17 +157,21 @@ struct SourcesTab: View {
     }
 
     private var vaultSubtitle: String {
-        guard model.monitoring(Prefs.bitwarden) else { return model.hasVault ? "Off · saved import kept" : "Off · enable in Monitoring to set up" }
-        guard model.hasVault else { return "Not set up" }
-        let state = model.vaultSession.isUnlocked ? "\(model.vault.count) codes · unlocked" : "Locked"
+        guard model.hasVault else { return "Two-step codes from your saved logins" }
+        guard model.monitoring(Prefs.bitwarden) else { return "Off · import kept" }
+        let state = model.vaultSession.isUnlocked ? "\(model.vault.count) codes" : "Locked"
         guard let imported = UserDefaults.standard.object(forKey: Prefs.vaultImportedAt) as? Date else { return state }
         return state + " · imported " + imported.formatted(.relative(presentation: .named))
+    }
+
+    private func setting(_ key: String) -> Binding<Bool> {
+        Binding(get: { model.monitoring(key) }, set: { model.setMonitoring(key, enabled: $0) })
     }
 
     @ViewBuilder private func diskAccessRow(_ status: SourceStatus) -> some View {
         if status == .attention(SourceStatus.needsDiskAccess) {
             SettingRow(symbol: "lock.shield.fill", color: .orange, title: "Full Disk Access Needed",
-                       subtitle: "Enable CodeCatch in Privacy & Security") {
+                       subtitle: "Turn on CodeCatch in Privacy & Security") {
                 Button("Open Settings") { SystemSettings.fullDiskAccess() }
             }
         }

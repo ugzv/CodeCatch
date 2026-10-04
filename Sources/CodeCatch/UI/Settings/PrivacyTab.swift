@@ -15,23 +15,23 @@ struct PrivacyTab: View {
         Form {
             Section("On Screen") {
                 SettingRow(symbol: "rectangle.dashed.badge.record", color: .red, title: "Hide from Screen Capture",
-                           info: "CodeCatch windows stay out of Zoom, Meet and screenshots", isOn: $hideFromCapture)
+                           info: "CodeCatch windows stay out of Zoom, Meet and screenshots.", isOn: $hideFromCapture)
                 SettingRow(symbol: "eye.slash.fill", color: .indigo, title: "Blur Codes Until Hover",
-                           info: "Point at a code to read it; the menu bar shows only the app icon", isOn: $blurCodes)
+                           info: "Point at a code to read it. The menu bar shows only the app icon.", isOn: $blurCodes)
                 SettingRow(symbol: "menubar.rectangle", color: .gray, title: "Show Code in Menu Bar",
-                           info: "For three minutes, or until used", isOn: $codeInMenuBar)
+                           info: "Shows the newest code for three minutes, or until you use it.", isOn: $codeInMenuBar)
                 SettingRow(symbol: "text.bubble.fill", color: .green, title: "Show Message Previews",
-                           info: "The SMS text or email subject under each code", isOn: $showPreviews)
+                           info: "Shows the SMS text or email subject under each code.", isOn: $showPreviews)
             }
             Section("Clipboard and Network") {
                 SettingRow(symbol: "clock.arrow.circlepath", color: .orange, title: "Clear Clipboard After 90 Seconds",
-                           info: "Only if nothing else was copied since. Universal Clipboard is disabled for these copies; clipboard managers are asked not to save them.", isOn: $clearClipboard)
+                           info: "Only if you have not copied something else since. Codes do not sync to your other devices, and clipboard managers are asked to skip them.", isOn: $clearClipboard)
                 SettingRow(symbol: "app.badge.fill", color: .purple, title: "Show Service Logos",
-                           info: "Logos load through Google, which receives your IP address and the requested service domain. CodeCatch does not contact service websites for logos. Turn this off to stop logo requests.", isOn: $serviceIcons)
+                           info: "Logos load through Google, which sees your IP address and the site name, such as github.com. Turn this off to stop it.", isOn: $serviceIcons)
             }
             Section("History") {
                 SettingRow(symbol: "clock.fill", color: .teal, title: "Keep Codes For",
-                           info: "Received history is re-read from Messages and mail, never written to disk. Changing this period refreshes the sources.") {
+                           info: "History is read again from Messages and mail. It is never saved to disk.") {
                     Picker("Keep Codes For", selection: $historyDays) {
                         Text("1 Day").tag(1)
                         Text("7 Days").tag(7)
@@ -45,10 +45,10 @@ struct PrivacyTab: View {
                     }
                 }
                 SettingRow(symbol: "lock.fill", color: .blue, title: "Clear History When Mac Locks",
-                           info: "Clear received history and any code still on the clipboard when your Mac locks. Saved Bitwarden logins are kept.", isOn: $clearOnLock)
+                           info: "Also clears a code still on the clipboard. Bitwarden codes are kept.", isOn: $clearOnLock)
                 SettingRow(symbol: "trash.fill", color: .gray, title: "Clear History",
-                           subtitle: "Cleared codes won’t return after restarting",
-                           info: "Clear all received history up to now. Saved Bitwarden logins are kept. New codes and links will still appear.") {
+                           subtitle: "Cleared codes stay gone after a restart",
+                           info: "Bitwarden codes are kept. New codes and links still appear.") {
                     Button("Clear Now") { model.clearHistory() }.disabled(model.items.isEmpty)
                 }
             }

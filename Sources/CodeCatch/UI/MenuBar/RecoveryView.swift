@@ -17,7 +17,7 @@ struct RecoveryView: View {
     }
     private var checking: Bool { sourceKeys.contains { model.status[$0] == .connecting } }
     private var monitoringSummary: String {
-        guard model.monitoring(Prefs.receivedCodes) else { return "Email monitoring paused" }
+        guard model.monitoring(Prefs.receivedCodes) else { return "Paused" }
         let count = enabledAccounts.count
         let accounts = "\(count) email \(count == 1 ? "account" : "accounts")"
         if model.monitoring(Prefs.appleMail) {
@@ -60,8 +60,8 @@ struct RecoveryView: View {
             Divider()
             Group {
                 if !model.monitoring(Prefs.receivedCodes) {
-                    notice("Verification code monitoring is off.") {
-                        Button("Open Settings") { showSettings(.monitoring) }
+                    notice("Verification Codes is off.") {
+                        Button("Open Sources") { showSettings(.sources) }
                     }
                 } else if !model.isUnlocked {
                     notice(unlockError ?? "Unlock to view recent emails.") {

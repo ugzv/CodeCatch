@@ -1,23 +1,21 @@
 import SwiftUI
 
 enum SettingsTab: String {
-    case monitoring, sources, general, privacy
+    case general, sources, privacy
     static let storageKey = "settingsTab"
     /// The tab Settings shows when it opens next.
     func select() { UserDefaults.standard.set(rawValue, forKey: Self.storageKey) }
 }
 
 struct SettingsView: View {
-    @AppStorage(SettingsTab.storageKey) private var selectedTab: SettingsTab = .monitoring
+    @AppStorage(SettingsTab.storageKey) private var selectedTab: SettingsTab = .general
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            MonitoringTab().modifier(SettingsBrandFooter()).tabItem { Label("Monitoring", systemImage: "switch.2") }
-                .tag(SettingsTab.monitoring)
-            SourcesTab().modifier(SettingsBrandFooter()).tabItem { Label("Sources", systemImage: "tray.2") }
-                .tag(SettingsTab.sources)
             GeneralTab().modifier(SettingsBrandFooter()).tabItem { Label("General", systemImage: "gearshape") }
                 .tag(SettingsTab.general)
+            SourcesTab().modifier(SettingsBrandFooter()).tabItem { Label("Sources", systemImage: "tray.2") }
+                .tag(SettingsTab.sources)
             PrivacyTab().modifier(SettingsBrandFooter()).tabItem { Label("Privacy", systemImage: "hand.raised") }
                 .tag(SettingsTab.privacy)
         }
