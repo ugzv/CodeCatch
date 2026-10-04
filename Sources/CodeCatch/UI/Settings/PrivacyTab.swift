@@ -47,8 +47,7 @@ struct PrivacyTab: View {
                 SettingRow(symbol: "lock.fill", color: .blue, title: "Clear History When Mac Locks",
                            info: "Also clears a code still on the clipboard. Bitwarden codes are kept.", isOn: $clearOnLock)
                 SettingRow(symbol: "trash.fill", color: .gray, title: "Clear History",
-                           subtitle: "Cleared codes stay gone after a restart",
-                           info: "Bitwarden codes are kept. New codes and links still appear.") {
+                           info: "Cleared codes stay gone after a restart. Bitwarden codes are kept. New codes and links still appear.") {
                     Button("Clear Now") { model.clearHistory() }.disabled(model.items.isEmpty)
                 }
             }

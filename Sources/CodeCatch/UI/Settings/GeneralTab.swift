@@ -14,14 +14,14 @@ struct GeneralTab: View {
         Form {
             Section("When a Code or Link Arrives") {
                 SettingRow(symbol: "rectangle.inset.topright.filled", color: .blue, title: "Show Banner", info: "A card appears at the top right. It does not take focus from the app you are using.", isOn: $showBanner)
-                SettingRow(symbol: "doc.on.clipboard.fill", color: .indigo, title: "Automatically Copy Codes", subtitle: "While unlocked", info: "New codes are ready to paste. Sign-in links are never copied.", isOn: $autoCopy)
-                SettingRow(symbol: "text.cursor", color: .teal, title: "Automatically Type Codes", subtitle: "Into the field you are in, while unlocked", info: "Types each new code key by key, so split fields fill too. It types into whatever app is in front, so check you are on the real site before you ask for a code. Needs Accessibility access.", isOn: $autoType)
+                SettingRow(symbol: "doc.on.clipboard.fill", color: .indigo, title: "Automatically Copy Codes", info: "New codes are ready to paste while CodeCatch is unlocked. Sign-in links are never copied.", isOn: $autoCopy)
+                SettingRow(symbol: "text.cursor", color: .teal, title: "Automatically Type Codes", info: "Types each new code into the field you are in, while CodeCatch is unlocked. It types key by key, so split fields fill too. It types into whatever app is in front, so check you are on the real site before you ask for a code. Needs Accessibility access.", isOn: $autoType)
                     .onChange(of: autoType) { if autoType { Accessibility.requestTrust() } }
                 if autoType {
                     let _ = model.now  // re-check once a second while open
                     let trusted = Accessibility.isTrusted
-                    SettingRow(symbol: "accessibility", color: .blue, title: "Accessibility", subtitle: "Needed to type codes",
-                               info: trusted ? nil : "Already on in System Settings? That entry is from an older version. Remove CodeCatch with −, then click Allow again.") {
+                    SettingRow(symbol: "accessibility", color: .blue, title: "Accessibility",
+                               info: "Needed to type codes." + (trusted ? "" : " Already on in System Settings? That entry is from an older version. Remove CodeCatch with −, then click Allow again.")) {
                         if trusted {
                             Label { Text("Allowed").foregroundStyle(.secondary) } icon: {
                                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
@@ -57,7 +57,7 @@ struct GeneralTab: View {
                     Button("Check Now…") { updater?.checkForUpdates() }
                         .disabled(updater?.canCheckForUpdates != true)
                 }
-                SettingRow(symbol: "arrow.down.circle.fill", color: .blue, title: "Update Automatically", subtitle: "Checks once a day", isOn: $autoUpdate)
+                SettingRow(symbol: "arrow.down.circle.fill", color: .blue, title: "Update Automatically", info: "Checks once a day and installs new versions.", isOn: $autoUpdate)
                     .onChange(of: autoUpdate) {
                         updater?.automaticallyChecksForUpdates = autoUpdate
                         updater?.automaticallyDownloadsUpdates = autoUpdate
