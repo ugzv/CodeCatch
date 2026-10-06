@@ -16,7 +16,7 @@ struct PrivacyTab: View {
             Section("Unlock") {
                 SettingRow(symbol: "touchid", color: .pink, title: "Ask for \(DeviceAuthentication.supportsTouchID() ? "Touch ID" : "Your Password") to Show Codes",
                            info: "Turn this off and CodeCatch unlocks whenever your Mac does, without asking for \(DeviceAuthentication.unlockMethods). Anyone using your unlocked Mac can then see your codes, Bitwarden codes too.",
-                           isOn: Binding(get: { !model.monitoring(Prefs.unlockWithMac) }, set: { model.setUnlockWithMac(!$0) }))
+                           isOn: Binding(get: { !model.monitoring(Prefs.unlockWithMac) }, set: { ask in Task { await model.setUnlockWithMac(!ask) } }))
             }
             Section("On Screen") {
                 SettingRow(symbol: "rectangle.dashed.badge.record", color: .red, title: "Hide from Screen Capture",

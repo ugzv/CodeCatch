@@ -44,11 +44,11 @@ final class DeviceAuthentication {
 
     private var context: LAContext?
 
-    func authenticate() async throws {
+    func authenticate(reason: String = "show your verification codes") async throws {
         let context = LAContext()
         self.context = context
         defer { if self.context === context { self.context = nil } }
-        guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "show your verification codes") else {
+        guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) else {
             throw LAError(.authenticationFailed)
         }
     }

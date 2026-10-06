@@ -33,6 +33,7 @@ final class AppModel: ObservableObject {
     private let defaults: UserDefaults
     private let copyToClipboard: (String, UUID) -> Void
     private let typeCode: (String) -> Void
+    private let confirmOwner: @MainActor () async throws -> Void
 
     var vault: [VaultCode] { monitoring(Prefs.bitwarden) ? vaultSession.codes : [] }
     var isUnlocked: Bool { vaultSession.isUnlocked }
@@ -51,7 +52,8 @@ final class AppModel: ObservableObject {
     init(vaultSession: VaultSession? = nil, monitor: SourceMonitor? = nil, search: CodeSearch? = nil, defaults: UserDefaults = .standard,
          accounts: [MailAccount]? = nil,
          copyToClipboard: @escaping (String, UUID) -> Void = { Clipboard.copy($0, id: $1) },
-         typeCode: (@MainActor (String) -> Void)? = nil) {
+         typeCode: (@MainActor (String) -> Void)? = nil,
+         confirmOwner: (@MainActor () async throws -> Void)? = nil) {
         self.defaults = defaults
         self.accounts = accounts ?? MailAccount.load(from: defaults)
         Prefs.register(in: defaults)
@@ -60,6 +62,7 @@ final class AppModel: ObservableObject {
         self.monitor = monitor ?? SourceMonitor(defaults: defaults)
         self.search = search ?? CodeSearch(defaults: defaults)
         self.copyToClipboard = copyToClipboard
+        self.confirmOwner = confirmOwner ?? { try await DeviceAuthentication().authenticate(reason: "show codes without asking each time") }
         let session = self.vaultSession
         self.typeCode = typeCode ?? { code in
             // Re-check the same session and settings when queued typing begins.
@@ -294,11 +297,23 @@ final class AppModel: ObservableObject {
         Task { try? await authenticate() }
     }
 
-    /// Turning the setting on unlocks now; turning it off locks now.
-    func setUnlockWithMac(_ enabled: Bool) {
+    /// Turning the prompt off asks for it one last time, even while unlocked, so no one at an
+    /// unlocked Mac can switch it off for later. Turning it back on locks now.
+    func setUnlockWithMac(_ enabled: Bool) async {
+        guard enabled else {
+            objectWillChange.send()
+            defaults.set(false, forKey: Prefs.unlockWithMac)
+            vaultSession.lock()
+            return
+        }
+        unlockError = nil
+        do { try await confirmOwner() } catch {
+            if !Self.isCancel(error) { unlockError = error.localizedDescription }
+            return
+        }
         objectWillChange.send()
-        defaults.set(enabled, forKey: Prefs.unlockWithMac)
-        if enabled { unlockWithMac() } else { vaultSession.lock() }
+        defaults.set(true, forKey: Prefs.unlockWithMac)
+        try? await authenticate()
     }
 
     /// On wake the lock screen may still be up; codes wait for it.

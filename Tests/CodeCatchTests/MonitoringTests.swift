@@ -14,6 +14,8 @@ import Testing
     private(set) var writes = 0
     private(set) var removals = 0
     var authenticationAllowed = true
+    var ownerConfirms = true
+    private(set) var ownerChecks = 0
     let stored = [VaultCode(id: "saved-login", name: "Example", username: nil, domain: nil,
                             secret: "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ")]
     var model: AppModel!
@@ -35,7 +37,11 @@ import Testing
         let monitor = SourceMonitor(watchMail: { _, _ in }, hasCredential: { _ in false }, defaults: defaults)
         return AppModel(vaultSession: session ?? self.session, monitor: monitor, search: search,
                         defaults: defaults, copyToClipboard: { [weak self] value, _ in self?.copied.append(value) },
-                        typeCode: { [weak self] code in self?.typed.append(code) })
+                        typeCode: { [weak self] code in self?.typed.append(code) },
+                        confirmOwner: { [self] in
+                            ownerChecks += 1
+                            if !ownerConfirms { throw CancellationError() }
+                        })
     }
 
     func storedSession() -> VaultSession {
@@ -68,13 +74,32 @@ private func monitoringMessage() -> IncomingMessage {
         }
     }
 
-    /// Turning "Unlock with Your Mac" off must hide codes now, not at the next sleep.
-    @Test func turningOffUnlockWithMacLocksAtOnce() async throws {
+    /// Prevents someone at the Mac, locked or already unlocked, from removing the Touch ID lock without the owner.
+    @Test(arguments: [(unlocked: false, confirms: false), (unlocked: true, confirms: false),
+                      (unlocked: false, confirms: true), (unlocked: true, confirms: true)])
+    func turningOnUnlockWithMacAlwaysAsksTheOwner(scenario: (unlocked: Bool, confirms: Bool)) async throws {
         let fixture = try MonitoringFixture()
         defer { fixture.cleanUp() }
-        fixture.model.setUnlockWithMac(true)
-        try await fixture.model.authenticate()
-        fixture.model.setUnlockWithMac(false)
+        if scenario.unlocked { try await fixture.model.authenticate() }
+        fixture.ownerConfirms = scenario.confirms
+        await fixture.model.setUnlockWithMac(true)
+
+        #expect(fixture.ownerChecks == 1)
+        #expect(fixture.model.monitoring(Prefs.unlockWithMac) == scenario.confirms)
+        #expect(fixture.model.isUnlocked == (scenario.unlocked || scenario.confirms))
+    }
+
+    /// Turning "Unlock with Your Mac" off must hide codes now, not at the next sleep, and must not be blockable.
+    @Test func turningOffUnlockWithMacLocksAtOnceWithoutAskingTheOwner() async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        await fixture.model.setUnlockWithMac(true)
+        try #require(fixture.model.isUnlocked)
+        fixture.ownerConfirms = false
+        await fixture.model.setUnlockWithMac(false)
+
+        #expect(fixture.ownerChecks == 1)
+        #expect(!fixture.model.monitoring(Prefs.unlockWithMac))
         #expect(!fixture.model.isUnlocked)
     }
 
