@@ -7,7 +7,7 @@ struct MailAccount: Codable, Identifiable, Hashable {
     var port = 993
     var user: String
     var enabled = true
-    /// Signed in with Google (XOAUTH2) instead of an app password. Optional so older saved accounts still decode.
+    /// Signed in with Google (read through the Gmail API) instead of an app password. Optional so older saved accounts still decode.
     var googleSignIn: Bool?
 
     var secretKey: String { "\(user.lowercased())@\(host.lowercased())" }
@@ -16,16 +16,6 @@ struct MailAccount: Codable, Identifiable, Hashable {
     var usesGoogle: Bool { googleSignIn == true }
     var hasCredential: Bool { usesGoogle ? Secrets.get(refreshTokenKey) != nil : password != nil }
     var isGmail: Bool { [Self.gmailHost, "imap.googlemail.com"].contains(host.lowercased()) }
-
-    /// What IMAP signs in with: a fresh Google access token, or the app password.
-    func auth() async throws -> IMAPConnection.Auth {
-        if usesGoogle {
-            guard let refresh = try Secrets.read(refreshTokenKey) else { throw GoogleOAuth.Failure.token("no refresh token") }
-            return .accessToken(try await GoogleOAuth.accessToken(refresh: refresh))
-        }
-        guard let password else { throw GoogleOAuth.Failure.token("no password") }
-        return .password(password)
-    }
 
     static let gmailHost = "imap.gmail.com"
     static let appPasswordHelp = URL(string: "https://support.google.com/accounts/answer/185833")!

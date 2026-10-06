@@ -2,7 +2,7 @@ import Foundation
 import Network
 
 enum IMAPError: LocalizedError {
-    case closed, timeout, invalidPort, invalidCredentials, invalidResponse, rejected(String)
+    case closed, timeout, invalidPort, invalidCredentials, invalidResponse, noPassword, rejected(String)
     var errorDescription: String? {
         switch self {
         case .closed: "The mail server closed the connection"
@@ -10,6 +10,7 @@ enum IMAPError: LocalizedError {
         case .invalidPort: "The IMAP port must be between 1 and 65535"
         case .invalidCredentials: "The email or password has a character that can't be sent. Type it again."
         case .invalidResponse: "The mail server sent a reply CodeCatch can't read. It will try again."
+        case .noPassword: "No app password saved"
         case .rejected: "The mail server rejected the request"
         }
     }
@@ -50,9 +51,7 @@ actor IMAPConnection {
 
     init(connection: NWConnection) { self.connection = connection }
 
-    enum Auth { case password(String), accessToken(String) }
-
-    func open(user: String, auth: Auth) async throws {
+    func open(user: String, password: String) async throws {
         try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
             let once = Once()
             connection.stateUpdateHandler = { state in
@@ -66,36 +65,12 @@ actor IMAPConnection {
             connection.start(queue: DispatchQueue(label: "imap"))
         }
         _ = try await withTimeout(20) { try await self.readResponse() }  // greeting
-        switch auth {
-        case .password(let password):
-            _ = try await command("LOGIN \(quote(user)) \(quote(password))")
-        case .accessToken(let token):
-            try await xoauth2(user: user, token: token)
-        }
+        _ = try await command("LOGIN \(quote(user)) \(quote(password))")
         let caps = try await command("CAPABILITY")
         capabilities = Set(caps.flatMap { $0.text.uppercased().split(separator: " ").map(String.init) })
     }
 
     func close() { connection.cancel() }
-
-    /// SASL XOAUTH2 with the initial response inline. On failure Gmail sends a "+"
-    /// challenge carrying the error; an empty reply then gets the tagged NO.
-    private func xoauth2(user: String, token: String) async throws {
-        tag += 1
-        let t = "C\(tag)"
-        let payload = Data("user=\(user)\u{1}auth=Bearer \(token)\u{1}\u{1}".utf8).base64EncodedString()
-        try await send("\(t) AUTHENTICATE XOAUTH2 \(payload)\r\n")
-        try await withTimeout(30) {
-            while true {
-                let r = try await self.readResponse()
-                if r.text.hasPrefix("+") { try await self.send("\r\n"); continue }
-                if r.text.hasPrefix(t + " ") {
-                    guard r.text.dropFirst(t.count + 1).hasPrefix("OK") else { throw IMAPError.rejected(r.text) }
-                    return
-                }
-            }
-        }
-    }
 
     /// Runs one command and returns its untagged responses; throws on NO/BAD.
     @discardableResult

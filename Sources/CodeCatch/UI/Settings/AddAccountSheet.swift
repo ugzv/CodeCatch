@@ -6,7 +6,6 @@ struct AddAccountSheet: View {
     let edit: (MailAccount) -> Void
     @ObservedObject private var icons = IconStore.shared
     @Environment(\.dismiss) private var dismiss
-    @Local private var googleConfigured = false
 
     private struct Provider {
         let name: String, label: String, detail: String, host: String, symbol: String, color: Color
@@ -29,9 +28,8 @@ struct AddAccountSheet: View {
                     .font(.callout).foregroundStyle(.secondary)
             }
             VStack(spacing: 0) {
-                row(icon: AnyView(googleLogo), name: "Google", detail: googleConfigured
-                    ? "Gmail and Google Workspace · Sign in with Google"
-                    : "Gmail and Google Workspace · App password") {
+                row(icon: AnyView(googleLogo), name: "Google",
+                    detail: "Gmail and Google Workspace · Sign in with Google (beta) or an app password") {
                     dismiss()
                     edit(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: ""))
                 }
@@ -53,7 +51,6 @@ struct AddAccountSheet: View {
         }
         .padding(20)
         .frame(width: 460)
-        .onAppear { googleConfigured = GoogleOAuth.isConfigured }
     }
 
     private var googleLogo: some View {

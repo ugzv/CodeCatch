@@ -9,22 +9,22 @@ enum Probe {
         "--probe-apple-mail": appleMail, "--probe-messages": messages, "--probe-links": links,
     ]
 
-    /// Checks Google sign-in without a consent: the client is accepted, the redirect
-    /// listener works, and Gmail's XOAUTH2 failure path returns instead of hanging.
+    /// Checks Google sign-in without a consent: the built-in client is accepted without a secret,
+    /// and the Gmail API refuses a bad token instead of hanging.
     static func google() async {
-        print("OAuth client imported: \(GoogleOAuth.isConfigured)")
         do { _ = try await GoogleOAuth.accessToken(refresh: "invalid-refresh-token") } catch {
             print("Token endpoint with a bogus refresh token: \(error.localizedDescription)")
         }
-        async let code = GoogleOAuth.waitForRedirect(state: "probe")
-        try? await Task.sleep(for: .milliseconds(300))
-        _ = try? await URLSession.shared.data(from: URL(string: "http://localhost:8765/?code=probe-code&state=probe")!)
-        print("Redirect listener received: \((try? await code) ?? "nothing")")
-        guard let conn = try? IMAPConnection(host: MailAccount.gmailHost, port: 993) else { return }
-        do { try await conn.open(user: "probe@gmail.com", auth: .accessToken("invalid-token")) } catch {
-            print("Gmail XOAUTH2 with a bad token: \(error.localizedDescription)")
+        do { _ = try await GmailAPI(refreshToken: "invalid-refresh-token").emailAddress() } catch {
+            print("Gmail API with a bogus token: \(error.localizedDescription)")
         }
-        await conn.close()
+        for account in MailAccount.load() where account.usesGoogle {
+            do {
+                let api = try GmailAPI(account: account)
+                let recent = try await api.inbox(since: Date().addingTimeInterval(-86400), limit: 5)
+                print("\(account.label): \(try await api.emailAddress()), \(recent.count) inbox mails today")
+            } catch { print("\(account.label): \(error.localizedDescription)") }
+        }
     }
 
     /// The imported Bitwarden logins' TOTP settings: counts, anything non-standard,

@@ -5,7 +5,6 @@ struct AccountEditor: View {
     @Local var account: MailAccount
     @Local private var password = ""
     @StateObject private var google = MailSignIn()
-    @Local private var googleConfigured = false
     @Local private var hasPassword = false
     @Local private var error: String?
     @Local private var original: MailAccount?
@@ -25,18 +24,14 @@ struct AccountEditor: View {
         VStack(alignment: .leading, spacing: 0) {
             Form {
                 TextField("Label", text: $account.label, prompt: Text("Personal"))
-                TextField("Email", text: $account.user, prompt: Text("you@example.com"))
-                    .onSubmit { if account.host.isEmpty { account.host = MailAccount.guess(for: account.user).host } }
-                TextField("IMAP server", text: $account.host, prompt: Text("imap.gmail.com"))
-                TextField("Port", value: $account.port, format: .number.grouping(.never))
-                if account.isGmail, googleConfigured || usesGoogle {
-                    LabeledContent("Google sign-in") {
+                if account.isGmail {
+                    LabeledContent {
                         if google.isBusy {
-                            HStack { ProgressView().controlSize(.small); Text("Finish in your browser…").foregroundStyle(.secondary) }
+                            HStack { ProgressView().controlSize(.small); Text("Finish in the Google window…").foregroundStyle(.secondary) }
                         } else if signInExpired {
                             HStack {
                                 Label("Expired", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                                Button("Sign In Again…", action: signInWithGoogle).disabled(!googleConfigured)
+                                Button("Sign In Again…", action: signInWithGoogle)
                                 Button("Sign Out") { account.googleSignIn = nil; google.cancel() }
                             }
                         } else if usesGoogle {
@@ -45,9 +40,24 @@ struct AccountEditor: View {
                                 Button("Sign Out") { account.googleSignIn = nil; google.cancel() }
                             }
                         } else {
-                            Button("Sign in with Google…", action: signInWithGoogle).disabled(!googleConfigured || account.user.isEmpty)
+                            Button("Sign in with Google…", action: signInWithGoogle)
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text("Google sign-in")
+                            Text("Beta").font(.caption2.weight(.semibold)).foregroundStyle(.blue)
+                                .padding(.horizontal, 5).padding(.vertical, 1).background(Capsule().fill(.blue.opacity(0.12)))
                         }
                     }
+                }
+                if usesGoogle {
+                    // Google fills in the address, and the Gmail API needs no server settings.
+                    LabeledContent("Email", value: account.user)
+                } else {
+                    TextField("Email", text: $account.user, prompt: Text("you@example.com"))
+                        .onSubmit { if account.host.isEmpty { account.host = MailAccount.guess(for: account.user).host } }
+                    TextField("IMAP server", text: $account.host, prompt: Text("imap.gmail.com"))
+                    TextField("Port", value: $account.port, format: .number.grouping(.never))
                 }
                 if !usesGoogle {
                     SecureField("App password", text: $password,
@@ -84,13 +94,13 @@ struct AccountEditor: View {
         .frame(width: 420)
         .onAppear {
             original = model.accounts.first { $0.id == account.id }
-            googleConfigured = GoogleOAuth.isConfigured
             hasPassword = account.password != nil
         }
         .onChange(of: account.secretKey) {
+            hasPassword = account.password != nil
+            guard google.token(for: account) == nil else { return }  // Google just filled in the address
             google.cancel()
             account.googleSignIn = account.secretKey == original?.secretKey ? original?.googleSignIn : nil
-            hasPassword = account.password != nil
         }
         .onDisappear { google.cancel(); password = "" }
     }
@@ -98,7 +108,7 @@ struct AccountEditor: View {
     private func signInWithGoogle() {
         error = nil
         Task {
-            do { try await google.signIn(for: account) }
+            do { account.user = try await google.signIn(for: account) }
             catch is CancellationError { return }
             catch { self.error = error.localizedDescription }
             NSApp.activate(ignoringOtherApps: true)

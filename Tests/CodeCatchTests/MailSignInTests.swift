@@ -6,7 +6,7 @@ import Testing
 @MainActor private final class ControlledMailAuthentication {
     struct Request {
         let user: String
-        let completion: CheckedContinuation<String, Error>
+        let completion: CheckedContinuation<GoogleOAuth.Grant, Error>
     }
 
     let requests: AsyncStream<Request>
@@ -16,7 +16,7 @@ import Testing
         (requests, continuation) = AsyncStream.makeStream()
     }
 
-    func authenticate(_ user: String) async throws -> String {
+    func authenticate(_ user: String) async throws -> GoogleOAuth.Grant {
         try await withCheckedThrowingContinuation { completion in
             continuation.yield(Request(user: user, completion: completion))
         }
@@ -25,9 +25,9 @@ import Testing
 
 private enum MailAuthenticationFailure: Error { case denied }
 
-@MainActor private func expectObsoleteSignInCancelled(_ task: Task<Void, Error>) async {
+@MainActor private func expectObsoleteSignInCancelled<T>(_ task: Task<T, Error>) async {
     do {
-        try await task.value
+        _ = try await task.value
         Issue.record("An obsolete sign-in must throw CancellationError")
     } catch is CancellationError {
     } catch {
@@ -48,8 +48,8 @@ private enum MailAuthenticationFailure: Error { case denied }
         #expect(request.user == account.user)
         #expect(signIn.isBusy)
         #expect(signIn.token(for: account) == nil)
-        request.completion.resume(returning: "first-refresh-token")
-        try await task.value
+        request.completion.resume(returning: .init(refreshToken: "first-refresh-token", email: request.user))
+        _ = try await task.value
 
         #expect(!signIn.isBusy)
         #expect(signIn.token(for: account) == "first-refresh-token")
@@ -62,7 +62,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     }
 
     @Test func cancellingCompletedSignInImmediatelyClearsStagedToken() async throws {
-        let signIn = MailSignIn(authenticate: { _ in "refresh-token" })
+        let signIn = MailSignIn(authenticate: { .init(refreshToken: "refresh-token", email: $0) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         try await signIn.signIn(for: account)
         #expect(signIn.token(for: account) == "refresh-token")
@@ -71,6 +71,15 @@ private enum MailAuthenticationFailure: Error { case denied }
 
         #expect(!signIn.isBusy)
         #expect(signIn.token(for: account) == nil)
+    }
+
+    /// The token belongs to whoever Google signed in, so it can't be saved under a different typed address.
+    @Test func tokenIsStagedForTheAddressGoogleSignedIn() async throws {
+        let signIn = MailSignIn(authenticate: { _ in .init(refreshToken: "token", email: "real@gmail.com") })
+        let typed = MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: "typo@gmail.com")
+        #expect(try await signIn.signIn(for: typed) == "real@gmail.com")
+        #expect(signIn.token(for: typed) == nil)
+        #expect(signIn.token(for: MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: "real@gmail.com")) == "token")
     }
 
     @Test(arguments: [true, false])
@@ -91,19 +100,19 @@ private enum MailAuthenticationFailure: Error { case denied }
         #expect(signIn.isBusy)
 
         if oldCompletesFirst {
-            oldRequest.completion.resume(returning: "obsolete-token")
+            oldRequest.completion.resume(returning: .init(refreshToken: "obsolete-token", email: oldRequest.user))
             await expectObsoleteSignInCancelled(oldTask)
             #expect(signIn.isBusy)
             #expect(signIn.token(for: account) == nil)
         }
 
-        newRequest.completion.resume(returning: "current-token")
+        newRequest.completion.resume(returning: .init(refreshToken: "current-token", email: newRequest.user))
         try await newTask.value
         #expect(!signIn.isBusy)
         #expect(signIn.token(for: account) == "current-token")
 
         if !oldCompletesFirst {
-            oldRequest.completion.resume(returning: "obsolete-token")
+            oldRequest.completion.resume(returning: .init(refreshToken: "obsolete-token", email: oldRequest.user))
             await expectObsoleteSignInCancelled(oldTask)
             #expect(!signIn.isBusy)
             #expect(signIn.token(for: account) == "current-token")
@@ -121,7 +130,7 @@ private enum MailAuthenticationFailure: Error { case denied }
         signIn.cancel()
         #expect(!signIn.isBusy)
         #expect(signIn.token(for: account) == nil)
-        request.completion.resume(returning: "cancelled-token")
+        request.completion.resume(returning: .init(refreshToken: "cancelled-token", email: request.user))
         await expectObsoleteSignInCancelled(task)
 
         #expect(!signIn.isBusy)
@@ -135,7 +144,7 @@ private enum MailAuthenticationFailure: Error { case denied }
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         let firstTask = Task { try await signIn.signIn(for: account) }
         let firstRequest = try #require(await requests.next())
-        firstRequest.completion.resume(returning: "earlier-token")
+        firstRequest.completion.resume(returning: .init(refreshToken: "earlier-token", email: firstRequest.user))
         try await firstTask.value
         #expect(signIn.token(for: account) == "earlier-token")
 
@@ -143,7 +152,7 @@ private enum MailAuthenticationFailure: Error { case denied }
         let failedRequest = try #require(await requests.next())
         failedRequest.completion.resume(throwing: MailAuthenticationFailure.denied)
         do {
-            try await failedTask.value
+            _ = try await failedTask.value
             Issue.record("Failed authentication must propagate its error")
         } catch MailAuthenticationFailure.denied {
         }

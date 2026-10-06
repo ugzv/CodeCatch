@@ -1,6 +1,11 @@
 import Testing
 @testable import CodeCatch
 
+/// The tables use the callback's path and query; this puts CodeCatch's redirect in front of them.
+private func callback(_ target: String) -> String {
+    target.hasPrefix("/") && !target.hasPrefix("//") ? GoogleOAuth.redirect + target.dropFirst() : target
+}
+
 @MainActor struct OAuthCallbackTests {
     @Test(arguments: [
         ("/?state=expected-state&code=authorization-code", "expected-state", "authorization-code"),
@@ -8,7 +13,7 @@ import Testing
         ("/?state=state%20with%20spaces&code=%C5%A1ifra", "state with spaces", "šifra"),
     ])
     func matchingStatePreservesTheDecodedAuthorizationCode(target: String, state: String, code: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: target, state: state) == code)
+        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: state) == code)
     }
 
     @Test(arguments: [
@@ -28,7 +33,7 @@ import Testing
         "/favicon.ico",
     ])
     func unauthenticatedOrEmptyCallbacksCannotCompleteOrCancelLogin(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: target, state: "expected-state") == nil)
+        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
     }
 
     @Test(arguments: [
@@ -38,7 +43,7 @@ import Testing
     ])
     func authenticatedProviderErrorsCannotBeMistakenForSuccessfulLogin(target: String) {
         #expect(throws: (any Error).self) {
-            try GoogleOAuth.authorizationCode(in: target, state: "expected-state")
+            try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state")
         }
     }
 
@@ -55,7 +60,7 @@ import Testing
         "/?state=expected-state&error=access_denied&%65rror=server_error",
     ])
     func duplicateCallbackParametersCannotSelectAnAmbiguousOutcome(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: target, state: "expected-state") == nil)
+        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
     }
 
     @Test(arguments: [
@@ -65,10 +70,11 @@ import Testing
         "https://example.invalid/?state=expected-state&code=authorization-code",
         "http://localhost:8765/?state=expected-state&code=authorization-code",
         "//example.invalid/?state=expected-state&code=authorization-code",
+        "com.example.other:/oauth2redirect?state=expected-state&code=authorization-code",
         "/?state=expected-state&code=%ZZ",
         "/?state=expected-state&code=%",
     ])
     func malformedOrNonRootTargetsCannotCompleteLogin(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: target, state: "expected-state") == nil)
+        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
     }
 }

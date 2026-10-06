@@ -32,7 +32,7 @@
    "description": "What CodeCatch reads, what it keeps and what it connects to. No account, no server, no usage tracking.",
    "url": "https://codecatch.app/privacy/",
    "inLanguage": "en",
-   "dateModified": "2026-10-04",
+   "dateModified": "2026-10-06",
    "author": {
     "@id": "https://codecatch.app/#author"
    },
@@ -107,7 +107,7 @@
   <p class="eyebrow">Privacy</p>
   <h1>What CodeCatch reads, keeps and connects to</h1>
   <p class="lede">CodeCatch has no account and no server. It never sends your codes, messages or mail anywhere.</p>
-  <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-04">Updated 4 October 2026</time></span></p>
+  <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-06">Updated 6 October 2026</time></span></p>
 </section>
 
 <section class="features about-blocks">
@@ -215,7 +215,7 @@
     </div>
     <div>
       <h3>Sign in with Google</h3>
-      <p>If you sign in with Google, CodeCatch reads your Gmail inbox from your Mac to find verification codes and sign-in links. Mail is processed in memory and never sent to CodeCatch or anyone else; the sign-in token stays in your Keychain. Remove the account in Settings → Sources, or revoke access in your Google Account, to stop it.</p>
+      <p>If you sign in with Google, CodeCatch gets read-only access to your Gmail. From your Mac, it reads new mail in your inbox to find verification codes and sign-in links. It never sends, deletes, moves or labels mail. Mail is processed in memory and never sent to CodeCatch or anyone else. The sign-in token stays in your Keychain. Removing the account in Settings → Sources also ends CodeCatch’s access at Google. You can end it in your Google Account too.</p>
       <p>CodeCatch’s use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
     </div>
     <div>
@@ -225,7 +225,7 @@
     <div>
       <h3>Removing everything</h3>
       <p>In Settings → Sources, remove each mail account and choose Remove Saved Import for Bitwarden. Then quit CodeCatch and move it to the Trash.</p>
-      <p>Settings and any cached logos remain. A developer-imported Google OAuth client also remains in the login Keychain under com.uros.codecatch; remove its google.client-id and google.client-secret entries in Keychain Access if you imported one.</p>
+      <p>Settings and any cached logos remain.</p>
     </div>
     <div>
       <h3>This website</h3>

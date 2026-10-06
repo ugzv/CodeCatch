@@ -211,7 +211,7 @@ final class AppModel: ObservableObject {
             account.googleSignIn = true
         } else if !account.usesGoogle {
             if !password.isEmpty { try setSecret(password, account.secretKey) }
-            try removeSecret(account.refreshTokenKey)
+            try forgetGoogleSignIn(account, removeSecret)
         }
         save(account)
     }
@@ -220,7 +220,7 @@ final class AppModel: ObservableObject {
         guard let saved = accounts.first(where: { $0.id == account.id }) else { return }
         if !accounts.contains(where: { $0.id != saved.id && $0.secretKey == saved.secretKey }) {
             try removeSecret(saved.secretKey)
-            try removeSecret(saved.refreshTokenKey)
+            try forgetGoogleSignIn(saved, removeSecret)
         }
         accounts.removeAll { $0.id == saved.id }
     }
@@ -229,7 +229,14 @@ final class AppModel: ObservableObject {
     func removeUnusedCredentials(for account: MailAccount, removeSecret: (String) throws -> Void = Secrets.remove) throws {
         guard !accounts.contains(where: { $0.secretKey == account.secretKey }) else { return }
         try removeSecret(account.secretKey)
+        try forgetGoogleSignIn(account, removeSecret)
+    }
+
+    /// A Google sign-in CodeCatch forgets also ends on Google's side, once it is gone from the Keychain.
+    private func forgetGoogleSignIn(_ account: MailAccount, _ removeSecret: (String) throws -> Void) throws {
+        let token = Secrets.get(account.refreshTokenKey)
         try removeSecret(account.refreshTokenKey)
+        if let token { Task { await GoogleOAuth.revoke(token) } }
     }
 
     // MARK: - Codes

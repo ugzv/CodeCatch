@@ -7,10 +7,10 @@ final class MailSignIn: ObservableObject {
     @Published private(set) var isBusy = false
     @Published private var credential: (key: String, token: String)?
     private var generation = 0
-    private var task: Task<String, Error>?
-    private let authenticate: (String) async throws -> String
+    private var task: Task<GoogleOAuth.Grant, Error>?
+    private let authenticate: (String) async throws -> GoogleOAuth.Grant
 
-    init(authenticate: @escaping (String) async throws -> String = { try await GoogleOAuth.signIn(email: $0) }) {
+    init(authenticate: @escaping (String) async throws -> GoogleOAuth.Grant = { try await GoogleOAuth.signIn(email: $0) }) {
         self.authenticate = authenticate
     }
 
@@ -18,7 +18,9 @@ final class MailSignIn: ObservableObject {
         credential?.key == account.secretKey ? credential?.token : nil
     }
 
-    func signIn(for account: MailAccount) async throws {
+    /// Stages the token for the address Google signed in, which may differ from the one typed, and returns it.
+    @discardableResult
+    func signIn(for account: MailAccount) async throws -> String {
         cancel()
         let request = generation
         isBusy = true
@@ -30,7 +32,11 @@ final class MailSignIn: ObservableObject {
         }
         let result = await task.result
         guard request == generation, !Task.isCancelled else { throw CancellationError() }
-        credential = (account.secretKey, try result.get())
+        let grant = try result.get()
+        var signedIn = account
+        signedIn.user = grant.email
+        credential = (signedIn.secretKey, grant.refreshToken)
+        return grant.email
     }
 
     func cancel() {

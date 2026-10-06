@@ -77,9 +77,9 @@ enum MailWatcher {
             } catch {
                 await conn.close()
                 if Task.isCancelled { break }
-                let authFailed = "\(error)".contains("AUTHENTICATIONFAILED") || error is GoogleOAuth.Failure
-                await status(.failed(!authFailed ? error.localizedDescription
-                    : account.usesGoogle ? SourceStatus.googleSignInExpired : "Sign-in failed — check the app password"))
+                let noPassword = if case IMAPError.noPassword = error { true } else { false }
+                let authFailed = noPassword || "\(error)".contains("AUTHENTICATIONFAILED")
+                await status(.failed(authFailed ? "Sign-in failed — check the app password" : error.localizedDescription))
                 let delay = authFailed ? 300 : backoff
                 await event(.retry(Date().addingTimeInterval(delay)))
                 try? await Task.sleep(for: .seconds(delay))

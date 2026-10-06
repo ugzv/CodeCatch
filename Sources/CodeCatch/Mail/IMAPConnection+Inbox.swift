@@ -7,7 +7,8 @@ extension IMAPConnection {
     /// Signs in and opens the INBOX read-only (EXAMINE): CodeCatch never changes mail.
     @discardableResult
     func openInbox(_ account: MailAccount) async throws -> [Response] {
-        try await open(user: account.user, auth: try await account.auth())
+        guard let password = account.password else { throw IMAPError.noPassword }
+        try await open(user: account.user, password: password)
         let response = try await command("EXAMINE INBOX")
         uidValidity = response.lazy.compactMap { $0.number(after: "UIDVALIDITY ") }.first
         return response

@@ -121,6 +121,69 @@ private actor InterruptedInbox: MailConnection {
     #expect(!statuses.contains(.live))
 }
 
+private actor FakeGmail: GmailMailbox {
+    let expireHistoryOnce: Bool
+    let signInRevoked: Bool
+    var historyChecks = 0
+    var fetched: [String] = []
+    init(expireHistoryOnce: Bool = false, signInRevoked: Bool = false) {
+        self.expireHistoryOnce = expireHistoryOnce
+        self.signInRevoked = signInRevoked
+    }
+    func historyID() throws -> String {
+        if signInRevoked { throw GoogleOAuth.Failure.token("invalid_grant") }
+        return "100"
+    }
+    func inbox(since date: Date, limit: Int) -> [String] { ["backfilled"] }
+    func added(since historyID: String) throws -> (ids: [String], historyID: String) {
+        historyChecks += 1
+        if expireHistoryOnce && historyChecks == 1 { throw GmailAPI.Failure.historyExpired }
+        // The backfilled mail also shows up in the first history check, as it can when it lands mid-backfill.
+        return (fetched.contains("new") ? [] : ["backfilled", "new"], "101")
+    }
+    func message(_ id: String, account: MailAccount) -> IncomingMessage? {
+        fetched.append(id)
+        return IncomingMessage(text: "Your code is 482913", senderName: "Example", senderID: "example.com",
+                               sourceKey: account.id.uuidString, sourceLabel: "Gmail", date: Date(), isMail: true, messageID: "gmail:\(id)")
+    }
+}
+
+/// Watches until the "new" mail arrives, and returns every message the mailbox was asked for.
+@MainActor private func gmailFetches(_ gmail: FakeGmail) async -> [String] {
+    let delivered = AsyncStream<String?>.makeStream()
+    let watcher = Task {
+        await GmailWatcher.watch(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: "test@gmail.com"),
+                                 status: { _ in }, deliver: { delivered.continuation.yield($0.messageID) },
+                                 mailbox: gmail, poll: 0.01, retryDelay: 0)
+    }
+    for await id in delivered.stream where id == "gmail:new" { break }
+    watcher.cancel()
+    await watcher.value
+    return await gmail.fetched
+}
+
+@Test @MainActor func gmailMailInBothBackfillAndHistoryIsDeliveredOnce() async {
+    #expect(await gmailFetches(FakeGmail()) == ["backfilled", "new"])
+}
+
+@Test @MainActor func expiredGmailHistoryBackfillsAgainInsteadOfLosingMail() async {
+    #expect(await gmailFetches(FakeGmail(expireHistoryOnce: true)) == ["backfilled", "backfilled", "new"])
+}
+
+@Test @MainActor func revokedGoogleSignInIsReportedAsExpired() async {
+    let statuses = AsyncStream<SourceStatus>.makeStream()
+    let watcher = Task {
+        await GmailWatcher.watch(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: "test@gmail.com"),
+                                 status: { statuses.continuation.yield($0) }, deliver: { _ in },
+                                 mailbox: FakeGmail(signInRevoked: true))
+    }
+    var reported: SourceStatus?
+    for await status in statuses.stream where status != .connecting { reported = status; break }
+    watcher.cancel()
+    await watcher.value
+    #expect(reported == .failed(SourceStatus.googleSignInExpired))
+}
+
 /// Guards the Apple Mail source against reading other mailboxes, deleted or old mail, against
 /// missing a body that Mail saves after listing the message, and against delivering one twice.
 @Test func appleMailDeliversInboxMailOnceAndAgainWhenItsBodyArrivesLate() throws {

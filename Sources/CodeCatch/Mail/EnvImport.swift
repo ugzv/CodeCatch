@@ -14,11 +14,6 @@ enum EnvImport {
         }
         var imported = 0
         var updated = accounts
-        // The OAuth client for "Sign in with Google".
-        if let id = env["GOOGLE_CLIENT_ID"], let secret = env["GOOGLE_CLIENT_SECRET"], !id.isEmpty, !secret.isEmpty {
-            try Secrets.set(id, for: GoogleOAuth.clientIDKey)
-            try Secrets.set(secret, for: GoogleOAuth.clientSecretKey)
-        }
         for (key, user) in env where key.hasSuffix("_USER") && user.contains("@") {
             let base = key.dropLast("_USER".count)
             guard let pass = env[base + "_PASS"] ?? env[base + "_PASSWORD"], !pass.isEmpty else { continue }

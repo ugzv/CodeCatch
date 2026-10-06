@@ -49,7 +49,7 @@ struct IMAPInputTests {
         }
         defer { deadline.cancel() }
         do {
-            try await client.open(user: "test", auth: .password("test"))
+            try await client.open(user: "test", password: "test")
             try await client.idle(renewAfter: 60)
             try await server.value
             await client.close()
