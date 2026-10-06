@@ -2,13 +2,20 @@
 // - update checks: Sparkle fetching the appcast, with the id, build, os and model the app adds
 //   (Sources/CodeCatch/System/Updater.swift), count installs and versions;
 // - landings: a page opened from a campaign link (utm_* or ref tags);
-// - downloads: every /download/CodeCatch.dmg, with the page and campaign it came from.
-// Every response is served as is: recording runs after it and its errors are dropped.
+// - downloads: every /download/CodeCatch.dmg, with the page and campaign it came from
+//   (from a phone or PC too, though those are sent to /download/ instead of the file).
+// Responses are served as is (but for that redirect): recording runs after them and its errors are dropped.
 // Bindings, set on the Pages project: DB (D1 codecatch-installs) and SALT (secret).
 const BOT = /bot|crawl|spider|slurp|preview|headless/i;
 
+// A phone or PC can't open the .dmg, so it gets a page that helps send the link to a Mac.
+// Macs, and tools that name no system (curl), still get the file.
+const NOT_MAC = ["iOS", "Android", "Windows", "Linux"];
+
 export async function onRequest({ request, env, next, waitUntil }) {
-  const response = await next();
+  const url = new URL(request.url);
+  const elsewhere = url.pathname === "/download/CodeCatch.dmg" && NOT_MAC.includes(system(request.headers.get("user-agent") ?? ""));
+  const response = elsewhere ? Response.redirect(new URL("/download/", url), 302) : await next();
   const task = env.DB && request.method === "GET" && record(request, env, response);
   if (task) waitUntil(task.catch((error) => console.error("stats", error)));
   return response;
