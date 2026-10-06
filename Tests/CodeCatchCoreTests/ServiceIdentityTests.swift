@@ -19,7 +19,9 @@ func namesMailSender(name: String, address: String, text: String, expected: Stri
     ("accounts.google.com", "google.com"), ("mail.bank.co.uk", "bank.co.uk"), ("Acme.COM", "acme.com"),
     ("login.acme-secure.net", "acme-secure.net"), ("localhost", "localhost"), ("192.168.0.1", "192.168.0.1"),
     // Anyone can host under these: the site is the subdomain, not the suffix.
-    ("evil.pages.dev", "evil.pages.dev"), ("login.someone.github.io", "someone.github.io"),
+    ("evil.pages.dev", "evil.pages.dev"), ("login.someone.github.io", "someone.github.io"), ("project.supabase.co", "project.supabase.co"),
+    // Public Suffix List rules a short hand-made list misses: every *.ne.jp site was one site to it.
+    ("www.example.ne.jp", "example.ne.jp"), ("a.b.kawasaki.jp", "a.b.kawasaki.jp"), ("www.city.kawasaki.jp", "city.kawasaki.jp"),
 ])
 func findsRegistrableDomain(host: String, expected: String) {
     #expect(ServiceIdentity.registrable(host) == expected)

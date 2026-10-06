@@ -2,13 +2,12 @@ import Foundation
 
 /// Who a code is from: the card's title and the domain its logo and link check use.
 public enum ServiceIdentity {
-    /// "accounts.google.com" → "google.com", "mail.bank.co.uk" → "bank.co.uk"; an IP stays whole.
+    /// "accounts.google.com" → "google.com", "mail.bank.co.uk" → "bank.co.uk", "evil.pages.dev" stays whole
+    /// (anyone can host there); an IP stays whole.
     public static func registrable(_ host: String) -> String {
         let parts = host.lowercased().split(separator: ".")
-        guard parts.count > 2, !parts.allSatisfy({ $0.allSatisfy(\.isNumber) }) else { return parts.joined(separator: ".") }
-        let secondLevel = ["co", "com", "org", "net", "gov", "ac"].contains(parts[parts.count - 2])
-            || sharedHosts.contains(parts.suffix(2).joined(separator: "."))
-        return parts.suffix(secondLevel ? 3 : 2).joined(separator: ".")
+        guard !parts.allSatisfy({ $0.allSatisfy(\.isNumber) }) else { return parts.joined(separator: ".") }
+        return parts.suffix(PublicSuffix.length(of: parts) + 1).joined(separator: ".")
     }
 
     /// A mail's display name unless it is generic ("noreply"), else the service the
@@ -36,12 +35,6 @@ public enum ServiceIdentity {
     public static func isHostname(_ text: String) -> Bool {
         text.range(of: #"^[a-z0-9-]+(\.[a-z0-9-]+)+$"#, options: [.regularExpression, .caseInsensitive]) != nil
     }
-
-    /// Hosting anyone can sign up for: each subdomain is its own site.
-    private static let sharedHosts: Set = [
-        "pages.dev", "workers.dev", "github.io", "gitlab.io", "vercel.app", "netlify.app", "web.app", "firebaseapp.com",
-        "herokuapp.com", "azurewebsites.net", "appspot.com", "blogspot.com", "cloudfront.net",
-    ]
 
     private static let genericSender = try! NSRegularExpression(
         pattern: #"(?i)no.?reply|do.?not.?reply|notifications?|^(info|support|security|accounts?|team|mailer)$"#)

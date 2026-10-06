@@ -15,6 +15,13 @@ esac
 if [[ "${1:-}" = --release || "${1:-}" = --publish ]] && [ -n "$(git status --porcelain)" ]; then
     echo "Commit or remove local changes before releasing." >&2; exit 1
 fi
+# Ship a current Public Suffix List (what the link check reads sites by); a change needs its own commit.
+if [[ "${1:-}" = --release || "${1:-}" = --publish ]]; then
+    scripts/update-psl.sh || echo "Couldn't refresh the Public Suffix List; releasing with the committed one." >&2
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "The Public Suffix List changed: commit Sources/CodeCatchCore/PublicSuffixList.swift, then release again." >&2; exit 1
+    fi
+fi
 # The release tags HEAD and the feed is pushed on top of it, so HEAD must be the pushed main.
 if [ "${1:-}" = --publish ]; then
     git fetch --quiet origin main
