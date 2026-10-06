@@ -61,7 +61,7 @@ F2DBB | Steam: Use code F2DBB to change credentials for your account
 770214 | Vaš verifikacioni kod je: 770214
 151612 | [GitHub] Please verify your device\n\nA sign in attempt requires further verification because we did not recognize your device. To complete the sign in, enter the verification code on the unrecognized device.\n\nDevice: Chrome on Windows\nVerification code: 151612
 amivi-ndigo-rinit-raman | Your temporary Notion login code is amivi-ndigo-rinit-raman\nOr, copy and paste this temporary login code: amivi-ndigo-rinit-raman
-482915 | Microsoft account security code\nPlease use the following security code for the Microsoft account u***@gmail.com.\nSecurity code: 482915
+482915 | Microsoft account security code\nPlease use the following security code for the Microsoft account j***@example.com.\nSecurity code: 482915
 284617 | Verify your Apple Account email address\nEnter the following code:\n284617\nIf you did not make this change, ignore this.
 391825 | amazon.com: Sign-in attempt\nYour one-time password (OTP): 391825
 KXQ-7PM | Slack confirmation code: KXQ-7PM
@@ -76,7 +76,7 @@ G7K2P | Your Steam account: Access from new computer\nLogin Code\nG7K2P
 482913 | Vaša enkratna koda je 482913.
 482913 | Use 482913 to sign in to Slack. Expires in 10 minutes.
 123456 | Your code is 123456 and expires at 12:30 on 2026-09-29
-482913 | Hi Uros,\n\nHere is your one-time passcode:\n\n482913\n\nThis code expires in 15 minutes.\n\n© 2026 Acme Inc, 1600 Main St, 94043
+482913 | Hi Alex,\n\nHere is your one-time passcode:\n\n482913\n\nThis code expires in 15 minutes.\n\n© 2026 Acme Inc, 1600 Main St, 94043
 604960 | Crypto.com: Use 604960 to authorize your EUR 50.43 transaction at Wolt. Valid for 10 minutes.
 NONE | Your phone number has been updated to: +46738632596. Please use your new number next time you log in to Revolut.
 NONE | PayPal: Danke für die Bestätigung Ihrer Telefonnummer. App herunterladen oder einloggen, um Kontoinformationen zu verwalten: https://py.pl/10AaEl
@@ -100,7 +100,7 @@ NONE | Your payment of €1234.50 was confirmed
 NONE | Call me at +386 41 123 456 about the login
 NONE | Your verification code is ready at https://example.com/v/482913
 NONE | Security update © 2026
-NONE | *Registrant:*\n\nName: Uros Gazvoda\n\nPostal Code: 2000\n\nCountry: SI
+NONE | *Registrant:*\n\nName: Jane Example\n\nPostal Code: 4021\n\nCountry: AT
 NONE | SUPPORT CENTER\nAbout Us | Support | Account Login\n4600 East Washington Street, Suite 305, Phoenix, AZ 85034
 NONE | KYC Review – UNETA / M-605351\nHi Andy,\n\nI’m writing to confirm that the details you have on file are correct.
 NONE | I hereby declare acceptance of your offer Quote Number: 11874 and confirm that we accept the terms.
