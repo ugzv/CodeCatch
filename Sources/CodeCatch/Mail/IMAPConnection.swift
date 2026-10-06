@@ -48,6 +48,8 @@ actor IMAPConnection {
         connection = NWConnection(host: .init(host), port: .init(integerLiteral: UInt16(port)), using: .tls)
     }
 
+    init(connection: NWConnection) { self.connection = connection }
+
     enum Auth { case password(String), accessToken(String) }
 
     func open(user: String, auth: Auth) async throws {
@@ -119,8 +121,7 @@ actor IMAPConnection {
         }
         defer { renew.cancel() }
         while true {
-            let r = try await readResponse()
-            if r.text.hasPrefix(t + " ") { return }
+            // EXISTS may arrive before the IDLE continuation; drain it before waiting again.
             if pendingExists {
                 pendingExists = false
                 renew.cancel()
@@ -128,6 +129,8 @@ actor IMAPConnection {
                 _ = try await withTimeout(30) { try await self.readUntilTagged(t) }
                 return
             }
+            let r = try await readResponse()
+            if r.text.hasPrefix(t + " ") { return }
         }
     }
 
