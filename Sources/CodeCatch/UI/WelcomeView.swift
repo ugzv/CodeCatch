@@ -40,7 +40,7 @@ struct WelcomeView: View {
                 SettingRow(symbol: "message.fill", color: .green, title: "Messages",
                            subtitle: messages == .attention(SourceStatus.needsDiskAccess)
                                ? "Needs Full Disk Access: drag CodeCatch into the list that opens."
-                               : "iMessage and forwarded SMS", status: messages) {
+                               : "iMessage, and SMS once Text Message Forwarding is on in your iPhone’s Messages settings", status: messages) {
                     switch messages {
                     case .live:
                         Label { Text("Watching").foregroundStyle(.secondary) } icon: {

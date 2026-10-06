@@ -47,7 +47,7 @@ enum BitwardenCLI {
     /// Unlocks with the master password, or uses a session from `bw unlock --raw`;
     /// syncs, and returns the logins with a TOTP. A vault that was locked is locked
     /// again, and neither the password nor the session is kept.
-    static func importCodes(password: String, session pasted: String) async throws -> [VaultCode] {
+    static func importCodes(password: String, session pasted: String) async throws -> (codes: [VaultCode], unreadable: [String]) {
         var session = pasted.trimmingCharacters(in: .whitespacesAndNewlines)
         let wasLocked = await status().state != "unlocked"
         if session.isEmpty {

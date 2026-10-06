@@ -79,7 +79,7 @@ enum MailWatcher {
                 if Task.isCancelled { break }
                 let authFailed = "\(error)".contains("AUTHENTICATIONFAILED") || error is GoogleOAuth.Failure
                 await status(.failed(!authFailed ? error.localizedDescription
-                    : account.usesGoogle ? "Google sign-in expired — sign in again" : "Sign-in failed — check the app password"))
+                    : account.usesGoogle ? SourceStatus.googleSignInExpired : "Sign-in failed — check the app password"))
                 let delay = authFailed ? 300 : backoff
                 await event(.retry(Date().addingTimeInterval(delay)))
                 try? await Task.sleep(for: .seconds(delay))

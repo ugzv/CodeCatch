@@ -18,7 +18,7 @@ struct CodeCard: View {
         VStack(alignment: .leading, spacing: 12) {
             header
             well
-            if let warning = linkWarning {
+            if let warning = item.linkWarning {
                 Label(warning, systemImage: "exclamationmark.triangle.fill")
                     .font(.subheadline)
                     .foregroundStyle(.orange)
@@ -49,13 +49,6 @@ struct CodeCard: View {
     private var onClipboard: Bool { Clipboard.holds(item) }
     private var locked: Bool { !model.isUnlocked }
 
-    /// Links go wherever the mail says; say so when that isn't the sender's own site.
-    private var linkWarning: String? {
-        guard item.isLink, let host = item.link?.host, let sender = item.domain else { return nil }
-        let target = ServiceIdentity.registrable(host)
-        return target == sender ? nil : "Opens \(target), not \(sender). Check it before you \(item.resetsPassword ? "change your password" : "sign in")."
-    }
-
     @ViewBuilder private var codeActions: some View {
         Button(action: copy) {
             Label(locked ? "Unlock" : onClipboard ? "Copied" : "Copy", systemImage: locked ? "lock.fill" : onClipboard ? "checkmark" : "doc.on.doc")
@@ -69,8 +62,13 @@ struct CodeCard: View {
             ServiceIcon(item: item, size: 38)
             VStack(alignment: .leading, spacing: 1) {
                 Text(item.service).font(.headline).lineLimit(1)
-                Text([item.origination, item.isLink ? item.kind.title : nil].compactMap { $0 }.joined(separator: " · "))
-                    .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                // The banner has no footer, so a failed unlock shows here, in the same one line.
+                if style == .banner, locked, let error = model.unlockError {
+                    Text(error).font(.subheadline).foregroundStyle(.orange).lineLimit(1).help(error)
+                } else {
+                    Text([item.origination, item.isLink ? item.kind.title : nil].compactMap { $0 }.joined(separator: " · "))
+                        .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                }
             }
             Spacer(minLength: 8)
             if !item.isLink, item.link != nil {

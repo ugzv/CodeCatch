@@ -13,7 +13,6 @@ struct MenuContent: View {
     @Namespace private var selectionSpace
     /// Opened for searching (shortcut or codecatch:// link): show the field even for a short list.
     @Local private var searchRequested = false
-    @Local private var unlockError: String?
     /// At rest the list is the newest few codes; the rest of the history is one click away.
     @Local private var showOlder = false
     private static let recent = 5
@@ -77,7 +76,8 @@ struct MenuContent: View {
                         if model.items.isEmpty, shortcuts.isEmpty, !searching {
                             emptyState
                         } else if rest.isEmpty, searching {
-                            Text("No codes match “\(query)”")
+                            // Saved logins are only loaded once unlocked: say so rather than "no match".
+                            Text(hasLogins && !model.isUnlocked ? "Unlock to search your Bitwarden logins." : "No codes match “\(query)”")
                                 .font(.system(size: 12)).foregroundStyle(.secondary)
                                 .padding(.vertical, 24)
                         } else if !rest.isEmpty || !shortcuts.isEmpty {
@@ -122,6 +122,7 @@ struct MenuContent: View {
         .frame(width: 380)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         .background(TopAnchor(height: contentHeight))
+        .hiddenFromCapture()
         .onChange(of: query) { selectedID = nil }
         .onChange(of: items.map(\.id)) { _, ids in
             if let selectedID, !ids.contains(selectedID) { self.selectedID = nil }
@@ -213,18 +214,14 @@ struct MenuContent: View {
             GlyphButton(symbol: "lock.open", help: "Lock: hide codes until you unlock again") { model.vaultSession.lock() }
         } else {
             Button {
-                unlockError = nil
-                Task {
-                    do { try await model.unlock() }
-                    catch { unlockError = error.localizedDescription }
-                }
+                Task { try? await model.unlock() }
             } label: {
                 Label(model.vaultSession.isBusy ? "Unlocking…" : "Unlock", systemImage: "lock.fill")
             }
             .controlSize(.small)
             .disabled(model.vaultSession.isBusy)
             .help("Codes are hidden until you unlock")
-            if let unlockError { Text(unlockError).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+            if let error = model.unlockError { Text(error).font(.caption).foregroundStyle(.secondary).lineLimit(1).help(error) }
         }
     }
 
@@ -238,7 +235,9 @@ struct MenuContent: View {
             }
             Spacer(minLength: 6)
             Button("Fix…") {
-                if status == .attention(SourceStatus.needsDiskAccess) { SystemSettings.fullDiskAccess() } else { openSettings() }
+                if status == .attention(SourceStatus.needsDiskAccess) { return SystemSettings.fullDiskAccess() }
+                SettingsTab.sources.select()
+                openSettings()
             }
             .controlSize(.small)
         }
@@ -274,7 +273,8 @@ struct MenuContent: View {
         HStack(spacing: 6) {
             lockControl
             Spacer()
-            if model.monitoring(Prefs.receivedCodes) {
+            // Recent Emails reads only mail: with Messages alone it would be an empty window.
+            if model.monitoring(Prefs.receivedCodes), !model.mailSourceKeys.isEmpty {
                 Button("Can’t find your code?") {
                     NSApp.activate()
                     openWindow(id: "recovery")
@@ -291,7 +291,8 @@ struct MenuContent: View {
                 Button("Clear Code") { clearable.map(model.dismiss) }
                     .keyboardShortcut(.delete)
                     .disabled(clearable == nil)
-                Button("Clear History") { model.clearHistory() }
+                Button("Clear History…") { confirmClearHistory(model) }
+                    .disabled(!model.hasHistory)
                 Divider()
                 Button("Settings…", action: openSettings).keyboardShortcut(",")
                 Button("Welcome Guide") {

@@ -89,13 +89,22 @@ public enum MIME {
         }
     }
 
-    /// Plain-text mail: each URL labelled by the rest of its line.
+    /// Plain-text mail: each URL labelled by the rest of its line, or, alone on its line,
+    /// by the text line above it ("Sign in here:" then the URL).
     static func bareLinks(_ text: String) -> [MailLink] {
-        text.split(separator: "\n").flatMap { line -> [MailLink] in
+        let trim = CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters)
+        var above: String?
+        return text.split(separator: "\n").flatMap { line -> [MailLink] in
             let l = String(line), ns = l as NSString
-            return bareURL.matches(in: l, range: NSRange(location: 0, length: ns.length)).map { m in
+            let matches = bareURL.matches(in: l, range: NSRange(location: 0, length: ns.length))
+            defer {
+                let text = l.trimmingCharacters(in: trim)
+                if !matches.isEmpty { above = nil } else if !text.isEmpty { above = text }
+            }
+            return matches.map { m in
                 let url = ns.substring(with: m.range).replacingOccurrences(of: #"[.,;:!?]+$"#, with: "", options: .regularExpression)
-                return MailLink(url: url, label: l.replacingOccurrences(of: url, with: "").trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters)))
+                let label = l.replacingOccurrences(of: url, with: "").trimmingCharacters(in: trim)
+                return MailLink(url: url, label: label.isEmpty && matches.count == 1 ? above ?? "" : label)
             }
         }
     }

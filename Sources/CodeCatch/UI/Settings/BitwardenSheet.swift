@@ -14,6 +14,8 @@ struct BitwardenSheet: View {
     @Local private var working = false
     @Local private var error: String?
     @Local private var pending: [VaultCode]?
+    /// Logins in the vault whose authenticator key couldn't be read, from the last import.
+    @Local private var unreadable: [String] = []
     @Local private var importGeneration: Int?
     @Local private var importTask: Task<Void, Never>?
 
@@ -132,8 +134,12 @@ struct BitwardenSheet: View {
         let changes = VaultChanges(before: model.vault, after: codes)
         Text("\(changes.added.count) added · \(changes.changed.count) changed · \(changes.removed.count) removed")
             .font(.headline)
-        if changes.isEmpty { Text("Your saved codes are up to date.").foregroundStyle(.secondary) }
-        else {
+        if codes.isEmpty, model.vault.isEmpty, unreadable.isEmpty {
+            Text("No logins with an authenticator key were found in your vault.").foregroundStyle(.secondary)
+        } else if changes.isEmpty {
+            // With skipped logins, the warning below says what didn't come across.
+            if unreadable.isEmpty { Text("Your saved codes are up to date.").foregroundStyle(.secondary) }
+        } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     reviewGroup("Added", entries: changes.added)
@@ -141,6 +147,12 @@ struct BitwardenSheet: View {
                     reviewGroup("Removed", entries: changes.removed)
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }.frame(maxHeight: 230)
+        }
+        if !unreadable.isEmpty {
+            let named = unreadable.prefix(5) + (unreadable.count > 5 ? ["\(unreadable.count - 5) more"] : [])
+            Label("Skipped \(unreadable.count == 1 ? "1 login" : "\(unreadable.count) logins") with a key CodeCatch can't read: \(named.formatted(.list(type: .and))). Check the key in Bitwarden.",
+                  systemImage: "exclamationmark.triangle.fill")
+                .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
         }
         Text("Your saved codes stay unchanged until you save.")
             .font(.caption).foregroundStyle(.secondary)
@@ -174,15 +186,16 @@ struct BitwardenSheet: View {
         error = nil
         defer { working = false; password = ""; session = "" }
         do {
-            try await model.vaultSession.unlock()
+            try await model.authenticate()
             let generation = model.vaultSession.generation
-            let codes = try await BitwardenCLI.importCodes(password: pasteSession ? "" : password, session: pasteSession ? session : "")
+            let (codes, skipped) = try await BitwardenCLI.importCodes(password: pasteSession ? "" : password, session: pasteSession ? session : "")
             try Task.checkCancellation()
             guard model.vaultSession.isUnlocked, model.vaultSession.generation == generation else { throw VaultSession.Failure.locked }
             importGeneration = generation
+            unreadable = skipped
             pending = codes
         } catch {
-            self.error = error.localizedDescription
+            if !AppModel.isCancel(error) { self.error = error.localizedDescription }
             await refresh()
         }
     }

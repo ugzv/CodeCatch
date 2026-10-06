@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Testing
 @testable import CodeCatch
 @testable import CodeCatchCore
@@ -273,6 +274,18 @@ private func monitoringMessage() -> IncomingMessage {
         session.lock()
         model.copy(item)
         #expect(fixture.copied == ["482913"])
+    }
+
+    /// A failed unlock from a click on a code used to do nothing at all; closing the prompt stays quiet.
+    @Test(arguments: [(LAError(.authenticationFailed) as any Error, true), (LAError(.userCancel), false), (CancellationError(), false)])
+    func unlockFailuresAreShownButCancelsAreNot(error: any Error, shown: Bool) async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        let model = fixture.makeModel(session: VaultSession(authenticate: { throw error }, read: { [] }, write: { _ in }, remove: {}))
+        var ran = false
+        await model.unlocked { ran = true }?.value
+        #expect(!ran)
+        #expect((model.unlockError != nil) == shown)
     }
 
     @Test func disabledMailRejectsOldCallbacksAndCannotRestartUntilOneFeatureIsEnabled() async throws {

@@ -48,7 +48,7 @@ struct PrivacyTab: View {
                            info: "Also clears a code still on the clipboard. Bitwarden codes are kept.", isOn: $clearOnLock)
                 SettingRow(symbol: "trash.fill", color: .gray, title: "Clear History",
                            info: "Cleared codes stay gone after a restart. Bitwarden codes are kept. New codes and links still appear.") {
-                    Button("Clear Now") { model.clearHistory() }.disabled(model.items.isEmpty)
+                    Button("Clear Now") { confirmClearHistory(model) }.disabled(!model.hasHistory)
                 }
             }
         }

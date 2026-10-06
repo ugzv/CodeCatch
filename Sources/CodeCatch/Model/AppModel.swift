@@ -1,6 +1,7 @@
 import AppKit
 import CodeCatchCore
 import Combine
+import LocalAuthentication
 
 @MainActor
 final class AppModel: ObservableObject {
@@ -20,6 +21,8 @@ final class AppModel: ObservableObject {
 
     @Published private(set) var items: [CodeItem] = []
     @Published private(set) var now = Date()
+    /// Why the last unlock failed; cleared when the next one starts.
+    @Published private(set) var unlockError: String?
     /// Senders whose messages are never read for codes ("Ignore All from…").
     @Published private(set) var ignoredSenders: [String]
     let vaultSession: VaultSession
@@ -115,7 +118,8 @@ final class AppModel: ObservableObject {
 
     private func tick() {
         now = Date()
-        // Covers the banner, the popover and Settings, whenever they are created.
+        // Every window, including menus and tooltips, follows a change within a second; the banner,
+        // the popover and Recent Emails are also covered from their first frame.
         let sharing: NSWindow.SharingType = monitoring(Prefs.hideFromCapture) ? .none : .readOnly
         for window in NSApp.windows where window.sharingType != sharing { window.sharingType = sharing }
         items.removeAll { now.timeIntervalSince($0.received) > history }
@@ -166,9 +170,12 @@ final class AppModel: ObservableObject {
         monitor.restartAppleMail()
     }
 
-    private func retainRecoverySources() {
-        recovery.retainSources(Set(accounts.filter(\.enabled).map { $0.id.uuidString } + (monitoring(Prefs.appleMail) ? [AppleMailStore.sourceKey] : [])))
+    /// The mail sources that are on: all that Recent Emails can show, since it reads only mail.
+    var mailSourceKeys: [String] {
+        accounts.filter(\.enabled).map { $0.id.uuidString } + (monitoring(Prefs.appleMail) ? [AppleMailStore.sourceKey] : [])
     }
+
+    private func retainRecoverySources() { recovery.retainSources(Set(mailSourceKeys)) }
 
     /// Adds the account, or replaces the saved one with the same id.
     func save(_ account: MailAccount) {
@@ -256,13 +263,16 @@ final class AppModel: ObservableObject {
             // Opt-in: the code goes to whatever field has focus, so only as it arrives, never later.
             if defaults.bool(forKey: Prefs.autoType) { typeCode(code) }
         }
-        if monitoring(Prefs.showBanner) { Banner.shared.show(item.id) }
+        if monitoring(Prefs.showBanner) {
+            unlockError = nil  // a failure from an earlier code isn't about this one
+            Banner.shared.show(item.id)
+        }
         if monitoring(Prefs.sound) { NSSound(named: "Tink")?.play() }
     }
 
     /// The Unlock button. A code that arrived while locked is what the unlock was for: copy it.
     func unlock() async throws {
-        try await vaultSession.unlock()
+        try await authenticate()
         if monitoring(Prefs.autoCopy), let item = latestCode, !item.used, item.shouldAnnounce(at: Date()) { copy(item) }
     }
 
@@ -270,7 +280,25 @@ final class AppModel: ObservableObject {
     @discardableResult
     func unlocked(_ action: @escaping @MainActor () -> Void) -> Task<Void, Never>? {
         if isUnlocked { action(); return nil }
-        return Task { if (try? await vaultSession.unlock()) != nil { action() } }
+        return Task { if (try? await authenticate()) != nil { action() } }
+    }
+
+    /// Every unlock goes through here, so a failure is shown wherever the click came from.
+    func authenticate() async throws {
+        unlockError = nil
+        do {
+            try await vaultSession.unlock()
+        } catch {
+            if !Self.isCancel(error) { unlockError = error.localizedDescription }
+            throw error
+        }
+    }
+
+    /// Closing the password prompt, or a lock while it was open, is not a failure to report.
+    static func isCancel(_ error: Error) -> Bool {
+        if error is CancellationError || error as? VaultSession.Failure == .busy { return true }
+        guard let code = (error as? LAError)?.code else { return false }
+        return [.userCancel, .appCancel, .systemCancel].contains(code)
     }
 
     func copy(_ item: CodeItem, at date: Date = Date()) {
@@ -381,12 +409,14 @@ final class AppModel: ObservableObject {
     }
 
     func removeVault() async throws {
-        try await vaultSession.unlock()
+        try await authenticate()
         try vaultSession.remove()
     }
 
     /// The launcher handles matching across all sources in one place.
     var vaultItems: [CodeItem] { vault.compactMap { CodeItem($0, at: now) } }
+
+    var hasHistory: Bool { !items.isEmpty || !recovery.entries.isEmpty }
 
     func clearHistory() {
         remove { _ in true }

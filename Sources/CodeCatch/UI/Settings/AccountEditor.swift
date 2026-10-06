@@ -15,6 +15,11 @@ struct AccountEditor: View {
     private var isNew: Bool { !model.accounts.contains { $0.id == account.id } }
 
     private var usesGoogle: Bool { google.token(for: account) != nil || account.usesGoogle }
+    /// Google turned the saved sign-in down, and no new one was made here yet.
+    private var signInExpired: Bool {
+        account.usesGoogle && google.token(for: account) == nil
+            && model.status[account.id.uuidString] == .failed(SourceStatus.googleSignInExpired)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -26,13 +31,19 @@ struct AccountEditor: View {
                 TextField("Port", value: $account.port, format: .number.grouping(.never))
                 if account.isGmail, googleConfigured || usesGoogle {
                     LabeledContent("Google sign-in") {
-                        if usesGoogle {
+                        if google.isBusy {
+                            HStack { ProgressView().controlSize(.small); Text("Finish in your browser…").foregroundStyle(.secondary) }
+                        } else if signInExpired {
+                            HStack {
+                                Label("Expired", systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                                Button("Sign In Again…", action: signInWithGoogle).disabled(!googleConfigured)
+                                Button("Sign Out") { account.googleSignIn = nil; google.cancel() }
+                            }
+                        } else if usesGoogle {
                             HStack {
                                 Label("Signed in", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
                                 Button("Sign Out") { account.googleSignIn = nil; google.cancel() }
                             }
-                        } else if google.isBusy {
-                            HStack { ProgressView().controlSize(.small); Text("Finish in your browser…").foregroundStyle(.secondary) }
                         } else {
                             Button("Sign in with Google…", action: signInWithGoogle).disabled(!googleConfigured || account.user.isEmpty)
                         }
@@ -53,7 +64,10 @@ struct AccountEditor: View {
             .disabled(google.isBusy)
             HStack {
                 if !isNew {
-                    Button("Remove Account", role: .destructive) {
+                    Button("Remove Account…", role: .destructive) {
+                        // Name the saved account, which is what gets removed, not unsaved edits.
+                        guard let saved = original, confirmed("Remove \(saved.label)?",
+                            "CodeCatch stops watching \(saved.user) and forgets how to sign in to it. Your mail doesn't change.", action: "Remove") else { return }
                         do { try model.remove(account); dismiss() }
                         catch { self.error = error.localizedDescription }
                     }

@@ -14,6 +14,8 @@ import Testing
     #expect(MIME.bareLinks("Sign in here: https://t.me/login/27635\nThanks") == [MailLink(url: "https://t.me/login/27635", label: "Sign in here")])
     // The sentence's full stop is not part of the token.
     #expect(MIME.bareLinks("Sign in: https://a.com/login?t=abc.").map(\.url) == ["https://a.com/login?t=abc"])
+    // A URL alone on its line takes the line above as its label; with an empty one the link was never offered.
+    #expect(MIME.bareLinks("Hi,\nSign in here:\n\nhttps://a.com/login?t=1\nThanks") == [MailLink(url: "https://a.com/login?t=1", label: "Sign in here")])
 }
 
 /// Codes arrive in multipart, quoted-printable, base64 and encoded-word

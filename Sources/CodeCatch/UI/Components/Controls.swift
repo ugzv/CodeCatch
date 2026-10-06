@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 /// Capsule actions with explicit colours, so they look the same in the
@@ -80,5 +81,44 @@ extension View {
     /// The strip along the bottom of the Settings, Welcome and Find a Code windows.
     func bottomBar() -> some View {
         padding(.horizontal, 20).padding(.vertical, 10).background(.background).overlay(alignment: .top) { Divider() }
+    }
+}
+
+/// Asks before something that can't be undone. An alert rather than a SwiftUI dialog,
+/// so it works the same from the menu-bar popover as from Settings.
+@MainActor
+func confirmed(_ title: String, _ message: String, action: String) -> Bool {
+    let alert = NSAlert()
+    alert.messageText = title
+    alert.informativeText = message
+    alert.alertStyle = .warning
+    alert.addButton(withTitle: action).hasDestructiveAction = true
+    alert.addButton(withTitle: "Cancel")
+    NSApp.activate()
+    return alert.runModal() == .alertFirstButtonReturn
+}
+
+/// Settings and the menu's Clear History: a clear outlasts restarts, so it asks first.
+@MainActor
+func confirmClearHistory(_ model: AppModel) {
+    guard confirmed("Clear history?", "Codes and links you have received are removed and don't come back after a restart. Bitwarden codes are kept.",
+                    action: "Clear") else { return }
+    model.clearHistory()
+}
+
+extension View {
+    /// Applies Hide from Screen Capture to this view's window as soon as it has one, before
+    /// a code is drawn; `AppModel.tick` keeps every window current when the setting changes.
+    func hiddenFromCapture() -> some View { background(CaptureGuard()) }
+}
+
+private struct CaptureGuard: NSViewRepresentable {
+    func makeNSView(context: Context) -> Probe { Probe() }
+    func updateNSView(_ view: Probe, context: Context) {}
+    final class Probe: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            window?.sharingType = Prefs[Prefs.hideFromCapture] ? .none : .readOnly
+        }
     }
 }

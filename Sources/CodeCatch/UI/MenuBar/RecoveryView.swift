@@ -6,16 +6,12 @@ struct RecoveryView: View {
     @Environment(\.openSettings) private var openSettings
     @Local private var selectedID: UUID?
     @Local private var copied = false
-    @Local private var unlockError: String?
 
     private var selected: RecoveryInbox.Entry? {
         model.recovery.entries.first { $0.id == selectedID } ?? model.recovery.entries.first
     }
     private var enabledAccounts: [MailAccount] { model.accounts.filter(\.enabled) }
-    private var sourceKeys: [String] {
-        enabledAccounts.map { $0.id.uuidString } + (model.monitoring(Prefs.appleMail) ? [AppleMailStore.sourceKey] : [])
-    }
-    private var checking: Bool { sourceKeys.contains { model.status[$0] == .connecting } }
+    private var checking: Bool { model.mailSourceKeys.contains { model.status[$0] == .connecting } }
     private var monitoringSummary: String {
         guard model.monitoring(Prefs.receivedCodes) else { return "Paused" }
         let count = enabledAccounts.count
@@ -53,7 +49,7 @@ struct RecoveryView: View {
                 Button(action: refresh) {
                     Label(checking ? "Checking…" : "Check Again", systemImage: "arrow.clockwise")
                 }
-                .disabled(checking || sourceKeys.isEmpty || !model.monitoring(Prefs.receivedCodes))
+                .disabled(checking || model.mailSourceKeys.isEmpty || !model.monitoring(Prefs.receivedCodes))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -64,23 +60,18 @@ struct RecoveryView: View {
                         Button("Open Sources") { showSettings(.sources) }
                     }
                 } else if !model.isUnlocked {
-                    notice(unlockError ?? "Unlock to view recent emails.") {
-                        Button(model.vaultSession.isBusy ? "Unlocking…" : "Unlock") {
-                            unlockError = nil
-                            Task {
-                                do { try await model.vaultSession.unlock() }
-                                catch { unlockError = error.localizedDescription }
-                            }
-                        }.disabled(model.vaultSession.isBusy)
+                    notice(model.unlockError ?? "Unlock to view recent emails.") {
+                        Button(model.vaultSession.isBusy ? "Unlocking…" : "Unlock") { model.unlocked {} }
+                            .disabled(model.vaultSession.isBusy)
                     }
-                } else if enabledAccounts.isEmpty, !model.monitoring(Prefs.appleMail) {
+                } else if model.mailSourceKeys.isEmpty {
                     notice("No email accounts enabled.") {
                         Button("Open Sources") { showSettings(.sources) }
                     }
                 } else if model.recovery.entries.isEmpty {
                     notice(checking ? "Checking your inboxes…" : "No recent verification emails.") {
-                        if let problem = enabledAccounts.first(where: { model.status[$0.id.uuidString]?.needsAttention == true }) {
-                            Text("\(problem.label): \(model.status[problem.id.uuidString]?.summary ?? "")")
+                        if let problem = model.sources.first(where: { model.mailSourceKeys.contains($0.key) && $0.status.needsAttention }) {
+                            Text("\(problem.label): \(problem.status.summary)")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                         Button("Open Sources") { showSettings(.sources) }
@@ -118,7 +109,7 @@ struct RecoveryView: View {
         }
         .frame(minWidth: 660, minHeight: 430)
         .background(.background)
-        .background(RecoveryWindowPrivacy(protect: model.monitoring(Prefs.hideFromCapture)))
+        .hiddenFromCapture()
         .onAppear {
             refresh()
             selectedID = selected?.id
@@ -167,23 +158,12 @@ struct RecoveryView: View {
     private func refresh() {
         model.recovery.prune()
         guard model.monitoring(Prefs.receivedCodes) else { return }
-        sourceKeys.forEach(model.monitor.check)
+        model.mailSourceKeys.forEach(model.monitor.check)
     }
     private func copy(_ text: String, from id: UUID) -> Bool {
         copied = model.copyRecoveryText(text, from: id)
         if !copied { NSSound.beep() }
         return copied
-    }
-}
-
-private struct RecoveryWindowPrivacy: NSViewRepresentable {
-    let protect: Bool
-    func makeNSView(context: Context) -> View { View() }
-    func updateNSView(_ view: View, context: Context) { view.protect = protect }
-    final class View: NSView {
-        var protect = true { didSet { apply() } }
-        override func viewDidMoveToWindow() { super.viewDidMoveToWindow(); apply() }
-        private func apply() { window?.sharingType = protect ? .none : .readOnly }
     }
 }
 

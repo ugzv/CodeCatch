@@ -13,8 +13,9 @@ public struct VaultCode: Codable, Equatable, Identifiable, Sendable {
 
     public var totp: TOTP? { TOTP(secret) }
 
-    /// `bw list items` output → the logins whose TOTP secret CodeCatch can use, by name.
-    public static func fromBitwarden(_ json: Data) throws -> [VaultCode] {
+    /// `bw list items` output → the logins whose TOTP secret CodeCatch can use, by name, and
+    /// the names of those with a secret it can't read.
+    public static func fromBitwarden(_ json: Data) throws -> (codes: [VaultCode], unreadable: [String]) {
         struct Item: Decodable {
             struct Login: Decodable {
                 struct URI: Decodable { let uri: String? }
@@ -26,13 +27,15 @@ public struct VaultCode: Codable, Equatable, Identifiable, Sendable {
             let name: String
             let login: Login?
         }
-        return try JSONDecoder().decode([Item].self, from: json).compactMap { item in
-            guard let login = item.login, let secret = login.totp, TOTP(secret) != nil else { return nil }
+        var codes: [VaultCode] = [], unreadable: [String] = []
+        for item in try JSONDecoder().decode([Item].self, from: json) {
+            guard let login = item.login, let secret = login.totp, !secret.isEmpty else { continue }
+            guard TOTP(secret) != nil else { unreadable.append(item.name); continue }
             let host = login.uris?.lazy.compactMap(\.uri).compactMap(webHost).first
-            return VaultCode(id: item.id, name: item.name, username: login.username.flatMap { $0.isEmpty ? nil : $0 },
-                             domain: host.map(ServiceIdentity.registrable), secret: secret)
+            codes.append(VaultCode(id: item.id, name: item.name, username: login.username.flatMap { $0.isEmpty ? nil : $0 },
+                                   domain: host.map(ServiceIdentity.registrable), secret: secret))
         }
-        .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return (codes.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }, unreadable)
     }
 
     /// "https://sso.acme.co.uk/" or a bare "github.com"; not app links like "androidapp://acme".

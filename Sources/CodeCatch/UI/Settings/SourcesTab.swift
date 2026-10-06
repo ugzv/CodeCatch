@@ -35,7 +35,7 @@ struct SourcesTab: View {
             Section("Messages") {
                 let status = model.status[MessagesStore.sourceKey] ?? .off
                 let codes = model.monitoring(Prefs.receivedCodes)
-                let about = "Reads codes from iMessage and forwarded SMS on this Mac. Needs Full Disk Access."
+                let about = "Reads codes from iMessage and SMS on this Mac. For SMS, turn on Text Message Forwarding in your iPhone’s Messages settings. Needs Full Disk Access."
                 SettingRow(symbol: "message.fill", color: .green, title: "Messages",
                            subtitle: codes ? problem(status) : "Paused while Verification Codes is off", info: about, status: status,
                            details: sourceDetails(MessagesStore.sourceKey, about: about, enabled: messagesEnabled && codes)) {
@@ -105,7 +105,9 @@ struct SourcesTab: View {
                         }
                     }
                 }
-                if let vaultError { Text(vaultError).font(.caption).foregroundStyle(.orange) }
+                if let error = vaultError ?? (model.isUnlocked ? nil : model.unlockError) {
+                    Text(error).font(.caption).foregroundStyle(.orange)
+                }
             }
 
             if !model.ignoredSenders.isEmpty {
@@ -142,12 +144,16 @@ struct SourcesTab: View {
                 Button(model.vaultSession.isUnlocked ? "Lock" : "Unlock") {
                     vaultError = nil
                     if model.vaultSession.isUnlocked { model.vaultSession.lock() }
-                    else { Task { do { try await model.vaultSession.unlock() } catch { vaultError = error.localizedDescription } } }
+                    else { model.unlocked {} }
                 }.disabled(model.vaultSession.isBusy || (!model.vaultSession.isUnlocked && !model.monitoring(Prefs.bitwarden)))
                 Spacer()
-                PopoverButton("Remove Import", role: .destructive) {
+                PopoverButton("Remove Import…", role: .destructive) {
                     vaultError = nil
-                    Task { do { try await model.removeVault() } catch { vaultError = error.localizedDescription } }
+                    guard confirmed("Remove Bitwarden codes?", "CodeCatch forgets the logins it imported. Your Bitwarden vault doesn't change. To get them back, import again.",
+                                    action: "Remove") else { return }
+                    Task {
+                        do { try await model.removeVault() } catch where !AppModel.isCancel(error) { vaultError = error.localizedDescription }
+                    }
                 }.disabled(model.vaultSession.isBusy)
             }
         })

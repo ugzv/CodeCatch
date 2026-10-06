@@ -43,13 +43,16 @@ struct CodeRow: View {
                      ? [item.accountLabel, item.sourceLabel].filter { !$0.isEmpty }.joined(separator: " · ")
                      : [item.origination, item.link?.host].compactMap { $0 }.joined(separator: " · "))
                     .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
+                if let warning = item.linkWarning {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption).foregroundStyle(.orange).lineLimit(2)
+                } else if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                 }
             }
             Spacer(minLength: 8)
             if item.isLink {
-                Button { model.unlocked { model.open(item, leavingMenu: true) } } label: {
+                Button(action: activate) {
                     Label { Text("Open") } icon: { Image(systemName: item.kind.symbol).foregroundStyle(item.kind.color) }
                 }
                     .buttonStyle(.bordered)
@@ -98,9 +101,17 @@ struct CodeRow: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
         .contentShape(Rectangle())
         .onHover { on in withAnimation(.easeOut(duration: 0.12)) { hovering = on } }
-        .onTapGesture { model.unlocked { withAnimation(.snappy(duration: 0.25, extraBounce: 0.15)) { model.copy(item) } } }
+        .onTapGesture(perform: activate)
         .help(concealed || !showPreviews ? item.origination : item.snippet)
         .contextMenu { CodeMenu(item: item) }
+    }
+
+    /// A click does what the card's well does: open a link, copy a code.
+    private func activate() {
+        model.unlocked {
+            if item.isLink { return model.open(item, leavingMenu: true) }
+            withAnimation(.snappy(duration: 0.25, extraBounce: 0.15)) { model.copy(item) }
+        }
     }
 }
 

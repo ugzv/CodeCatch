@@ -33,6 +33,12 @@ struct CodeItem: Identifiable, Equatable {
     var isLink: Bool { code.isEmpty }
     /// The setting that lets this item's link show.
     var linkSetting: String { resetsPassword ? Prefs.resetLinks : Prefs.signInLinks }
+    /// Links go wherever the mail says; say so when that isn't the sender's own site.
+    var linkWarning: String? {
+        guard let host = link?.host, let domain else { return nil }
+        let target = ServiceIdentity.registrable(host)
+        return target == domain ? nil : "Opens \(target), not \(domain). Check it before you \(resetsPassword ? "change your password" : "sign in")."
+    }
     /// What Copy puts on the clipboard.
     var copyValue: String { isLink ? link?.absoluteString ?? "" : code }
 
