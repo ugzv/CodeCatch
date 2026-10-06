@@ -29,7 +29,7 @@ struct AddAccountSheet: View {
             }
             VStack(spacing: 0) {
                 row(icon: AnyView(logo("google.com", fallback: "g.circle.fill", color: .red)), name: "Google",
-                    detail: "Gmail and Google Workspace · Sign in with Google (beta) or an app password") {
+                    detail: "Gmail · Sign in with Google (beta) or an app password") {
                     dismiss()
                     edit(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: ""))
                 }

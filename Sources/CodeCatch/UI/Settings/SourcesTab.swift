@@ -55,7 +55,7 @@ struct SourcesTab: View {
                 if appleMailEnabled { diskAccessRow(appleMail) }
                 ForEach(model.accounts) { account in
                     let status = model.status[account.id.uuidString] ?? .off
-                    let about = "Nothing is changed or marked as read. Your password stays in your Keychain."
+                    let about = "Nothing is changed or marked as read. Your \(account.usesSignIn ? "sign-in" : "password") stays in your Keychain."
                     SettingRow(symbol: SourceKind.mail.symbol, color: account.isGmail ? .red : SourceKind.mail.color,
                                title: account.label, subtitle: [account.user, problem(status)].compactMap { $0 }.joined(separator: " · "),
                                info: about, status: status,
