@@ -152,7 +152,7 @@ struct SourcesTab: View {
                     guard confirmed("Remove Bitwarden codes?", "CodeCatch forgets the logins it imported. Your Bitwarden vault doesn't change. To get them back, import again.",
                                     action: "Remove") else { return }
                     Task {
-                        do { try await model.removeVault() } catch where !AppModel.isCancel(error) { vaultError = error.localizedDescription }
+                        do { try await model.removeVault() } catch { if !AppModel.isCancel(error) { vaultError = error.localizedDescription } }
                     }
                 }.disabled(model.vaultSession.isBusy)
             }

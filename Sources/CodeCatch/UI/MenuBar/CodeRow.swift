@@ -44,8 +44,9 @@ struct CodeRow: View {
                      : [item.origination, item.link?.host].compactMap { $0 }.joined(separator: " · "))
                     .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
                 if let warning = item.linkWarning {
+                    // Never cut short: it is a phishing warning, and its end says what to check.
                     Label(warning, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption).foregroundStyle(.orange).lineLimit(2)
+                        .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
                 } else if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                 }
