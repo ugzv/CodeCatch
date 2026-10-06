@@ -6,7 +6,7 @@ import Foundation
 enum Probe {
     static let all: [String: () async -> Void] = [
         "--probe": sources, "--probe-google": google, "--probe-vault": vault,
-        "--probe-apple-mail": appleMail, "--probe-messages": messages,
+        "--probe-apple-mail": appleMail, "--probe-messages": messages, "--probe-links": links,
     ]
 
     /// Checks Google sign-in without a consent: the client is accepted, the redirect
@@ -80,6 +80,54 @@ enum Probe {
             let code = CodeExtractor.code(in: m.fullText).map { String(repeating: "•", count: max(0, $0.count - 2)) + $0.suffix(2) } ?? "—"
             let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.url.host ?? "")" } ?? ""
             print("  \(m.date.formatted(date: .numeric, time: .shortened))  \(code.padding(toLength: 10, withPad: " ", startingAt: 0))  \(m.service.prefix(22))\(link)")
+        }
+    }
+
+    /// A year of sign-in, verification and reset mail per account, through the link check: the sender's
+    /// site and the server's verdict on it, where the link really goes, and the warning shown. Sites only:
+    /// never a code, token, path or address. Then every sender the server didn't vouch for, with why.
+    static func links() async {
+        let terms = ["sign", "log", "verif", "confirm", "magic", "password", "reset", "activat", "approv", "prijav", "potrdi", "geslo"]
+        let subjects = terms.dropFirst().reduce("SUBJECT \"\(terms[0])\"") { "OR \($0) SUBJECT \"\($1)\"" }
+        for account in MailAccount.load() where account.enabled && account.hasCredential {
+            guard let conn = try? IMAPConnection(account: account) else { continue }
+            do {
+                try await conn.openInbox(account)
+                if account.host == MailAccount.gmailHost { _ = try await conn.command("EXAMINE \"[Gmail]/All Mail\"") }  // Gmail archives most of it
+                let uids = try await conn.search("SINCE \(MailWatcher.imapDay(Date().addingTimeInterval(-365 * 86400))) \(subjects)").suffix(1500)
+                var verdicts: [String: Int] = [:], unvouched: [String: Int] = [:], links = 0, warned = 0, unwrapped = 0
+                print("\n\(account.label): \(uids.count) matching mails in a year")
+                for batch in stride(from: 0, to: uids.count, by: 100).map({ Array(uids.dropFirst($0).prefix(100)) }) {
+                    for m in try await conn.fetch(batch, account: account) {
+                        let sender = ServiceIdentity.registrable(String(m.senderID.split(separator: "@").last ?? ""))
+                        let verdict = m.senderVerified.map { $0 ? "pass" : "FAIL" } ?? "none"
+                        verdicts[verdict, default: 0] += 1
+                        if m.senderVerified != true, let uid = m.messageID?.split(separator: ":").last { unvouched["\(sender) \(uid)", default: 0] += 1 }
+                        guard let found = SignInLink.find(in: m.links, subject: m.subject ?? "") else { continue }
+                        let item = CodeItem(m, code: nil, link: found.url, resetsPassword: found.kind == .passwordReset)
+                        let target = ServiceIdentity.registrable(item.destination?.host ?? "")
+                        links += 1
+                        if item.linkNotice?.warns == true { warned += 1 }
+                        if item.destination != item.link { unwrapped += 1 }
+                        print("  \(m.date.formatted(date: .numeric, time: .omitted))  \(sender.padding(toLength: 26, withPad: " ", startingAt: 0)) \(verdict.padding(toLength: 5, withPad: " ", startingAt: 0)) → \(target)\(item.destination != item.link ? " (unwrapped from \(ServiceIdentity.registrable(found.url.host ?? "")))" : "")\(item.linkNotice.map { "  \($0.warns ? "⚠︎" : "ℹ︎") \($0.text)" } ?? "")")
+                    }
+                }
+                print("  verdicts \(verdicts.sorted { $0.key < $1.key }), sign-in links \(links), warned \(warned), unwrapped \(unwrapped)")
+                // Why the server didn't vouch: its own results, domains only.
+                let bySender = Dictionary(grouping: unvouched.keys, by: { String($0.split(separator: " ")[0]) })
+                for (sender, keys) in bySender.sorted(by: { $0.key < $1.key }) {
+                    guard let uid = keys.first?.split(separator: " ").last,
+                          let header = try? await conn.command("UID FETCH \(uid) (BODY.PEEK[HEADER.FIELDS (AUTHENTICATION-RESULTS)])").first?.literals.first
+                    else { continue }
+                    let results = String(decoding: header, as: UTF8.self)
+                        .replacingOccurrences(of: #"\([^)]*\)|header\.[sb]=\S+|[^\s=;@]+@"#, with: "", options: .regularExpression)
+                        .split(whereSeparator: \.isWhitespace).joined(separator: " ")
+                    print("  not vouched: \(sender) ×\(keys.count)  \(results.isEmpty ? "no Authentication-Results" : results)")
+                }
+            } catch {
+                print("\(account.label): \(error.localizedDescription)")
+            }
+            await conn.close()
         }
     }
 

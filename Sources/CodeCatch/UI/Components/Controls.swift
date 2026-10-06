@@ -85,10 +85,12 @@ struct GlyphButton: View {
 struct WarningText: View {
     let message: String
     var compact = false
+    /// Worth knowing, not a warning.
+    var calm = false
 
     var body: some View {
-        Label(message, systemImage: "exclamationmark.triangle.fill")
-            .foregroundStyle(.orange)
+        Label(message, systemImage: calm ? "info.circle" : "exclamationmark.triangle.fill")
+            .foregroundStyle(calm ? AnyShapeStyle(.secondary) : AnyShapeStyle(.orange))
             .lineLimit(compact ? 1 : nil)
             .fixedSize(horizontal: false, vertical: !compact)
             .help(compact ? message : "")

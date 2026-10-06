@@ -28,16 +28,26 @@ struct CodeItem: Identifiable, Equatable {
     var used = false
     /// The link resets a password rather than signing in.
     var resetsPassword = false
+    /// The mail server's DMARC verdict on the sender; nil when it gave none.
+    var senderVerified: Bool? = nil
 
     var lifetime: TimeInterval { expires.timeIntervalSince(received) }
     var isLink: Bool { code.isEmpty }
     /// The setting that lets this item's link show.
     var linkSetting: String { resetsPassword ? Prefs.resetLinks : Prefs.signInLinks }
-    /// Links go wherever the mail says; say so when that isn't the sender's own site.
-    var linkWarning: String? {
-        guard let host = link?.host, let domain else { return nil }
+    /// Where the link really goes: inside a company link scanner, the site it forwards to.
+    var destination: URL? { link.map(LinkWrapper.destination) }
+    /// Where the link goes, when that isn't the sender's own site. The user decides: a warning when the sender
+    /// can't be read or verified (a lookalike, malformed or spoofed From), else a calm note, since a sender
+    /// the mail server verified chose that site itself (claude.ai from anthropic.com).
+    var linkNotice: (text: String, warns: Bool)? {
+        guard let host = destination?.host else { return nil }
         let target = ServiceIdentity.registrable(host)
-        return target == domain ? nil : "Opens \(target), not \(domain). Check it before you \(resetsPassword ? "change your password" : "sign in")."
+        guard target != domain else { return nil }
+        let check = "Check it before you \(resetsPassword ? "change your password" : "sign in")."
+        guard let domain else { return ("Opens \(target), from a sender we can't verify. \(check)", true) }
+        return senderVerified == true ? ("Opens \(target), not \(domain). The sender is verified.", false)
+            : ("Opens \(target), not \(domain). \(check)", true)
     }
     /// What Copy puts on the clipboard.
     var copyValue: String { isLink ? link?.absoluteString ?? "" : code }
@@ -58,8 +68,10 @@ extension CodeItem {
                   snippet: String(((message.subject.map { $0 + " — " } ?? "") + body).prefix(280)), received: message.date,
                   expires: message.date.addingTimeInterval(CodeExtractor.validity(in: message.fullText)
                       ?? (code == nil ? AppModel.linkValidity : AppModel.defaultValidity)),
-                  domain: ServiceIdentity.domain(senderAddress: message.senderID, isMail: message.isMail, text: message.fullText, service: service),
-                  dismissKey: message.dismissKey, resetsPassword: resetsPassword)
+                  // A spoofed sender gets neither its logo nor a pass on the link check.
+                  domain: message.senderVerified == false ? nil
+                      : ServiceIdentity.domain(senderAddress: message.senderID, isMail: message.isMail, text: message.fullText, service: service),
+                  dismissKey: message.dismissKey, resetsPassword: resetsPassword, senderVerified: message.senderVerified)
     }
 
     /// A vault login's code as it stands at `date`, under the login's own id for a stable row.

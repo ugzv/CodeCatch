@@ -14,6 +14,8 @@ struct IncomingMessage {
     var links: [MailLink] = []
     /// Source identifier only; never a code or a sign-in token.
     var messageID: String? = nil
+    /// The mail server's verdict on the From domain; nil when it left none.
+    var senderVerified: Bool? = nil
 
     /// Subject and body: what codes and service names are read from.
     var fullText: String { [subject, text].compactMap { $0 }.joined(separator: "\n") }

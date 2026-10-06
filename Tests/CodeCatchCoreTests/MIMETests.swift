@@ -50,3 +50,23 @@ import Testing
     let bare = "Subject: Vaša koda\r\nContent-Type: multipart/mixed; boundary=XX\r\n\r\n--XX\r\n\r\nYour code: 482913\r\n--XX--"
     #expect(MIME.parse(Data(bare.utf8)) == MailMessage(fromName: "", fromAddress: "", subject: "Vaša koda", text: "Your code: 482913\n"))
 }
+
+/// The receiving server's DMARC verdict on the From domain. Only the top block counts (lower ones came with
+/// the message and can be forged); anything short of a DMARC verdict stays unknown, or genuine mail would warn.
+@Test(arguments: [
+    (["mx.google.com; dkim=pass header.i=@notion.so; spf=pass smtp.mailfrom=notion.so; dmarc=pass (p=REJECT) header.from=notion.so"], true),
+    (["mx.google.com; spf=softfail smtp.mailfrom=evil.com; dmarc=fail (p=NONE) header.from=notion.so"], false),
+    // A forwarding server breaks DKIM on most genuine mail: no verdict, not a failure.
+    (["mail.example.net; dkim=fail reason=\"signature verification failed\" header.d=notion.so"], nil),
+    // Microsoft writes no server id.
+    (["spf=pass (sender IP is 1.2.3.4) smtp.mailfrom=notion.so; dkim=pass (signature was verified) header.d=notion.so;dmarc=pass action=none header.from=notion.so;compauth=pass"], true),
+    // iCloud splits its verdict over several headers from its own hosts.
+    (["dkim-verifier.icloud.com; dkim=none", "dmarc.icloud.com; dmarc=pass header.from=notion.so"], true),
+    // A forged "pass" further down, below the server's own fail, is ignored.
+    (["mx.google.com; dmarc=fail header.from=notion.so", "attacker.example; dmarc=pass header.from=notion.so"], false),
+    ([], nil),
+] as [([String], Bool?)])
+func readsSenderVerdict(results: [String], expected: Bool?) {
+    let raw = results.map { "Authentication-Results: \($0)\r\n" }.joined() + "Received: from x\r\nFrom: Notion <team@mail.notion.so>\r\n\r\nHi"
+    #expect(MIME.parse(Data(raw.utf8)).senderVerified == expected)
+}

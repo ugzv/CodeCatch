@@ -41,11 +41,11 @@ struct CodeRow: View {
                 }
                 Text(item.origin == .vault
                      ? [item.accountLabel, item.sourceLabel].filter { !$0.isEmpty }.joined(separator: " · ")
-                     : [item.origination, item.link?.host].compactMap { $0 }.joined(separator: " · "))
+                     : [item.origination, item.destination?.host].compactMap { $0 }.joined(separator: " · "))
                     .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                if let warning = item.linkWarning {
+                if let notice = item.linkNotice {
                     // Never cut short: it is a phishing warning, and its end says what to check.
-                    WarningText(message: warning).font(.caption)
+                    WarningText(message: notice.text, calm: !notice.warns).font(.caption)
                 } else if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                 }
@@ -53,13 +53,15 @@ struct CodeRow: View {
             Spacer(minLength: 8)
             if item.isLink {
                 Button(action: activate) {
-                    Label { Text("Open") } icon: { Image(systemName: item.kind.symbol).foregroundStyle(item.kind.color) }
+                    Label { Text(locked ? "Unlock" : "Open") } icon: {
+                        Image(systemName: locked ? "lock.fill" : item.kind.symbol).foregroundStyle(locked ? AnyShapeStyle(.secondary) : AnyShapeStyle(item.kind.color))
+                    }
                 }
                     .buttonStyle(.bordered)
-                    .accessibilityLabel("Open \(item.kind.title.lowercased())")
+                    .accessibilityLabel(locked ? "Unlock" : "Open \(item.kind.title.lowercased())")
                     .controlSize(.small)
                     .buttonBorderShape(.capsule)
-                    .help(concealed ? item.link?.host ?? "" : item.link?.absoluteString ?? "")
+                    .help(concealed ? item.destination?.host ?? "" : item.link?.absoluteString ?? "")
             }
             if !item.isLink {
                 // On the clipboard: the ring turns into a checkmark; the code itself stays put.
@@ -103,8 +105,9 @@ struct CodeRow: View {
         .contextMenu { CodeMenu(item: item) }
     }
 
-    /// A click does what the card's well does: open a link, copy a code.
+    /// A click does what the card's well does: open a link, copy a code. Locked, a link only unlocks.
     private func activate() {
+        if item.isLink, locked { model.unlocked {}; return }
         model.unlocked {
             if item.isLink { return model.open(item, leavingMenu: true) }
             withAnimation(.snappy(duration: 0.25, extraBounce: 0.15)) { model.copy(item) }

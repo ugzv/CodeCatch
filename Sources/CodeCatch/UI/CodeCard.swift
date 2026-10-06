@@ -18,8 +18,8 @@ struct CodeCard: View {
         VStack(alignment: .leading, spacing: 12) {
             header
             well
-            if let warning = item.linkWarning {
-                WarningText(message: warning).font(.subheadline)
+            if let notice = item.linkNotice {
+                WarningText(message: notice.text, calm: !notice.warns).font(.subheadline)
             }
             HStack(spacing: 8) {
                 if item.isLink {
@@ -69,7 +69,7 @@ struct CodeCard: View {
             }
             Spacer(minLength: 8)
             if !item.isLink, item.link != nil {
-                GlyphButton(symbol: "link", help: "Open the \(item.resetsPassword ? "password reset" : "sign-in") link (\(item.link?.host ?? ""))", action: open)
+                GlyphButton(symbol: "link", help: "Open the \(item.resetsPassword ? "password reset" : "sign-in") link (\(item.destination?.host ?? ""))", action: open)
             }
             if style == .banner, hoveringCard {
                 GlyphButton(symbol: "xmark", help: "Dismiss") { Banner.shared.hide() }
@@ -83,7 +83,7 @@ struct CodeCard: View {
     private var well: some View {
         let live = model.isFresh(item)
         return HStack(spacing: 10) {
-            if item.isLink, let link = item.link {
+            if item.isLink, let link = item.destination {
                 IconTile(item.kind).help(item.kind.title).accessibilityLabel(item.kind.title)
                 VStack(alignment: .leading, spacing: 1) {
                     // The site, never truncated: it is what a phishing check reads.
@@ -129,10 +129,10 @@ struct CodeCard: View {
         }
     }
 
+    /// Locked, a click only unlocks: the full link shows before anything opens.
     private func open() {
-        model.unlocked {
-            model.open(item, leavingMenu: style == .menu)
-            if style == .banner { Banner.shared.hide(after: 0.3) }
-        }
+        guard !locked else { model.unlocked {}; return }
+        model.open(item, leavingMenu: style == .menu)
+        if style == .banner { Banner.shared.hide(after: 0.3) }
     }
 }

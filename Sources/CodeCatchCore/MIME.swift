@@ -7,6 +7,8 @@ public struct MailMessage: Equatable, Sendable {
     public var text: String
     /// Every link, with its anchor (or surrounding line) text, for spotting sign-in links.
     public var links: [MailLink] = []
+    /// The receiving server's verdict on the From domain; nil when it left none.
+    public var senderVerified: Bool? = nil
 }
 
 public struct MailLink: Equatable, Sendable {
@@ -23,10 +25,29 @@ public struct MailLink: Equatable, Sendable {
 /// multipart walking, base64 / quoted-printable, charsets, encoded-word headers, HTML to text.
 public enum MIME {
     public static func parse(_ raw: Data) -> MailMessage {
-        let (headers, body) = split(latin1(raw))
+        let (headers, body, results) = split(latin1(raw))
         let (name, address) = parseAddress(header(headers["from"]))
         let (text, links) = bodyText(headers: headers, body: body)
-        return MailMessage(fromName: name, fromAddress: address, subject: header(headers["subject"]), text: text, links: links)
+        return MailMessage(fromName: name, fromAddress: address, subject: header(headers["subject"]), text: text, links: links,
+                           senderVerified: senderVerified(results))
+    }
+
+    /// The receiving server's DMARC verdict on the From domain (RFC 8601). Only the top block, from the
+    /// user's own server, counts: headers below it came with the message and can be forged. A bare DKIM
+    /// or SPF failure is not a verdict: forwarding breaks signatures on genuine mail. nil without one.
+    static func senderVerified(_ results: [String]) -> Bool? {
+        guard let top = results.first else { return nil }
+        let server = authServer(top)
+        let own = results.prefix { authServer($0) == server }.flatMap { $0.lowercased().split(separator: ";") }
+            .map { $0.replacingOccurrences(of: #"\s*=\s*"#, with: "=", options: .regularExpression).trimmingCharacters(in: .whitespaces) }
+        if own.contains(where: { $0.hasPrefix("dmarc=pass") }) { return true }
+        return own.contains(where: { $0.hasPrefix("dmarc=fail") }) ? false : nil
+    }
+
+    /// "mx.google.com; dkim=pass …" → "google.com"; iCloud's several hosts share one. Microsoft writes none.
+    private static func authServer(_ result: String) -> String? {
+        let id = result.split(separator: ";").first?.trimmingCharacters(in: .whitespaces) ?? ""
+        return id.contains("=") ? nil : ServiceIdentity.registrable(String(id.split(separator: " ").first ?? ""))
     }
 
     /// Encoded words, or raw UTF-8 (RFC 6532), which the Latin-1 read left as mojibake.
@@ -41,24 +62,31 @@ public enum MIME {
     /// to their bytes and decoded with their own charset later.
     private static func latin1(_ data: Data) -> String { String(decoding: data.map { UInt16($0) }, as: UTF16.self) }
 
-    private static func split(_ s: String) -> ([String: String], String) {
+    /// Headers (the first of each name), the body, and every Authentication-Results in order.
+    private static func split(_ s: String) -> ([String: String], String, [String]) {
         let s = s.replacingOccurrences(of: "\r\n", with: "\n")
-        if s.hasPrefix("\n") { return ([:], String(s.dropFirst())) }  // no headers at all
+        if s.hasPrefix("\n") { return ([:], String(s.dropFirst()), []) }  // no headers at all
         let parts = s.components(separatedBy: "\n\n")
         let body = parts.dropFirst().joined(separator: "\n\n")
         var headers: [String: String] = [:]
+        var results: [String] = []
         var current: (String, String)?
+        func flush() {
+            guard let c = current else { return }
+            if headers[c.0] == nil { headers[c.0] = c.1 }
+            if c.0 == "authentication-results" { results.append(c.1) }
+        }
         for line in parts[0].split(separator: "\n", omittingEmptySubsequences: false) {
             if line.first == " " || line.first == "\t", current != nil {
                 current!.1 += " " + line.trimmingCharacters(in: .whitespaces)
                 continue
             }
-            if let c = current, headers[c.0] == nil { headers[c.0] = c.1 }
+            flush()
             guard let colon = line.firstIndex(of: ":") else { current = nil; continue }
             current = (line[..<colon].lowercased(), line[line.index(after: colon)...].trimmingCharacters(in: .whitespaces))
         }
-        if let c = current, headers[c.0] == nil { headers[c.0] = c.1 }
-        return (headers, body)
+        flush()
+        return (headers, body, results)
     }
 
     private static func bodyText(headers: [String: String], body: String) -> (String, [MailLink]) {
@@ -114,7 +142,7 @@ public enum MIME {
         if type.hasPrefix("multipart/"), let boundary = params["boundary"], depth < 8 {
             for chunk in body.components(separatedBy: "--" + boundary).dropFirst() {
                 if chunk.hasPrefix("--") { break }
-                let (h, b) = split(String(chunk.drop(while: { $0 != "\n" }).dropFirst()))  // rest of the boundary line
+                let (h, b, _) = split(String(chunk.drop(while: { $0 != "\n" }).dropFirst()))  // rest of the boundary line
                 collect(headers: h, body: b, plain: &plain, html: &html, depth: depth + 1)
             }
             return

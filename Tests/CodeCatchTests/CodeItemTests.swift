@@ -51,3 +51,22 @@ func expiredCodesDoNotTriggerAutomaticCopyWhileClockSkewStillWorks(age: TimeInte
         #expect(!Clipboard.holds(current, pasteboard: pasteboard))
     }
 }
+
+/// What the card says about the link: nothing on the sender's own site, a warning when the site differs or
+/// the sender can't be read (lookalike, port, empty), and only a calm note when the mail server verified it.
+@Test(arguments: [
+    ("team@notion.so", "https://www.notion.so/login", nil as Bool?, nil as Bool?), ("team@notion.so", "https://evil.com/login", nil, true),
+    ("team@nоtion.so", "https://evil.com/login", nil, true), ("team@evil.com:8443", "https://evil.com/login", nil, true),
+    ("", "https://evil.com/login", nil, true),
+    // The scanner's destination is what counts.
+    ("team@notion.so", "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.notion.so%2Flogin", nil, nil),
+    ("team@notion.so", "https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fevil.com%2Flogin", nil, true),
+    // Verified: another site is the sender's own choice, said calmly. Failed: never a pass, even on its own domain.
+    ("team@notion.so", "https://notion-static.com/login", true, false), ("team@notion.so", "https://sites.notion.so/evil-login", false, true),
+])
+func linkNotice(sender: String, link: String, verified: Bool?, warns: Bool?) {
+    var mail = IncomingMessage(text: "Sign in", senderName: "Notion", senderID: sender, sourceKey: "account", sourceLabel: "Test",
+                               date: Date(timeIntervalSince1970: 1_700_000_000), isMail: true)
+    mail.senderVerified = verified
+    #expect(CodeItem(mail, code: nil, link: URL(string: link)!).linkNotice?.warns == warns)
+}

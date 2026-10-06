@@ -53,3 +53,25 @@ func findsPasswordResetLink(subject: String, links: [(String, String)], expected
     #expect(found?.url.absoluteString == expected)
     #expect(found.map { $0.kind == .passwordReset } ?? true)
 }
+
+/// Company mail wraps every link in a scanner; unread, every link warns "Opens outlook.com" and the warning
+/// stops meaning anything. Only the scanners' own hosts unwrap: a lookalike host must keep its own address.
+@Test(arguments: [
+    ("https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.notion.so%2Flogin%3Ft%3D1&data=05%7C02", "https://www.notion.so/login?t=1"),
+    ("https://www.google.com/url?q=https://app.slack.com/verify&sa=D", "https://app.slack.com/verify"),
+    ("https://urldefense.proofpoint.com/v2/url?u=https-3A__github.com_login-3Ft-3D1&d=DwMF", "https://github.com/login?t=1"),
+    ("https://urldefense.com/v3/__https://github.com/login__;!!abc$", "https://github.com/login"),
+    ("https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.google.com%2Furl%3Fq%3Dhttps%3A%2F%2Fevil.com", "https://evil.com"),
+    ("https://safelinks.protection.outlook.com.evil.com/?url=https%3A%2F%2Fnotion.so", "https://safelinks.protection.outlook.com.evil.com/?url=https%3A%2F%2Fnotion.so"),
+    ("https://www.google.com/url?q=javascript:alert(1)", "https://www.google.com/url?q=javascript:alert(1)"),
+    ("https://www.notion.so/login?url=https://evil.com", "https://www.notion.so/login?url=https://evil.com"),
+    // Click trackers that write the destination into the link (real shapes; most warnings on a real inbox).
+    ("https://abcd.eu-west-1.resend-clicks-a.com/CL0/https:%2F%2Fexample.com%2Fauth%2Fverify%3Ftoken=x/1/0102/AbC=441", "https://example.com/auth/verify?token=x"),
+    ("https://abcd.r.us-west-2.awstrack.me/L0/https:%2F%2Fapp.example.org%2Freset%3Ftoken=x/1/0101/AbC=453", "https://app.example.org/reset?token=x"),
+    ("https://mandrillapp.com/track/click/12345/app.example.com?p=eyJwIjogIntcInVcIjogMSwgXCJ2XCI6IDIsIFwidXJsXCI6IFwiaHR0cHM6Ly9hcHAuZXhhbXBsZS5jb20vbG9naW4/dD1hYmNcIiwgXCJpZFwiOiBcInhcIn0ifQ==", "https://app.example.com/login?t=abc"),
+    // The tracker path on anyone else's host is just a path.
+    ("https://evil.com/CL0/https:%2F%2Fnotion.so/1/x", "https://evil.com/CL0/https:%2F%2Fnotion.so/1/x"),
+])
+func unwrapsLinkScanners(wrapped: String, expected: String) {
+    #expect(LinkWrapper.destination(URL(string: wrapped)!).absoluteString == expected)
+}

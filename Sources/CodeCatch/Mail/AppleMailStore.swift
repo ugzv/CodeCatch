@@ -78,7 +78,7 @@ final class AppleMailStore: LocalStore {
                                        senderName: mail?.fromName ?? text(s, 3), senderID: mail?.fromAddress ?? text(s, 2),
                                        sourceKey: Self.sourceKey, sourceLabel: name,
                                        date: Date(timeIntervalSince1970: Double(sqlite3_column_int64(s, 1))), isMail: true,
-                                       links: mail?.links ?? [], messageID: String(id))
+                                       links: mail?.links ?? [], messageID: String(id), senderVerified: mail?.senderVerified)
             }.compactMap { $0 }.reversed()
         }
         let late = waiting.isEmpty ? [] : try rows("m.ROWID IN (\(waiting.keys.map(String.init).joined(separator: ",")))")
