@@ -14,7 +14,7 @@ final class SourceMonitor: ObservableObject {
     var deliver: (IncomingMessage) -> Void = { _ in }
 
     private let defaults: UserDefaults
-    private var receiving: Bool { defaults.bool(forKey: Prefs.receivedCodes) || defaults.bool(forKey: Prefs.signInLinks) }
+    private var receiving: Bool { [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks].contains(where: defaults.bool(forKey:)) }
     private var accounts: [MailAccount] = []
     private var local: [String: LocalWatcher] = [:]
     private var tasks: [String: Task<Void, Never>] = [:]

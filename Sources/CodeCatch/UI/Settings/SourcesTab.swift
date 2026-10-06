@@ -16,12 +16,15 @@ struct SourcesTab: View {
     var body: some View {
         Form {
             Section {
-                SettingRow(symbol: "number", color: .blue, title: "Verification Codes",
+                SettingRow(symbol: CatchKind.code.symbol, color: CatchKind.code.color, title: "Verification Codes",
                            info: "Read from Messages and mail. Turning this off stops reading Messages. Turning it back on reads recent history again.",
                            isOn: setting(Prefs.receivedCodes))
-                SettingRow(symbol: "link", color: .teal, title: "Sign-In Links",
+                SettingRow(symbol: CatchKind.signIn.symbol, color: CatchKind.signIn.color, title: "Sign-In Links",
                            info: "Read from mail. Links open only when you click them, after you unlock CodeCatch.",
                            isOn: setting(Prefs.signInLinks))
+                SettingRow(symbol: CatchKind.passwordReset.symbol, color: CatchKind.passwordReset.color, title: "Password Reset Links",
+                           info: "Links to reset or change a password, read from mail. Links open only when you click them, after you unlock CodeCatch.",
+                           isOn: setting(Prefs.resetLinks))
             } header: {
                 Text("What to Catch")
             } footer: {

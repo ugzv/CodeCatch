@@ -78,7 +78,7 @@ enum Probe {
         print("Apple Mail: \(read.count) inbox mails read, \(read.filter { !$0.text.isEmpty }.count) with text")
         for m in read {
             let code = CodeExtractor.code(in: m.fullText).map { String(repeating: "•", count: max(0, $0.count - 2)) + $0.suffix(2) } ?? "—"
-            let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.host ?? "")" } ?? ""
+            let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.url.host ?? "")" } ?? ""
             print("  \(m.date.formatted(date: .numeric, time: .shortened))  \(code.padding(toLength: 10, withPad: " ", startingAt: 0))  \(m.service.prefix(22))\(link)")
         }
     }
@@ -104,7 +104,7 @@ enum Probe {
                     let codeLike = (m.subject ?? "").range(of: #"code|verif|sign|log ?in|password|confirm|one-time|otp|magic|koda|prijav|potrd"#,
                                                            options: [.regularExpression, .caseInsensitive]) != nil
                     let masked = code.map { String(repeating: "•", count: max(0, $0.count - 2)) + $0.suffix(2) } ?? "—"
-                    let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.host ?? "")" } ?? ""
+                    let link = SignInLink.find(in: m.links, subject: m.subject ?? "").map { "  → \($0.url.host ?? "")" } ?? ""
                     guard code != nil || !link.isEmpty || codeLike else { continue }
                     // Subjects often carry a code ("…verification code: 884 720", "…is SZBPM"): mask every
                     // digit and every capitals-only word of 4+ letters.

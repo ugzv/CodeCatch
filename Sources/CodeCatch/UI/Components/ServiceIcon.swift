@@ -22,6 +22,8 @@ struct ServiceIcon: View {
                     }
                 }
                 .frame(width: size, height: size)
+                // The same light-to-dark sheen as a monogram's gradient, so logos and monograms sit together.
+                .overlay(LinearGradient(colors: [.white.opacity(0.14), .black.opacity(0.08)], startPoint: .top, endPoint: .bottom))
                 .clipShape(shape)
                 .overlay(shape.strokeBorder(.black.opacity(0.1), lineWidth: 0.5))
                 .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)

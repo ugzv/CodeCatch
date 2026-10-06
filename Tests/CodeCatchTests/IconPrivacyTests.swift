@@ -26,21 +26,37 @@ import Testing
     }
 }
 
-private let iconPNG: Data = {
-    let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 32, pixelsHigh: 32,
+private func png(side: Int) -> Data {
+    let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: side, pixelsHigh: side,
                                   bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true,
                                   isPlanar: false, colorSpaceName: .deviceRGB,
-                                  bytesPerRow: 128, bitsPerPixel: 32)!
-    bitmap.bitmapData!.initialize(repeating: 255, count: 32 * 128)
+                                  bytesPerRow: side * 4, bitsPerPixel: 32)!
+    bitmap.bitmapData!.initialize(repeating: 255, count: side * side * 4)
     return bitmap.representation(using: .png, properties: [:])!
-}()
+}
+
+private let iconPNG = png(side: 32)
+
+/// A 64 px logo of one black shape on transparency, the way favicons come.
+private func logo(_ shape: (CGRect) -> NSBezierPath) -> Data {
+    let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 64, pixelsHigh: 64, bitsPerSample: 8, samplesPerPixel: 4,
+                                  hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 256, bitsPerPixel: 32)!
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
+    NSColor.black.setFill()
+    shape(CGRect(x: 0, y: 0, width: 64, height: 64)).fill()
+    NSGraphicsContext.restoreGraphicsState()
+    return bitmap.representation(using: .png, properties: [:])!
+}
+
+enum LogoShape: CaseIterable, Sendable { case square, roundedSquareInMargin, circle, glyph }
 
 private func iconResponse(_ url: URL, status: Int) throws -> HTTPURLResponse {
     try #require(HTTPURLResponse(url: url, statusCode: status, httpVersion: nil,
                                 headerFields: ["Content-Type": "image/png"]))
 }
 
-struct GoogleIconURLCase: Sendable {
+struct IconProxyURLCase: Sendable {
     let candidate: String?
     let allowed: Bool
 
@@ -155,8 +171,65 @@ struct GoogleIconURLCase: Sendable {
 
         await store.load("example.com")
 
-        #expect(requests == 1)
+        #expect(requests == 2)
         #expect(fixture.files.contains { $0.pathExtension == "miss" } == (status == 404))
+    }
+
+    /// Small sites only have a 16 px favicon (zabec.net); smaller is unusable and must not be refetched every launch.
+    @Test(arguments: [(16, true), (8, false)])
+    func smallFaviconsLoadAndUnusableOnesAreRememberedAsMisses(side: Int, loads: Bool) async throws {
+        let fixture = try IconPrivacyFixture(enabled: true)
+        defer { fixture.cleanUp() }
+        let store = IconStore(defaults: fixture.defaults, folder: fixture.folder, fetch: { url in
+            (png(side: side), try iconResponse(url, status: 200))
+        })
+
+        await store.load("example.com")
+
+        #expect((store.icon(for: "example.com") != nil) == loads)
+        #expect(fixture.files.contains { $0.pathExtension == "miss" } == !loads)
+    }
+
+    /// Google lacks or blurs some logos; DuckDuckGo fills in only then, and the sharper one wins.
+    @Test(arguments: [(404, 0, 32, 32), (200, 16, 48, 48), (200, 16, 16, 16), (200, 64, 16, 64)])
+    func duckDuckGoIsAskedOnlyWhenGoogleHasNoSharpLogo(googleStatus: Int, googleSide: Int, duckSide: Int, shown: Int) async throws {
+        let fixture = try IconPrivacyFixture(enabled: true)
+        defer { fixture.cleanUp() }
+        var hosts: [String] = []
+        let store = IconStore(defaults: fixture.defaults, folder: fixture.folder, fetch: { url in
+            hosts.append(url.host ?? "")
+            return url.host == "www.google.com"
+                ? (googleSide > 0 ? png(side: googleSide) : Data(), try iconResponse(url, status: googleStatus))
+                : (png(side: duckSide), try iconResponse(url, status: 200))
+        })
+
+        await store.load("example.com")
+
+        #expect(hosts == (googleSide >= 32 ? ["www.google.com"] : ["www.google.com", "icons.duckduckgo.com"]))
+        let icon = try #require(store.icon(for: "example.com"))
+        #expect(icon.image.size.width == CGFloat(shown))
+    }
+
+    /// App-icon logos with rounded corners and a margin (Dynadot) fill the tile; glyphs and circles stay fitted on white.
+    @Test(arguments: LogoShape.allCases)
+    func tileShapedLogosFillTheIcon(shape: LogoShape) async throws {
+        let fixture = try IconPrivacyFixture(enabled: true)
+        defer { fixture.cleanUp() }
+        let data = logo { box in
+            switch shape {
+            case .square: NSBezierPath(rect: box)
+            case .roundedSquareInMargin: NSBezierPath(roundedRect: box.insetBy(dx: 6, dy: 6), xRadius: 12, yRadius: 12)
+            case .circle: NSBezierPath(ovalIn: box)
+            case .glyph: NSBezierPath(rect: CGRect(x: 22, y: 4, width: 20, height: 56))
+            }
+        }
+        let store = IconStore(defaults: fixture.defaults, folder: fixture.folder, fetch: { url in (data, try iconResponse(url, status: 200)) })
+
+        await store.load("example.com")
+
+        let icon = try #require(store.icon(for: "example.com"))
+        #expect(icon.fullBleed == [.square, .roundedSquareInMargin].contains(shape))
+        if shape == .roundedSquareInMargin { #expect(icon.image.size.width == 52) }
     }
 
     @Test func successfulResponseFromUnrelatedHostCannotBecomeAnIconOrPNGCache() async throws {
@@ -174,29 +247,34 @@ struct GoogleIconURLCase: Sendable {
     }
 
     @Test(arguments: [
-        GoogleIconURLCase("https://www.google.com/s2/favicons?domain=example.com&sz=128", allowed: true),
-        GoogleIconURLCase("https://WWW.GOOGLE.COM/s2/favicons", allowed: true),
-        GoogleIconURLCase("https://www.google.com:443/s2/favicons", allowed: true),
-        GoogleIconURLCase("https://t0.gstatic.com/faviconV2", allowed: true),
-        GoogleIconURLCase("https://t1.gstatic.com/faviconV2", allowed: true),
-        GoogleIconURLCase("https://t2.gstatic.com/faviconV2", allowed: true),
-        GoogleIconURLCase("https://t3.gstatic.com/faviconV2", allowed: true),
-        GoogleIconURLCase("http://www.google.com/s2/favicons"),
-        GoogleIconURLCase("https://www.google.com:8443/s2/favicons"),
-        GoogleIconURLCase("https://user@www.google.com/s2/favicons"),
-        GoogleIconURLCase("https://user:password@www.google.com/s2/favicons"),
-        GoogleIconURLCase("https://www.google.com/faviconV2"),
-        GoogleIconURLCase("https://www.google.com/s2/favicons/extra"),
-        GoogleIconURLCase("https://google.com/s2/favicons"),
-        GoogleIconURLCase("https://www.google.com.evil.test/s2/favicons"),
-        GoogleIconURLCase("https://t0.gstatic.com/s2/favicons"),
-        GoogleIconURLCase("https://t0.gstatic.com/faviconV2/extra"),
-        GoogleIconURLCase("https://t4.gstatic.com/faviconV2"),
-        GoogleIconURLCase("https://gstatic.com/faviconV2"),
-        GoogleIconURLCase("https://example.com/favicon.ico"),
-        GoogleIconURLCase(nil)
+        IconProxyURLCase("https://www.google.com/s2/favicons?domain=example.com&sz=128", allowed: true),
+        IconProxyURLCase("https://WWW.GOOGLE.COM/s2/favicons", allowed: true),
+        IconProxyURLCase("https://www.google.com:443/s2/favicons", allowed: true),
+        IconProxyURLCase("https://t0.gstatic.com/faviconV2", allowed: true),
+        IconProxyURLCase("https://t1.gstatic.com/faviconV2", allowed: true),
+        IconProxyURLCase("https://t2.gstatic.com/faviconV2", allowed: true),
+        IconProxyURLCase("https://t3.gstatic.com/faviconV2", allowed: true),
+        IconProxyURLCase("http://www.google.com/s2/favicons"),
+        IconProxyURLCase("https://www.google.com:8443/s2/favicons"),
+        IconProxyURLCase("https://user@www.google.com/s2/favicons"),
+        IconProxyURLCase("https://user:password@www.google.com/s2/favicons"),
+        IconProxyURLCase("https://www.google.com/faviconV2"),
+        IconProxyURLCase("https://www.google.com/s2/favicons/extra"),
+        IconProxyURLCase("https://google.com/s2/favicons"),
+        IconProxyURLCase("https://www.google.com.evil.test/s2/favicons"),
+        IconProxyURLCase("https://t0.gstatic.com/s2/favicons"),
+        IconProxyURLCase("https://t0.gstatic.com/faviconV2/extra"),
+        IconProxyURLCase("https://t4.gstatic.com/faviconV2"),
+        IconProxyURLCase("https://gstatic.com/faviconV2"),
+        IconProxyURLCase("https://example.com/favicon.ico"),
+        IconProxyURLCase("https://icons.duckduckgo.com/ip3/example.com.ico", allowed: true),
+        IconProxyURLCase("https://icons.duckduckgo.com/ip3/a/b.ico"),
+        IconProxyURLCase("https://icons.duckduckgo.com/ip2/example.com.ico"),
+        IconProxyURLCase("https://duckduckgo.com/ip3/example.com.ico"),
+        IconProxyURLCase("https://icons.duckduckgo.com.evil.test/ip3/example.com.ico"),
+        IconProxyURLCase(nil)
     ])
-    nonisolated func iconURLsCannotEscapeTheAllowedGoogleHostsAndPaths(testCase: GoogleIconURLCase) {
-        #expect(IconStore.isGoogleIconURL(testCase.candidate.flatMap(URL.init(string:))) == testCase.allowed)
+    nonisolated func iconURLsCannotEscapeTheAllowedProxyHostsAndPaths(testCase: IconProxyURLCase) {
+        #expect(IconStore.isIconProxyURL(testCase.candidate.flatMap(URL.init(string:))) == testCase.allowed)
     }
 }

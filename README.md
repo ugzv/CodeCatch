@@ -24,8 +24,9 @@ browser or app.
   never takes focus from what you were typing.
 - **Keeps recent codes in the menu bar.** Click one to copy it. History is 7 days
   by default.
-- **Handles sign-in links.** It shows where a link leads and warns you when that
-  is a different site from the sender's. It never opens a link by itself.
+- **Handles sign-in and password reset links.** It shows where a link leads and
+  warns you when that is a different site from the sender's. It never opens a
+  link by itself.
 - **Reads Messages and mail.** iMessage and forwarded SMS, the Mail app's
   inboxes, Gmail and any IMAP account. It only reads; it never changes a mail.
 - **Shows your Bitwarden codes.** Import your two-step logins once, then search
@@ -39,8 +40,8 @@ browser or app.
   look like verification mail, so you can copy the code yourself.
 - **Lets you fix mistakes.** Right-click → **Not a Code** or **Ignore All from …**.
   Ignored senders can be restored in Settings → Sources.
-- **Gives you control.** Turn codes, sign-in links, Bitwarden or a single mail
-  account on and off in Settings. Each source shows when it was last checked.
+- **Gives you control.** Turn codes, sign-in links, password reset links,
+  Bitwarden or a single mail account on and off in Settings. Each source shows when it was last checked.
 - **Reads about 35 languages**, including English, German, Slovenian, Russian,
   Arabic, Chinese, Japanese and Korean.
 - **Stays private.** Hidden from screen sharing and recordings. Optional blur

@@ -49,8 +49,11 @@ struct CodeRow: View {
             }
             Spacer(minLength: 8)
             if item.isLink {
-                Button("Open") { model.unlocked { model.open(item, leavingMenu: true) } }
+                Button { model.unlocked { model.open(item, leavingMenu: true) } } label: {
+                    Label { Text("Open") } icon: { Image(systemName: item.kind.symbol).foregroundStyle(item.kind.color) }
+                }
                     .buttonStyle(.bordered)
+                    .accessibilityLabel("Open \(item.kind.title.lowercased())")
                     .controlSize(.small)
                     .buttonBorderShape(.capsule)
                     .help(concealed ? item.link?.host ?? "" : item.link?.absoluteString ?? "")
@@ -137,7 +140,7 @@ struct CodeMenu: View {
             Divider()
         }
         Button("Clear") { model.dismiss(item) }
-        Button(item.isLink ? "Not a Sign-In Link" : "Not a Code") { model.dismiss(item) }
+        Button(!item.isLink ? "Not a Code" : item.resetsPassword ? "Not a Password Reset Link" : "Not a Sign-In Link") { model.dismiss(item) }
         if !item.sender.isEmpty {
             Button("Ignore All from \(item.sender)") { model.ignoreSender(of: item) }
         }

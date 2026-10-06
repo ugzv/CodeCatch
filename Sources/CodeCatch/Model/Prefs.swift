@@ -9,11 +9,11 @@ enum Prefs {
     static let ignoredSenders = "ignoredSenders", dismissed = "dismissedMessages", vaultImportedAt = "vaultImportedAt"
     static let hotkeys = "hotkeys", welcomed = "welcomed"
 
-    static let receivedCodes = "receivedCodes", signInLinks = "signInLinks", bitwarden = "bitwardenEnabled"
+    static let receivedCodes = "receivedCodes", signInLinks = "signInLinks", resetLinks = "passwordResetLinks", bitwarden = "bitwardenEnabled"
 
     static func register(in defaults: UserDefaults = .standard) {
         defaults.register(defaults: [
-            receivedCodes: true, signInLinks: true, bitwarden: true,
+            receivedCodes: true, signInLinks: true, resetLinks: true, bitwarden: true,
             showBanner: true, autoCopy: true, autoType: false, clearClipboard: true, codeInMenuBar: true,
             sound: false, messages: true, appleMail: false, launchAtLogin: true, historyDays: 7, serviceIcons: true,
             hideFromCapture: true, blurCodes: false, showPreviews: true, clearOnLock: false, hotkeys: true,

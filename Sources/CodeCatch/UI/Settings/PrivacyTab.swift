@@ -27,7 +27,7 @@ struct PrivacyTab: View {
                 SettingRow(symbol: "clock.arrow.circlepath", color: .orange, title: "Clear Clipboard After 90 Seconds",
                            info: "Only if you have not copied something else since. Codes do not sync to your other devices, and clipboard managers are asked to skip them.", isOn: $clearClipboard)
                 SettingRow(symbol: "app.badge.fill", color: .purple, title: "Show Service Logos",
-                           info: "Logos load through Google, which sees your IP address and the site name, such as github.com. Turn this off to stop it.", isOn: $serviceIcons)
+                           info: "Logos load through Google, or DuckDuckGo when Google has none. They see your IP address and the site name, such as github.com. Turn this off to stop it.", isOn: $serviceIcons)
             }
             Section("History") {
                 SettingRow(symbol: "clock.fill", color: .teal, title: "Keep Codes For",

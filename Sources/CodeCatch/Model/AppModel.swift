@@ -125,7 +125,7 @@ final class AppModel: ObservableObject {
     // MARK: - Sources
 
     func monitoring(_ key: String) -> Bool { defaults.bool(forKey: key) }
-    var receiving: Bool { monitoring(Prefs.receivedCodes) || monitoring(Prefs.signInLinks) }
+    var receiving: Bool { [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks].contains(where: monitoring) }
 
     func setMonitoring(_ key: String, enabled: Bool) {
         guard monitoring(key) != enabled else { return }
@@ -148,7 +148,7 @@ final class AppModel: ObservableObject {
     private func filtered(_ item: CodeItem) -> CodeItem? {
         var item = item
         if !monitoring(Prefs.receivedCodes) { item.code = "" }
-        if !monitoring(Prefs.signInLinks) { item.link = nil }
+        if !monitoring(item.linkSetting) { item.link = nil }
         return item.code.isEmpty && item.link == nil ? nil : item
     }
 
@@ -225,8 +225,9 @@ final class AppModel: ObservableObject {
               !ignoredSenders.contains(message.senderID.lowercased()) else { return }
         let code = monitoring(Prefs.receivedCodes) ? CodeExtractor.code(in: message.fullText) : nil
         let detectedLink = message.isMail ? SignInLink.find(in: message.links, subject: message.subject ?? "") : nil
-        let link = monitoring(Prefs.signInLinks) ? detectedLink : nil
-        let item = CodeItem(message, code: code, link: link)
+        let resets = detectedLink?.kind == .passwordReset
+        let link = monitoring(resets ? Prefs.resetLinks : Prefs.signInLinks) ? detectedLink?.url : nil
+        let item = CodeItem(message, code: code, link: link, resetsPassword: resets)
         guard !dismissed.contains(item.dismissKey) else { return }
         if code != nil || detectedLink != nil { recovery.remove(messageKey: message.dismissKey) }
         guard code != nil || link != nil else {
@@ -273,7 +274,7 @@ final class AppModel: ObservableObject {
     }
 
     func copy(_ item: CodeItem, at date: Date = Date()) {
-        let feature = item.origin == .vault ? Prefs.bitwarden : item.isLink ? Prefs.signInLinks : Prefs.receivedCodes
+        let feature = item.origin == .vault ? Prefs.bitwarden : item.isLink ? item.linkSetting : Prefs.receivedCodes
         guard isUnlocked, monitoring(feature) else { return }
         var current = item
         if item.origin == .vault {
@@ -287,7 +288,7 @@ final class AppModel: ObservableObject {
     }
 
     func copyLink(_ item: CodeItem) {
-        guard isUnlocked, monitoring(Prefs.signInLinks), let link = item.link else { return }
+        guard isUnlocked, monitoring(item.linkSetting), let link = item.link else { return }
         copyToClipboard(link.absoluteString, item.id)
     }
 
@@ -312,9 +313,9 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// Only ever on the user's click: sign-in links are never opened automatically.
+    /// Only ever on the user's click: links are never opened automatically.
     func open(_ item: CodeItem, leavingMenu: Bool = false) {
-        guard isUnlocked, monitoring(Prefs.signInLinks), let link = item.link else { return }
+        guard isUnlocked, monitoring(item.linkSetting), let link = item.link else { return }
         if leavingMenu { NSApp.hide(nil) }
         NSWorkspace.shared.open(link)
         markUsed(item)

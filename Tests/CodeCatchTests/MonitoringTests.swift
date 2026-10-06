@@ -57,12 +57,12 @@ private func monitoringMessage() -> IncomingMessage {
     @Test func registrationEnablesAllFeaturesWithoutOverwritingSavedChoices() throws {
         let fixture = try MonitoringFixture()
         defer { fixture.cleanUp() }
-        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.bitwarden] {
+        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks, Prefs.bitwarden] {
             #expect(fixture.defaults.bool(forKey: key))
             fixture.defaults.set(false, forKey: key)
         }
         Prefs.register(in: fixture.defaults)
-        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.bitwarden] {
+        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks, Prefs.bitwarden] {
             #expect(!fixture.defaults.bool(forKey: key))
         }
     }
@@ -78,6 +78,29 @@ private func monitoringMessage() -> IncomingMessage {
         #expect(fixture.model.items.contains { !$0.code.isEmpty } == codes)
         #expect(fixture.model.items.contains { $0.link != nil } == links)
         if !codes && !links { #expect(fixture.model.items.isEmpty) }
+    }
+
+    /// Each link kind follows its own setting: turning off sign-in links must not hide resets, and the reverse.
+    @Test(arguments: [(true, false), (false, true)])
+    func passwordResetLinksFollowTheirOwnSetting(signIn: Bool, reset: Bool) throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        fixture.model.setMonitoring(Prefs.signInLinks, enabled: signIn)
+        fixture.model.setMonitoring(Prefs.resetLinks, enabled: reset)
+        let mail = { (subject: String, label: String) in
+            IncomingMessage(text: label, subject: subject, senderName: "Example", senderID: "support@example.com",
+                            sourceKey: "test-mail", sourceLabel: "Test", date: Date().addingTimeInterval(-300), isMail: true,
+                            links: [MailLink(url: "https://example.com/\(label.count)?token=t", label: label)])
+        }
+        fixture.model.ingest(mail("Reset your password", "Reset password"))
+        fixture.model.ingest(mail("Confirm your sign-in", "Confirm sign-in"))
+
+        #expect(fixture.model.items.contains { $0.resetsPassword } == reset)
+        #expect(fixture.model.items.contains { !$0.resetsPassword } == signIn)
+
+        fixture.model.setMonitoring(Prefs.signInLinks, enabled: false)
+        fixture.model.setMonitoring(Prefs.resetLinks, enabled: false)
+        #expect(fixture.model.items.isEmpty)
     }
 
     @Test(arguments: [true, false])
@@ -188,7 +211,7 @@ private func monitoringMessage() -> IncomingMessage {
     @Test func newModelsHonorSavedMonitoringChoices() throws {
         let fixture = try MonitoringFixture()
         defer { fixture.cleanUp() }
-        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.bitwarden] {
+        for key in [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks, Prefs.bitwarden] {
             fixture.model.setMonitoring(key, enabled: false)
             #expect(!fixture.defaults.bool(forKey: key))
         }
@@ -278,6 +301,7 @@ private func monitoringMessage() -> IncomingMessage {
 
         fixture.defaults.set(false, forKey: Prefs.receivedCodes)
         fixture.defaults.set(false, forKey: Prefs.signInLinks)
+        fixture.defaults.set(false, forKey: Prefs.resetLinks)
         monitor.restartMail([account])
         _ = await stopped.next()
         original.status(.live)

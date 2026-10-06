@@ -48,9 +48,25 @@ struct GlyphButton: View {
 }
 
 /// System Settings–style coloured icon tile.
+/// What CodeCatch catches, drawn the same in Settings → What to Catch and on the cards.
+enum CatchKind {
+    case code, signIn, passwordReset
+
+    var title: String { switch self { case .code: "Code"; case .signIn: "Sign-in link"; case .passwordReset: "Password reset" } }
+    var symbol: String { switch self { case .code: "number"; case .signIn: "link"; case .passwordReset: "lock.rotation" } }
+    var color: Color { switch self { case .code: .blue; case .signIn: .teal; case .passwordReset: .orange } }
+}
+
+extension CodeItem {
+    var kind: CatchKind { !isLink ? .code : resetsPassword ? .passwordReset : .signIn }
+}
+
 struct IconTile: View {
     let symbol: String
     let color: Color
+
+    init(symbol: String, color: Color) { self.symbol = symbol; self.color = color }
+    init(_ kind: CatchKind) { self.init(symbol: kind.symbol, color: kind.color) }
 
     var body: some View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)

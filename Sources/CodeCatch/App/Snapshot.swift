@@ -42,12 +42,16 @@ enum Snapshot {
         model.ingest(IncomingMessage(text: "Confirm it was you.", subject: "Verify your sign-in", senderName: "Acme", senderID: "security@acme.com",
                                      sourceKey: "m", sourceLabel: "Personal", date: Date().addingTimeInterval(-90), isMail: true,
                                      links: [MailLink(url: "https://acme-secure-login.net/verify?t=1", label: "Verify sign-in")]))
+        model.ingest(IncomingMessage(text: "Use the link to choose a new password.", subject: "Reset your password", senderName: "Dynadot",
+                                     senderID: "support@dynadot.com", sourceKey: "m", sourceLabel: "Personal",
+                                     date: Date().addingTimeInterval(-20), isMail: true,
+                                     links: [MailLink(url: "https://www.dynadot.com/reset.html?t=1", label: "Reset Password")]))
         for item in model.items { _ = IconStore.shared.icon(for: item.domain) }
         RunLoop.main.run(until: Date().addingTimeInterval(10))  // let the logos arrive
         let id = model.items.first!.id
         for (scheme, appearance) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
             render(AnyView(BannerCard(id: id).padding(20)), "hud-\(scheme)", appearance, dir)
-            render(AnyView(BannerCard(id: model.items[2].id).padding(20)), "hud-mail-\(scheme)", appearance, dir)
+            render(AnyView(BannerCard(id: model.items[1].id).padding(20)), "hud-mail-\(scheme)", appearance, dir)
             render(AnyView(MenuContent()), "menu-\(scheme)", appearance, dir)
             render(AnyView(SettingsView()), "settings-\(scheme)", appearance, dir)
             render(AnyView(WelcomeView()), "welcome-\(scheme)", appearance, dir)

@@ -26,9 +26,13 @@ struct CodeItem: Identifiable, Equatable {
     let domain: String?
     let dismissKey: String
     var used = false
+    /// The link resets a password rather than signing in.
+    var resetsPassword = false
 
     var lifetime: TimeInterval { expires.timeIntervalSince(received) }
     var isLink: Bool { code.isEmpty }
+    /// The setting that lets this item's link show.
+    var linkSetting: String { resetsPassword ? Prefs.resetLinks : Prefs.signInLinks }
     /// What Copy puts on the clipboard.
     var copyValue: String { isLink ? link?.absoluteString ?? "" : code }
 
@@ -38,7 +42,7 @@ struct CodeItem: Identifiable, Equatable {
 }
 
 extension CodeItem {
-    init(_ message: IncomingMessage, code: String?, link: URL?) {
+    init(_ message: IncomingMessage, code: String?, link: URL?, resetsPassword: Bool = false) {
         let body = message.text.split(whereSeparator: \.isWhitespace).joined(separator: " ")
         let service = message.service
         self.init(origin: message.sourceKey == AppModel.testSourceKey ? .test : message.isMail ? .mail : .messages,
@@ -49,7 +53,7 @@ extension CodeItem {
                   expires: message.date.addingTimeInterval(CodeExtractor.validity(in: message.fullText)
                       ?? (code == nil ? AppModel.linkValidity : AppModel.defaultValidity)),
                   domain: ServiceIdentity.domain(senderAddress: message.senderID, isMail: message.isMail, text: message.fullText, service: service),
-                  dismissKey: message.dismissKey)
+                  dismissKey: message.dismissKey, resetsPassword: resetsPassword)
     }
 
     /// A vault login's code as it stands at `date`, under the login's own id for a stable row.

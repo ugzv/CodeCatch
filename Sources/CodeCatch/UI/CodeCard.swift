@@ -53,7 +53,7 @@ struct CodeCard: View {
     private var linkWarning: String? {
         guard item.isLink, let host = item.link?.host, let sender = item.domain else { return nil }
         let target = ServiceIdentity.registrable(host)
-        return target == sender ? nil : "Opens \(target), not \(sender). Check it before you sign in."
+        return target == sender ? nil : "Opens \(target), not \(sender). Check it before you \(item.resetsPassword ? "change your password" : "sign in")."
     }
 
     @ViewBuilder private var codeActions: some View {
@@ -69,11 +69,12 @@ struct CodeCard: View {
             ServiceIcon(item: item, size: 38)
             VStack(alignment: .leading, spacing: 1) {
                 Text(item.service).font(.headline).lineLimit(1)
-                Text(item.origination).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                Text([item.origination, item.isLink ? item.kind.title : nil].compactMap { $0 }.joined(separator: " · "))
+                    .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 8)
             if !item.isLink, item.link != nil {
-                GlyphButton(symbol: "link", help: "Open the sign-in link (\(item.link?.host ?? ""))", action: open)
+                GlyphButton(symbol: "link", help: "Open the \(item.resetsPassword ? "password reset" : "sign-in") link (\(item.link?.host ?? ""))", action: open)
             }
             if style == .banner, hoveringCard {
                 GlyphButton(symbol: "xmark", help: "Dismiss") { Banner.shared.hide() }
@@ -88,6 +89,7 @@ struct CodeCard: View {
         let live = model.isFresh(item)
         return HStack(spacing: 10) {
             if item.isLink, let link = item.link {
+                IconTile(item.kind).help(item.kind.title).accessibilityLabel(item.kind.title)
                 VStack(alignment: .leading, spacing: 1) {
                     // The site, never truncated: it is what a phishing check reads.
                     Text(ServiceIdentity.registrable(link.host ?? "")).font(.system(size: 16, weight: .semibold))
