@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them</title>
-<meta name="description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
-<link rel="canonical" href="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
+<title>Is this sign-in link safe? How to check a magic link</title>
+<meta name="description" content="What a magic link is, how to tell a real sign-in link from a fake one before you click, and what to do if you already clicked.">
+<link rel="canonical" href="https://codecatch.app/guides/magic-link-safety/">
 <meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#100d0e" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CodeCatch">
-<meta property="og:url" content="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
-<meta property="og:title" content="Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them">
-<meta property="og:description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
+<meta property="og:url" content="https://codecatch.app/guides/magic-link-safety/">
+<meta property="og:title" content="Is this sign-in link safe? How to check a magic link">
+<meta property="og:description" content="What a magic link is, how to tell a real sign-in link from a fake one before you click, and what to do if you already clicked.">
 <meta property="og:image" content="https://codecatch.app/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch banner showing a verification code ready to paste">
+<meta property="og:image:alt" content="CodeCatch showing where a sign-in link opens">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -27,13 +27,13 @@
  "@graph": [
   {
    "@type": "TechArticle",
-   "@id": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/#article",
-   "headline": "Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them",
-   "name": "Bitwarden TOTP codes in your Mac menu bar",
-   "description": "Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.",
+   "@id": "https://codecatch.app/guides/magic-link-safety/#article",
+   "headline": "Is this sign-in link safe? How to check a magic link",
+   "name": "How to check a magic link",
+   "description": "What a magic link is, how to tell a real sign-in link from a fake one before you click, and what to do if you already clicked.",
    "image": "https://codecatch.app/assets/og.png",
-   "datePublished": "2026-10-03",
-   "dateModified": "2026-10-03",
+   "datePublished": "2026-10-06",
+   "dateModified": "2026-10-06",
    "inLanguage": "en",
    "author": {
     "@id": "https://codecatch.app/#author"
@@ -41,7 +41,7 @@
    "publisher": {
     "@id": "https://codecatch.app/#org"
    },
-   "mainEntityOfPage": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/",
+   "mainEntityOfPage": "https://codecatch.app/guides/magic-link-safety/",
    "about": {
     "@type": "SoftwareApplication",
     "name": "CodeCatch",
@@ -86,8 +86,8 @@
     {
      "@type": "ListItem",
      "position": 2,
-     "name": "Bitwarden TOTP codes in your Mac menu bar",
-     "item": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/"
+     "name": "Is this sign-in link safe? How to check a magic link",
+     "item": "https://codecatch.app/guides/magic-link-safety/"
     }
    ]
   },
@@ -96,50 +96,42 @@
    "mainEntity": [
     {
      "@type": "Question",
-     "name": "Does CodeCatch save my Bitwarden master password?",
+     "name": "Are magic links safer than passwords?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards."
+      "text": "In one way, yes: there is no password to guess, reuse or leak. But your email inbox becomes the key to the account. Protect your email with a strong password and two-step sign-in."
      }
     },
     {
      "@type": "Question",
-     "name": "Do the codes work without an internet connection?",
+     "name": "Why did I get a sign-in link I didn’t ask for?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online."
+      "text": "Someone entered your email address on that site, by mistake or on purpose. They can’t sign in without opening the link in your inbox. Don’t click it. Just delete the email."
      }
     },
     {
      "@type": "Question",
-     "name": "Is it safe to keep codes next to my passwords?",
+     "name": "How long does a magic link last?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest."
+      "text": "Usually minutes, not hours. Many expire within 10 to 30 minutes, and most work only once. If one has expired, ask the site for a new one."
      }
     },
     {
      "@type": "Question",
-     "name": "Why is the code different from the one on my phone?",
+     "name": "Can I check a link without clicking it?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on Set time and date automatically in System Settings → General → Date &amp; Time."
+      "text": "Yes. Rest the pointer on the button to see the address, or Control-click it and choose Copy Link. Then read the site name as shown above."
      }
     },
     {
      "@type": "Question",
-     "name": "A login is missing from CodeCatch. Why?",
+     "name": "Is it safe to forward a sign-in link?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use Refresh… in CodeCatch."
-     }
-    },
-    {
-     "@type": "Question",
-     "name": "I use Bitwarden’s EU server. Does it work?",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs bw logout first."
+      "text": "No. On many sites, whoever opens the link is signed in to your account. Treat it like a password."
      }
     }
    ]
@@ -168,115 +160,98 @@
 <article class="article">
   <header class="vs-hero">
     <p class="eyebrow">Guide</p>
-    <h1>Bitwarden TOTP codes in your Mac menu bar</h1>
-    <p class="lede">Four ways to get your Bitwarden two-step codes on a Mac, from the simplest to the fastest.</p>
-    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-03">Published 3 October 2026</time></span></p>
+    <h1>Is this sign-in link safe? How to check a magic link</h1>
+    <p class="lede">More and more sites email you a link instead of asking for a password. Here is how these links work, and how to check one before you click.</p>
+    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-06">Published 6 October 2026</time></span></p>
   </header>
   <div class="feature-art article-art" aria-hidden="true">
     <div class="cc">
-      <div class="popover floating">
-        <div class="popover-head"><svg class="mark" viewBox="208 208 608 608"><use href="#mark"/></svg><b>CodeCatch</b></div>
-        <div class="search"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg><span class="typed">git</span></div>
-        <ul class="rows">
-          <li class="row"><div class="tile s32"><img src="/assets/services/github.svg" alt="" loading="lazy"><img class="badge" src="/assets/services/bitwarden.png" alt="" loading="lazy"></div><div class="row-who"><b>GitHub <svg class="pin" viewBox="0 0 24 24"><use href="#i-pin"/></svg></b><span>you@example.com · Bitwarden</span></div><svg class="ring s14" viewBox="0 0 22 22" style="--p:.6"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg><span class="row-code">318 842</span></li>
-        </ul>
+      <div class="card floating">
+        <div class="card-head"><div class="tile  bleed"><img src="/assets/services/notion.png" alt="" loading="lazy"><img class="badge" src="/assets/services/mail.png" alt="" loading="lazy"></div><div class="card-who"><b>Notion</b><span>Personal</span></div><span class="card-age">2 min</span></div>
+        <div class="well"><span class="link-text"><b>sign-in.example</b><span>notion.so.sign-in.example/verify</span></span></div>
+        <p class="warning"><svg viewBox="0 0 24 24"><use href="#i-warning"/></svg>Opens sign-in.example, not notion.so. Check it before you sign in.</p>
       </div>
     </div>
   </div>
   <div class="prose">
-    <p>Bitwarden can hold the keys for your two-step codes and make the six-digit codes for you. On a Mac there are four ways to get at them. The first three need nothing but Bitwarden.</p>
-    <p class="callout">Bitwarden stores authenticator keys on every plan. Showing the codes needs Premium or a paid organisation plan, according to <a href="https://bitwarden.com/help/integrated-authenticator/" rel="noopener">Bitwarden’s help page</a>.</p>
+    <p>You type your email, and the site says “Check your inbox.” A moment later an email arrives with a button: <b>Sign in</b>, <b>Log in to Slack</b> or <b>Confirm it’s you</b>. That button is a magic link. Click it, and you are in.</p>
 
-    <h2>At a glance</h2>
-    <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">Extension</th><th scope="col">Desktop app</th><th scope="col">Command line</th><th scope="col">CodeCatch</th></tr></thead><tbody>
-<tr><th scope="row">Works in</th><td>The browser</td><td>Any app</td><td>Terminal</td><td>Any app</td></tr>
-<tr><th scope="row">Steps per code</th><td>None, it copies as it fills</td><td>Open app, find login, copy</td><td>Type a command</td><td>Shortcut, type a name, Return</td></tr>
-<tr><th scope="row">Where the keys live</th><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden and your Mac’s Keychain</td></tr>
-<tr><th scope="row">Works offline</th><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>Yes</td></tr>
-</tbody></table></div>
+    <p class="callout"><b>Short answer:</b> only click a sign-in link you just asked for. Before you click, check that it opens the site you are signing in to. If either is off, don’t click. Go to the site yourself and ask for a new link.</p>
 
-    <h2>How these codes work</h2>
-    <p>When you turn on two-step sign-in, the service gives you a secret key, usually as a QR code. An authenticator mixes that key with the current time and gets a six-digit code that changes every 30 seconds. Anything that holds the key can make the code: your phone, Bitwarden, or CodeCatch.</p>
+    <h2>What a magic link is</h2>
+    <p>A magic link is a sign-in link with a secret, one-time key inside it. Only your inbox gets the email, so opening the link proves the inbox is yours. That replaces the password.</p>
+    <ul class="ticks plain">
+      <li>It usually works once.</li>
+      <li>It expires quickly, often within 10 to 30 minutes.</li>
+      <li>On many sites, whoever opens it is signed in. So never forward one, and never share a screenshot of it.</li>
+    </ul>
+    <p>Sites call them different things: magic links, sign-in links, login links, “one-time links” or “Is this you?” emails. They all work the same way.</p>
 
-    <h2>1. The browser extension</h2>
-    <p>This is the least work. When the extension fills your username and password, it also copies the code. Press <kbd>⌘</kbd><kbd>V</kbd> in the code field.</p>
-    <p>If nothing is copied, open the extension and check <b>Settings → Autofill → Copy TOTP automatically</b>. Bitwarden says it is on by default.</p>
+    <h2>Why fake ones work</h2>
+    <p>People expect these emails and click them fast. A fake one looks the same, but its button opens a copy of the real site. That copy asks for your password, a code or your card. Whatever you type goes to whoever made it.</p>
 
-    <h2>2. The desktop app</h2>
-    <p>Open the login in the Bitwarden app. The code is shown inside the item, counting down. Click it to copy.</p>
-    <p>This works for sign-ins outside the browser, but it means switching apps and searching each time.</p>
-
-    <h2>3. The command line</h2>
-    <p>With the <a href="https://bitwarden.com/help/cli/" rel="noopener">Bitwarden CLI</a> installed and unlocked:</p>
-    <pre><code>bw get totp github.com</code></pre>
-    <p>It prints the current code. Useful in scripts, less so when a code expires in 30 seconds.</p>
-
-    <h2>4. The menu bar, with CodeCatch</h2>
-    <p>CodeCatch puts your Bitwarden codes in the menu bar next to the codes you get by text and email. Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>F</kbd>, type a name, press Return, and the code is copied.</p>
+    <h2>How to check a sign-in link in five steps</h2>
     <ol class="numbered">
-      <li>Install the Bitwarden CLI: <code>brew install bitwarden-cli</code></li>
-      <li>Sign in once in Terminal: <code>bw login</code></li>
-      <li>In CodeCatch, open <b>Settings → Sources → Bitwarden → Set Up…</b> It checks each step for you.</li>
-      <li>Enter your master password, review the list of logins, and save.</li>
+      <li><b>Did you just ask for it?</b> If you did not just try to sign in, don’t click. Someone typed your email address, by mistake or on purpose. Without the link they can’t get in, so ignore the email.</li>
+      <li><b>Check the sender’s address, not the name.</b> The name can say anything. Look at the address after the @.</li>
+      <li><b>See where the button goes, without clicking.</b> In most mail apps, rest the pointer on the button and the address appears. In Gmail in a browser, it shows in the bottom corner of the window. Or Control-click the button, choose <b>Copy Link</b> and paste it into a note.</li>
+      <li><b>Read the site name the right way.</b> Find the first single slash after <code>https://</code>. The site is what comes just before it, read from the right. See the examples below.</li>
+      <li><b>After you click, look before you type.</b> A real magic link signs you in. If the page asks for your password or card instead, close it.</li>
     </ol>
-    <p>After you change two-step logins in Bitwarden, use <b>Refresh…</b> in the same place.</p>
 
-    <p>Once it is set up:</p>
-    <ul class="ticks">
-      <li><b>Search</b> by service, account or site.</li>
-      <li><b>Pin</b> the logins you use most, so they sit at the top.</li>
-      <li><b>See the time left</b> on each code before it changes.</li>
-      <li><b>Steam codes</b> work too.</li>
+    <h2>Reading a link: real or not?</h2>
+    <p>The site is the last two parts of the name before the first single slash. For addresses like <code>bank.co.uk</code>, it is the last three.</p>
+    <p>Say you asked Notion for a sign-in link:</p>
+    <ul class="ticks plain">
+      <li><code>https://www.notion.so/loginwithemail?token=…</code> opens <b>notion.so</b>. That’s Notion.</li>
+      <li><code>https://notion.so.sign-in.example/verify</code> opens <b>sign-in.example</b>. “notion.so” is only the start of the name.</li>
+      <li><code>https://notion-so.com/login</code> opens <b>notion-so.com</b>. A lookalike name.</li>
+      <li><code>https://example.com/r?u=notion.so</code> opens <b>example.com</b>. Notion only appears after the slash.</li>
+    </ul>
+    <p>One honest catch: some real emails send links through a mailing service first, so the address can look unrelated even when the email is genuine. You can’t tell these apart by looking. When you are not sure, open the site yourself and ask for a new link.</p>
+
+    <h2>If you already clicked</h2>
+    <ul class="ticks plain">
+      <li><b>You typed nothing:</b> close the page. Opening a page alone rarely does harm.</li>
+      <li><b>You typed a password:</b> change it on the real site now, and anywhere else you use it. Turn on two-step sign-in.</li>
+      <li><b>You typed a code or card details:</b> contact the service or your bank, and check the account for devices or payments you don’t know.</li>
     </ul>
 
-    <h2>If setup gets stuck</h2>
+    <h2 id="codecatch">How CodeCatch helps on a Mac</h2>
+    <p>I built CodeCatch to catch sign-in codes, and sign-in links come with the same chore. It reads your Apple Mail, Gmail and other mail, and shows each new sign-in link next to your codes. You see the site it opens before you decide.</p>
     <ul class="ticks">
-      <li><b>“bw: command not found”.</b> The Bitwarden CLI is not installed. Run <code>brew install bitwarden-cli</code>, or get it from Bitwarden’s site.</li>
-      <li><b>“You are not logged in”.</b> Run <code>bw login</code> in Terminal. It also handles your two-step login for Bitwarden itself.</li>
-      <li><b>Wrong server.</b> If your account is on bitwarden.eu, pick it in the server step. Switching needs <code>bw logout</code> first.</li>
-      <li><b>Changed something in Bitwarden?</b> Use <b>Refresh…</b> You see what was added, changed and removed before it is saved.</li>
+      <li>It never opens a link by itself. You click <b>Open Link</b> or <b>Copy Link</b>.</li>
+      <li>It shows the site the link opens, read the right way.</li>
+      <li>If that site differs from the sender’s address, it warns you, as in the picture above.</li>
+      <li>It picks the sign-in button only, not unsubscribe or help links, and only secure <code>https</code> links.</li>
+      <li>Password reset links get the same check.</li>
     </ul>
+    <p>It is a hint, not a guarantee. The warning compares the link with the sender’s address, and a sender’s address can be faked. Step 1 still matters most: only click links you asked for.</p>
 
-    <h2>What CodeCatch keeps, and the trade-off</h2>
-    <ul class="ticks">
-      <li>It saves each login’s name, username, site and authenticator key in your Mac’s login Keychain.</li>
-      <li>Codes are made on your Mac. No connection is needed.</li>
-      <li>Codes stay hidden until you unlock with Touch ID or your Mac password, and lock again on sleep.</li>
-      <li><b>Remove Saved Import</b> deletes the saved keys.</li>
-    </ul>
-    <p>The trade-off is plain: a copy of your authenticator keys now lives on this Mac, outside Bitwarden. If you would rather keep them only in your vault, use one of the first three ways.</p>
-
-    <h2>Which one to use</h2>
-    <ul class="ticks">
-      <li><b>Mostly in the browser:</b> the extension.</li>
-      <li><b>Now and then, anywhere:</b> the desktop app.</li>
-      <li><b>In scripts:</b> the command line.</li>
-      <li><b>All day, in any app, with your text and email codes in one place:</b> CodeCatch.</li>
-    </ul>
     <h2>Questions</h2>
     <div class="faq-list">
-      <details><summary>Does CodeCatch save my Bitwarden master password?</summary><p>No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards.</p></details>
-      <details><summary>Do the codes work without an internet connection?</summary><p>Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online.</p></details>
-      <details><summary>Is it safe to keep codes next to my passwords?</summary><p>It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest.</p></details>
-      <details><summary>Why is the code different from the one on my phone?</summary><p>Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on <b>Set time and date automatically</b> in System Settings → General → Date &amp; Time.</p></details>
-      <details><summary>A login is missing from CodeCatch. Why?</summary><p>Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use <b>Refresh…</b> in CodeCatch.</p></details>
-      <details><summary>I use Bitwarden’s EU server. Does it work?</summary><p>Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs <code>bw logout</code> first.</p></details>
+      <details><summary>Are magic links safer than passwords?</summary><p>In one way, yes: there is no password to guess, reuse or leak. But your email inbox becomes the key to the account. Protect your email with a strong password and two-step sign-in.</p></details>
+      <details><summary>Why did I get a sign-in link I didn’t ask for?</summary><p>Someone entered your email address on that site, by mistake or on purpose. They can’t sign in without opening the link in your inbox. Don’t click it. Just delete the email.</p></details>
+      <details><summary>How long does a magic link last?</summary><p>Usually minutes, not hours. Many expire within 10 to 30 minutes, and most work only once. If one has expired, ask the site for a new one.</p></details>
+      <details><summary>Can I check a link without clicking it?</summary><p>Yes. Rest the pointer on the button to see the address, or Control-click it and choose Copy Link. Then read the site name as shown above.</p></details>
+      <details><summary>Is it safe to forward a sign-in link?</summary><p>No. On many sites, whoever opens the link is signed in to your account. Treat it like a password.</p></details>
     </div>
   </div>
 </article>
 <section class="cta">
   <img src="/assets/icon-256.png" width="96" height="96" alt="CodeCatch app icon" loading="lazy">
-  <h2>Try CodeCatch.</h2>
-  <p>Your next code, ready to paste.</p>
+  <h2>See where a link goes before you click.</h2>
+  <p>CodeCatch shows sign-in links and codes from your mail in one place.</p>
   <div class="actions">
     <a class="button" href="/download/CodeCatch.dmg" data-download>
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
 </section>
 </main>
+
 
 <footer class="footer">
   <div class="footer-top">
@@ -316,7 +291,7 @@
   </div>
   <div class="footer-bottom">
     <p>© 2026 CodeCatch</p>
-    <p>Bitwarden is a trademark of Bitwarden Inc. CodeCatch is not affiliated with it.</p>
+    <p>CodeCatch is not affiliated with Apple, Google or Notion.</p>
   </div>
 </footer>
 

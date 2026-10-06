@@ -438,7 +438,7 @@ section[id] { scroll-margin-top: 60px; }
 .prose a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand-2) 60%, transparent); text-underline-offset: 3px; }
 .prose a:hover { text-decoration-color: var(--brand-2); }
 .prose b { color: var(--text); font-weight: 620; }
-.prose code { padding: 2px 6px; border-radius: 6px; background: var(--tint); font: 0.9em ui-monospace, "SF Mono", Menlo, monospace; }
+.prose code { overflow-wrap: anywhere; padding: 2px 6px; border-radius: 6px; background: var(--tint); font: 0.9em ui-monospace, "SF Mono", Menlo, monospace; }
 .prose pre { margin: 0; padding: 14px 16px; border-radius: 14px; background: var(--tint); overflow-x: auto; }
 .prose pre code { padding: 0; background: none; }
 .prose-table { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
