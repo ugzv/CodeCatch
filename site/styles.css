@@ -425,7 +425,7 @@ section[id] { scroll-margin-top: 60px; }
 .fine a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
 .fine a:hover { color: var(--text); }
 
-/* Articles: guides, privacy, changelog, about */
+/* Articles: guides, privacy, changelog */
 .article { padding: 0 max(20px, calc((100vw - 1120px) / 2)) 96px; }
 .article .vs-hero { padding: 72px 0 32px !important; }
 .article-art { min-height: 0; max-width: 760px; padding: 36px 20px; margin-bottom: 40px; }
@@ -462,17 +462,16 @@ section[id] { scroll-margin-top: 60px; }
 .numbered li::before { content: counter(n); position: absolute; left: 0; top: 0.1em; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); color: #fff; font-size: 13px; font-weight: 700; }
 .search .typed { color: var(--text); }
 
-/* About: the homepage's blocks, with the app's rows and settings panel as the visuals. */
+/* Article blocks: the homepage's feature layout, with the app's settings panel as the visual. */
 .about-hero { padding-bottom: 8px !important; }
 .about-hero .lede { max-width: 700px; }
 .about-blocks { padding-top: 56px !important; padding-bottom: 96px !important; }
-.brandtile { display: grid; place-items: center; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); color: #fff; font-size: 18px; box-shadow: 0 0.500px 1px rgba(0, 0, 0, 0.14); }
 .about-facts { padding-top: 6px; }
 .value { flex: none; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .principles { display: grid; gap: 14px; padding-top: 88px !important; padding-bottom: 96px !important; border-top: 1px solid var(--line); }
 .principles h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 720; }
 .principles .points { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 48px; margin-top: 14px; max-width: 980px; }
-.principles a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand-2) 60%, transparent); text-underline-offset: 3px; }
+.principles a, .why a, .faq a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand-2) 60%, transparent); text-underline-offset: 3px; }
 .principles .fine { margin-top: 10px; }
 .principles .fine a { color: var(--muted); }
 
@@ -547,6 +546,12 @@ section[id] { scroll-margin-top: 60px; }
 .switch[data-on] { background: var(--accent); cursor: default; }
 .switch[data-on]::after { transform: translateX(14px); }
 .set-text b { display: flex; align-items: center; gap: 6px; }
+/* Why: the hunt across apps, then the one row CodeCatch shows instead. */
+.why { padding-top: 88px !important; padding-bottom: 96px !important; border-top: 1px solid var(--line); }
+.why .tile { --size: 26px; }
+.why .hunt li { opacity: 0.72; }
+.why .set-title .mark { margin-right: 6px; vertical-align: -2px; }
+.state { flex: none; color: var(--faint); font-size: 11px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #34c759; }
 
 /* FAQ */
@@ -601,6 +606,7 @@ section[id] { scroll-margin-top: 60px; }
   .compare td.us::before { color: var(--red); }
   .compare .yes { display: none; }
   .privacy { padding-bottom: 72px !important; }
+  .why { padding-top: 72px !important; padding-bottom: 72px !important; }
   .nav nav { display: none; }
   .nav .button { margin-left: auto; }
   .footer-top { grid-template-columns: minmax(0, 1fr); gap: 36px; }

@@ -51,7 +51,7 @@
    ],
    "@id": "https://codecatch.app/#app",
    "author": {
-    "@id": "https://codecatch.app/about/#author"
+    "@id": "https://codecatch.app/#author"
    },
    "publisher": {
     "@id": "https://codecatch.app/#org"
@@ -79,14 +79,14 @@
     "height": 512
    },
    "founder": {
-    "@id": "https://codecatch.app/about/#author"
+    "@id": "https://codecatch.app/#author"
    }
   },
   {
    "@type": "Person",
-   "@id": "https://codecatch.app/about/#author",
+   "@id": "https://codecatch.app/#author",
    "name": "Uros Gazvoda",
-   "url": "https://codecatch.app/about/",
+   "url": "https://codecatch.app/#why",
    "sameAs": [
     "https://github.com/ugzv"
    ]
@@ -140,6 +140,14 @@
      "acceptedAnswer": {
       "@type": "Answer",
       "text": "macOS 15 or later, on Apple silicon or Intel. To get SMS codes on your Mac, turn on Text Message Forwarding on your iPhone."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "What if CodeCatch misses a code?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Report it on GitHub. Send the message with the code replaced by another number. It becomes a test, so the next version catches it."
      }
     }
    ]
@@ -423,6 +431,31 @@
   </div>
 </section>
 
+<section id="why" class="why feature flip">
+  <div class="feature-copy">
+    <p class="eyebrow">Why it exists</p>
+    <h2>I got tired of hunting for codes</h2>
+    <p>Every sign-in was the same chore. Wait for the code. Pick up my phone. Check Messages, then each of my mail accounts. The Mac’s own code autofill helped sometimes, but too often it never showed up.</p>
+    <p>So I built the app I wanted: one place on my Mac where every code shows up the moment it arrives. I’m Uros Gazvoda, and I build CodeCatch on my own. Every change is <a href="https://github.com/ugzv/CodeCatch" rel="noopener">on GitHub</a>, with the reason for it.</p>
+  </div>
+  <div class="feature-art" aria-hidden="true">
+    <div class="cc">
+      <div class="settings floating">
+        <p class="set-title">Before: where was that code?</p>
+        <ul class="set-group hunt">
+          <li><div class="tile bleed"><img src="/assets/services/messages.png" alt="" loading="lazy"></div><span class="set-text"><b>Messages</b><span>Still on your iPhone</span></span><span class="state">Waiting</span></li>
+          <li><div class="tile"><img src="/assets/services/gmail.png" alt="" loading="lazy"></div><span class="set-text"><b>Gmail</b><span>Personal · 12 unread</span></span><span class="state">Not here</span></li>
+          <li><div class="tile bleed"><img src="/assets/services/mail.png" alt="" loading="lazy"></div><span class="set-text"><b>Mail</b><span>Work · Spam</span></span><span class="state">Not here</span></li>
+        </ul>
+        <p class="set-title"><svg class="mark" viewBox="208 208 608 608"><use href="#mark"/></svg>With CodeCatch</p>
+        <ul class="set-group solid">
+          <li><div class="tile bleed"><img src="/assets/services/paypal.png" alt="" loading="lazy"><img class="badge" src="/assets/services/messages.png" alt="" loading="lazy"></div><span class="set-text"><b>PayPal</b><span>Messages · now · Copied</span></span><span class="value">729 351</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="compare" class="compare">
   <p class="eyebrow">How it compares</p>
   <h2>What your Mac already does, and what it doesn’t</h2>
@@ -518,6 +551,10 @@
     <summary>What does CodeCatch need to run?</summary>
     <p>macOS 15 or later, on Apple silicon or Intel. To get SMS codes on your Mac, turn on Text Message Forwarding on your iPhone.</p>
   </details>
+  <details>
+    <summary>What if CodeCatch misses a code?</summary>
+    <p><a href="https://github.com/ugzv/CodeCatch/issues/new?template=bug_report.yml" rel="noopener">Report it on GitHub</a>. Send the message with the code replaced by another number. It becomes a test, so the next version catches it.</p>
+  </details>
 </section>
 
 <section class="cta">
@@ -562,7 +599,7 @@
       </div>
       <div>
         <h2>About</h2>
-        <a href="/about/">Who makes it</a>
+        <a href="/#why">Who makes it</a>
         <a href="/privacy/">Privacy</a>
         <a href="/changelog/">Changelog</a>
         <a href="https://github.com/ugzv/CodeCatch/issues/new?template=bug_report.yml" rel="noopener">Report a bug</a>
