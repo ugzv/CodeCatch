@@ -13,6 +13,11 @@ struct PrivacyTab: View {
 
     var body: some View {
         Form {
+            Section("Unlock") {
+                SettingRow(symbol: "lock.open.fill", color: .green, title: "Unlock with Your Mac",
+                           info: "CodeCatch unlocks whenever your Mac does, without asking for \(DeviceAuthentication.unlockMethods). Anyone using your unlocked Mac can see your codes, Bitwarden codes too.",
+                           isOn: Binding(get: { model.monitoring(Prefs.unlockWithMac) }, set: { model.setUnlockWithMac($0) }))
+            }
             Section("On Screen") {
                 SettingRow(symbol: "rectangle.dashed.badge.record", color: .red, title: "Hide from Screen Capture",
                            info: "CodeCatch windows stay out of Zoom, Meet and screenshots.", isOn: $hideFromCapture)

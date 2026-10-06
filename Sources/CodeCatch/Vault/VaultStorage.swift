@@ -9,7 +9,10 @@ enum VaultStorage {
 
     static func session(defaults: UserDefaults = .standard) -> VaultSession {
         let authentication = DeviceAuthentication()
-        let session = VaultSession(authenticate: { try await authentication.authenticate() }, read: {
+        let session = VaultSession(authenticate: {
+            // "Unlock with Your Mac": being past the Mac's own lock screen is enough.
+            if !defaults.bool(forKey: Prefs.unlockWithMac) { try await authentication.authenticate() }
+        }, read: {
             guard defaults.bool(forKey: Prefs.bitwarden) else { return [] }
             guard let json = try Secrets.read(key) else { return [] }
             return try JSONDecoder().decode([VaultCode].self, from: Data(json.utf8))

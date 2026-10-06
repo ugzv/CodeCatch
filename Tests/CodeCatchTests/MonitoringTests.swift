@@ -68,6 +68,16 @@ private func monitoringMessage() -> IncomingMessage {
         }
     }
 
+    /// Turning "Unlock with Your Mac" off must hide codes now, not at the next sleep.
+    @Test func turningOffUnlockWithMacLocksAtOnce() async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        fixture.model.setUnlockWithMac(true)
+        try await fixture.model.authenticate()
+        fixture.model.setUnlockWithMac(false)
+        #expect(!fixture.model.isUnlocked)
+    }
+
     @Test(arguments: [(true, true), (true, false), (false, true), (false, false)])
     func ingestionDoesNotLeakDisabledPortionsOfMixedMail(codes: Bool, links: Bool) throws {
         let fixture = try MonitoringFixture()

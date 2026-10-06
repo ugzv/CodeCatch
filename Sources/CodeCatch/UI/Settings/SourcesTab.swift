@@ -129,7 +129,9 @@ struct SourcesTab: View {
     }
 
     private var aboutBitwarden: String {
-        let about = "Shows Bitwarden codes for your saved logins. Codes are made on this Mac and stay hidden until you unlock with \(DeviceAuthentication.unlockMethods)."
+        let shown = model.monitoring(Prefs.unlockWithMac) ? "show whenever your Mac is unlocked"
+            : "stay hidden until you unlock with \(DeviceAuthentication.unlockMethods)"
+        let about = "Shows Bitwarden codes for your saved logins. Codes are made on this Mac and \(shown)."
         return model.hasVault ? about + " Turning this off hides the codes and keeps them saved. It also locks CodeCatch." : about
     }
 

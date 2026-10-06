@@ -95,6 +95,7 @@ final class AppModel: ObservableObject {
             Task { @MainActor in
                 self?.restartMessages()
                 self?.restartMail()
+                self?.unlockWithMac()
             }
         }
         center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
@@ -109,6 +110,10 @@ final class AppModel: ObservableObject {
                 Clipboard.clearIfOurs()
             }
         }
+        DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.unlockWithMac() }
+        }
+        unlockWithMac()
         LoginItem.sync()
         Hotkeys.sync()
         monitor.start(accounts: accounts)
@@ -281,6 +286,24 @@ final class AppModel: ObservableObject {
     func unlocked(_ action: @escaping @MainActor () -> Void) -> Task<Void, Never>? {
         if isUnlocked { action(); return nil }
         return Task { if (try? await authenticate()) != nil { action() } }
+    }
+
+    /// "Unlock with Your Mac": unlocks without a prompt at launch, on wake and when the screen unlocks.
+    func unlockWithMac() {
+        guard monitoring(Prefs.unlockWithMac), !isUnlocked, !Self.screenIsLocked else { return }
+        Task { try? await authenticate() }
+    }
+
+    /// Turning the setting on unlocks now; turning it off locks now.
+    func setUnlockWithMac(_ enabled: Bool) {
+        objectWillChange.send()
+        defaults.set(enabled, forKey: Prefs.unlockWithMac)
+        if enabled { unlockWithMac() } else { vaultSession.lock() }
+    }
+
+    /// On wake the lock screen may still be up; codes wait for it.
+    private static var screenIsLocked: Bool {
+        (CGSessionCopyCurrentDictionary() as? [String: Any])?["CGSSessionScreenIsLocked"] as? Bool ?? false
     }
 
     /// Every unlock goes through here, so a failure is shown wherever the click came from.
