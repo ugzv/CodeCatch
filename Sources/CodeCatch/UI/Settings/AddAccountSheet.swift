@@ -28,10 +28,16 @@ struct AddAccountSheet: View {
                     .font(.callout).foregroundStyle(.secondary)
             }
             VStack(spacing: 0) {
-                row(icon: AnyView(googleLogo), name: "Google",
+                row(icon: AnyView(logo("google.com", fallback: "g.circle.fill", color: .red)), name: "Google",
                     detail: "Gmail and Google Workspace · Sign in with Google (beta) or an app password") {
                     dismiss()
                     edit(MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: ""))
+                }
+                Divider().padding(.leading, 52)
+                row(icon: AnyView(logo("microsoft.com", fallback: "m.circle.fill", color: .blue)), name: "Microsoft",
+                    detail: "Outlook, Hotmail and Microsoft 365 · Sign in with Microsoft (beta)") {
+                    dismiss()
+                    edit(MailAccount(label: "Outlook", host: MailAccount.outlookHost, user: ""))
                 }
                 ForEach(others, id: \.name) { provider in
                     Divider().padding(.leading, 52)
@@ -53,13 +59,13 @@ struct AddAccountSheet: View {
         .frame(width: 460)
     }
 
-    private var googleLogo: some View {
+    private func logo(_ domain: String, fallback: String, color: Color) -> some View {
         Group {
-            if let logo = icons.icon(for: "google.com") {
+            if let logo = icons.icon(for: domain) {
                 Image(nsImage: logo.image).resizable().interpolation(.high).scaledToFit().padding(4)
                     .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(.white))
             } else {
-                IconTile(symbol: "g.circle.fill", color: .red).scaleEffect(1.3)
+                IconTile(symbol: fallback, color: color).scaleEffect(1.3)
             }
         }
         .frame(width: 28, height: 28)

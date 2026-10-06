@@ -28,8 +28,8 @@ final class SourceMonitor: ObservableObject {
         self.defaults = defaults
         Prefs.register(in: defaults)
         self.watchMail = watchMail ?? { account, callbacks in
-            if account.usesGoogle {
-                await GmailWatcher.watch(account, status: callbacks.status, deliver: callbacks.deliver,
+            if account.usesSignIn {
+                await APIWatcher.watch(account, status: callbacks.status, deliver: callbacks.deliver,
                                          event: callbacks.event, lookback: Prefs.history(in: defaults))
             } else {
                 await MailWatcher.watch(account, status: callbacks.status, deliver: callbacks.deliver,

@@ -9,20 +9,20 @@ enum Probe {
         "--probe-apple-mail": appleMail, "--probe-messages": messages, "--probe-links": links,
     ]
 
-    /// Checks Google sign-in without a consent: the built-in client is accepted without a secret,
-    /// and the Gmail API refuses a bad token instead of hanging.
+    /// Checks Google and Microsoft sign-in without a consent: the built-in clients are accepted without a
+    /// secret, the mail APIs refuse a bad token instead of hanging, and signed-in accounts can read their inbox.
     static func google() async {
-        do { _ = try await GoogleOAuth.accessToken(refresh: "invalid-refresh-token") } catch {
-            print("Token endpoint with a bogus refresh token: \(error.localizedDescription)")
-        }
-        do { _ = try await GmailAPI(refreshToken: "invalid-refresh-token").emailAddress() } catch {
+        do { _ = try await GmailAPI(auth: .issued("invalid-token")).emailAddress() } catch {
             print("Gmail API with a bogus token: \(error.localizedDescription)")
         }
-        for account in MailAccount.load() where account.usesGoogle {
+        do { _ = try await OutlookAPI(auth: .issued("invalid-token")).emailAddress() } catch {
+            print("Graph API with a bogus token: \(error.localizedDescription)")
+        }
+        for account in MailAccount.load() where account.usesSignIn {
+            let api = APIWatcher.api(for: account)
             do {
-                let api = try GmailAPI(account: account)
                 let recent = try await api.inbox(since: Date().addingTimeInterval(-86400), limit: 5)
-                print("\(account.label): \(try await api.emailAddress()), \(recent.count) inbox mails today")
+                print("\(account.label): \(recent.count) inbox mails today, cursor \(try await api.cursor().prefix(24))")
             } catch { print("\(account.label): \(error.localizedDescription)") }
         }
     }

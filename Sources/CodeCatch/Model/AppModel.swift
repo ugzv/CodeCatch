@@ -208,10 +208,10 @@ final class AppModel: ObservableObject {
         var account = account
         if let refreshToken {
             try setSecret(refreshToken, account.refreshTokenKey)
-            account.googleSignIn = true
-        } else if !account.usesGoogle {
+            account.signedIn = true
+        } else if !account.usesSignIn {
             if !password.isEmpty { try setSecret(password, account.secretKey) }
-            try forgetGoogleSignIn(account, removeSecret)
+            try forgetSignIn(account, removeSecret)
         }
         save(account)
     }
@@ -220,7 +220,7 @@ final class AppModel: ObservableObject {
         guard let saved = accounts.first(where: { $0.id == account.id }) else { return }
         if !accounts.contains(where: { $0.id != saved.id && $0.secretKey == saved.secretKey }) {
             try removeSecret(saved.secretKey)
-            try forgetGoogleSignIn(saved, removeSecret)
+            try forgetSignIn(saved, removeSecret)
         }
         accounts.removeAll { $0.id == saved.id }
     }
@@ -229,14 +229,15 @@ final class AppModel: ObservableObject {
     func removeUnusedCredentials(for account: MailAccount, removeSecret: (String) throws -> Void = Secrets.remove) throws {
         guard !accounts.contains(where: { $0.secretKey == account.secretKey }) else { return }
         try removeSecret(account.secretKey)
-        try forgetGoogleSignIn(account, removeSecret)
+        try forgetSignIn(account, removeSecret)
     }
 
-    /// A Google sign-in CodeCatch forgets also ends on Google's side, once it is gone from the Keychain.
-    private func forgetGoogleSignIn(_ account: MailAccount, _ removeSecret: (String) throws -> Void) throws {
+    /// A sign-in CodeCatch forgets also ends on the provider's side, once it is gone from the Keychain.
+    private func forgetSignIn(_ account: MailAccount, _ removeSecret: (String) throws -> Void) throws {
         let token = Secrets.get(account.refreshTokenKey)
         try removeSecret(account.refreshTokenKey)
-        if let token { Task { await GoogleOAuth.revoke(token) } }
+        OAuth.forgetAccessToken(tokenKey: account.refreshTokenKey)
+        if let token, let provider = account.provider { Task { await provider.revoke(token) } }
     }
 
     // MARK: - Codes

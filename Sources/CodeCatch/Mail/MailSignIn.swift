@@ -7,10 +7,13 @@ final class MailSignIn: ObservableObject {
     @Published private(set) var isBusy = false
     @Published private var credential: (key: String, token: String)?
     private var generation = 0
-    private var task: Task<GoogleOAuth.Grant, Error>?
-    private let authenticate: (String) async throws -> GoogleOAuth.Grant
+    private var task: Task<OAuth.Grant, Error>?
+    private let authenticate: (MailAccount) async throws -> OAuth.Grant
 
-    init(authenticate: @escaping (String) async throws -> GoogleOAuth.Grant = { try await GoogleOAuth.signIn(email: $0) }) {
+    init(authenticate: @escaping (MailAccount) async throws -> OAuth.Grant = {
+        guard let provider = $0.provider else { throw OAuth.Failure.denied("this server has no sign-in") }
+        return try await provider.signIn(email: $0.user)
+    }) {
         self.authenticate = authenticate
     }
 
@@ -25,7 +28,7 @@ final class MailSignIn: ObservableObject {
         let request = generation
         isBusy = true
         let authenticate = self.authenticate
-        let task = Task { try await authenticate(account.user) }
+        let task = Task { try await authenticate(account) }
         self.task = task
         defer {
             if request == generation { isBusy = false; self.task = nil }

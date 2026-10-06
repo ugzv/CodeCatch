@@ -7,24 +7,34 @@ struct MailAccount: Codable, Identifiable, Hashable {
     var port = 993
     var user: String
     var enabled = true
-    /// Signed in with Google (read through the Gmail API) instead of an app password. Optional so older saved accounts still decode.
-    var googleSignIn: Bool?
+    /// Signed in with the provider (Google or Microsoft, by host) and read through its API instead of IMAP.
+    /// Optional so older saved accounts still decode.
+    var signedIn: Bool?
+
+    /// `signedIn` is saved under its first name, from when only Google had sign-in.
+    private enum CodingKeys: String, CodingKey { case id, label, host, port, user, enabled, signedIn = "googleSignIn" }
 
     var secretKey: String { "\(user.lowercased())@\(host.lowercased())" }
     var password: String? { Secrets.get(secretKey) }
+    /// Where the sign-in's refresh token is kept; the suffix predates Microsoft sign-in.
     var refreshTokenKey: String { secretKey + "#google" }
-    var usesGoogle: Bool { googleSignIn == true }
-    var hasCredential: Bool { usesGoogle ? Secrets.get(refreshTokenKey) != nil : password != nil }
+    var usesSignIn: Bool { signedIn == true }
+    var hasCredential: Bool { usesSignIn ? Secrets.get(refreshTokenKey) != nil : password != nil }
     var isGmail: Bool { [Self.gmailHost, "imap.googlemail.com"].contains(host.lowercased()) }
+    var isOutlook: Bool { [Self.outlookHost, "imap-mail.outlook.com"].contains(host.lowercased()) }
+    /// Who this account can sign in with.
+    var provider: OAuth? { isGmail ? .google : isOutlook ? .microsoft : nil }
 
     static let gmailHost = "imap.gmail.com"
+    static let outlookHost = "outlook.office365.com"
     static let appPasswordHelp = URL(string: "https://support.google.com/accounts/answer/185833")!
 
     static func guess(for user: String) -> MailAccount {
         let domain = user.split(separator: "@").last.map(String.init)?.lowercased() ?? ""
         let gmail = ["gmail.com", "googlemail.com"].contains(domain)
-        return MailAccount(label: gmail ? "Gmail" : (domain.split(separator: ".").first.map { $0.capitalized } ?? domain),
-                           host: gmail ? gmailHost : "imap.\(domain)", user: user)
+        let outlook = ["outlook.com", "hotmail.com", "live.com", "msn.com"].contains(domain)
+        return MailAccount(label: gmail ? "Gmail" : outlook ? "Outlook" : (domain.split(separator: ".").first.map { $0.capitalized } ?? domain),
+                           host: gmail ? gmailHost : outlook ? outlookHost : "imap.\(domain)", user: user)
     }
 
     private static let storeKey = "mailAccounts"

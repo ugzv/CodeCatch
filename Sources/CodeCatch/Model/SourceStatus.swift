@@ -7,8 +7,8 @@ enum SourceStatus: Equatable {
 
     /// What a local store reports until the app is allowed to read it.
     static let needsDiskAccess = "Needs Full Disk Access"
-    /// What a Gmail account reports when Google no longer accepts its sign-in.
-    static let googleSignInExpired = "Google sign-in expired — sign in again"
+    /// What a signed-in mail account reports when its provider no longer accepts the sign-in.
+    static let signInExpired = "Sign-in expired — sign in again"
 
     var needsAttention: Bool {
         switch self {

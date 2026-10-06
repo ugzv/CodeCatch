@@ -6,7 +6,7 @@ import Testing
 @MainActor private final class ControlledMailAuthentication {
     struct Request {
         let user: String
-        let completion: CheckedContinuation<GoogleOAuth.Grant, Error>
+        let completion: CheckedContinuation<OAuth.Grant, Error>
     }
 
     let requests: AsyncStream<Request>
@@ -16,7 +16,7 @@ import Testing
         (requests, continuation) = AsyncStream.makeStream()
     }
 
-    func authenticate(_ user: String) async throws -> GoogleOAuth.Grant {
+    func authenticate(_ user: String) async throws -> OAuth.Grant {
         try await withCheckedThrowingContinuation { completion in
             continuation.yield(Request(user: user, completion: completion))
         }
@@ -39,7 +39,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     @Test func refreshTokenCannotBeUsedForAnotherUserOrHost() async throws {
         let authentication = ControlledMailAuthentication()
         var requests = authentication.requests.makeAsyncIterator()
-        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0) })
+        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0.user) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         #expect(!signIn.isBusy)
 
@@ -62,7 +62,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     }
 
     @Test func cancellingCompletedSignInImmediatelyClearsStagedToken() async throws {
-        let signIn = MailSignIn(authenticate: { .init(refreshToken: "refresh-token", email: $0) })
+        let signIn = MailSignIn(authenticate: { .init(refreshToken: "refresh-token", email: $0.user) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         try await signIn.signIn(for: account)
         #expect(signIn.token(for: account) == "refresh-token")
@@ -86,7 +86,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     func cancelledCompletionCannotClearNewBusyStateOrReplaceNewToken(oldCompletesFirst: Bool) async throws {
         let authentication = ControlledMailAuthentication()
         var requests = authentication.requests.makeAsyncIterator()
-        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0) })
+        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0.user) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         let oldTask = Task { try await signIn.signIn(for: account) }
         let oldRequest = try #require(await requests.next())
@@ -122,7 +122,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     @Test func cancelledAuthenticationCannotStageTokenWhenProviderIgnoresCancellation() async throws {
         let authentication = ControlledMailAuthentication()
         var requests = authentication.requests.makeAsyncIterator()
-        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0) })
+        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0.user) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         let task = Task { try await signIn.signIn(for: account) }
         let request = try #require(await requests.next())
@@ -140,7 +140,7 @@ private enum MailAuthenticationFailure: Error { case denied }
     @Test func failedReauthenticationCannotRetainPreviouslyStagedToken() async throws {
         let authentication = ControlledMailAuthentication()
         var requests = authentication.requests.makeAsyncIterator()
-        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0) })
+        let signIn = MailSignIn(authenticate: { try await authentication.authenticate($0.user) })
         let account = MailAccount(label: "Work", host: "imap.example.com", user: "first@example.com")
         let firstTask = Task { try await signIn.signIn(for: account) }
         let firstRequest = try #require(await requests.next())

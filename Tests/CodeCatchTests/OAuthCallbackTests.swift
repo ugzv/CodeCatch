@@ -3,7 +3,7 @@ import Testing
 
 /// The tables use the callback's path and query; this puts CodeCatch's redirect in front of them.
 private func callback(_ target: String) -> String {
-    target.hasPrefix("/") && !target.hasPrefix("//") ? GoogleOAuth.redirect + target.dropFirst() : target
+    target.hasPrefix("/") && !target.hasPrefix("//") ? OAuth.google.redirect + target.dropFirst() : target
 }
 
 @MainActor struct OAuthCallbackTests {
@@ -13,7 +13,7 @@ private func callback(_ target: String) -> String {
         ("/?state=state%20with%20spaces&code=%C5%A1ifra", "state with spaces", "šifra"),
     ])
     func matchingStatePreservesTheDecodedAuthorizationCode(target: String, state: String, code: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: state) == code)
+        #expect(try OAuth.google.authorizationCode(in: callback(target), state: state) == code)
     }
 
     @Test(arguments: [
@@ -33,7 +33,7 @@ private func callback(_ target: String) -> String {
         "/favicon.ico",
     ])
     func unauthenticatedOrEmptyCallbacksCannotCompleteOrCancelLogin(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
+        #expect(try OAuth.google.authorizationCode(in: callback(target), state: "expected-state") == nil)
     }
 
     @Test(arguments: [
@@ -43,7 +43,7 @@ private func callback(_ target: String) -> String {
     ])
     func authenticatedProviderErrorsCannotBeMistakenForSuccessfulLogin(target: String) {
         #expect(throws: (any Error).self) {
-            try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state")
+            try OAuth.google.authorizationCode(in: callback(target), state: "expected-state")
         }
     }
 
@@ -60,7 +60,7 @@ private func callback(_ target: String) -> String {
         "/?state=expected-state&error=access_denied&%65rror=server_error",
     ])
     func duplicateCallbackParametersCannotSelectAnAmbiguousOutcome(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
+        #expect(try OAuth.google.authorizationCode(in: callback(target), state: "expected-state") == nil)
     }
 
     @Test(arguments: [
@@ -75,6 +75,14 @@ private func callback(_ target: String) -> String {
         "/?state=expected-state&code=%",
     ])
     func malformedOrNonRootTargetsCannotCompleteLogin(target: String) throws {
-        #expect(try GoogleOAuth.authorizationCode(in: callback(target), state: "expected-state") == nil)
+        #expect(try OAuth.google.authorizationCode(in: callback(target), state: "expected-state") == nil)
+    }
+
+    /// Each provider only takes its own redirect, so one's callback can't finish the other's sign-in.
+    @Test func providersOnlyAcceptTheirOwnRedirect() throws {
+        let query = "?state=expected-state&code=authorization-code"
+        #expect(try OAuth.microsoft.authorizationCode(in: OAuth.microsoft.redirect + query, state: "expected-state") == "authorization-code")
+        #expect(try OAuth.microsoft.authorizationCode(in: OAuth.google.redirect + query, state: "expected-state") == nil)
+        #expect(try OAuth.google.authorizationCode(in: OAuth.microsoft.redirect + query, state: "expected-state") == nil)
     }
 }

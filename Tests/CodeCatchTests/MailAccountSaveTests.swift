@@ -47,7 +47,7 @@ private enum SecretOperation: Equatable {
         var duplicate = saved
         duplicate.id = UUID()
         duplicate.label = "Duplicate"
-        duplicate.googleSignIn = mode == .google
+        duplicate.signedIn = mode == .google
         var operations: [SecretOperation] = []
         var rejected = false
 
@@ -64,7 +64,7 @@ private enum SecretOperation: Equatable {
         for snapshot in [model, fixture.makeModel()] {
             #expect(snapshot.accounts.map(\.id) == [saved.id])
             #expect(snapshot.accounts.map(\.label) == [saved.label])
-            #expect(snapshot.accounts.map(\.googleSignIn) == [saved.googleSignIn])
+            #expect(snapshot.accounts.map(\.signedIn) == [saved.signedIn])
         }
     }
 
@@ -77,7 +77,7 @@ private enum SecretOperation: Equatable {
         model.save(saved)
         var edited = saved
         edited.label = "Updated"
-        edited.googleSignIn = mode == .google
+        edited.signedIn = mode == .google
         var operations: [SecretOperation] = []
 
         try model.saveAccount(edited, password: mode.password, refreshToken: mode.refreshToken,
@@ -104,7 +104,7 @@ private enum SecretOperation: Equatable {
         for snapshot in [model, fixture.makeModel()] {
             #expect(snapshot.accounts.map(\.id) == [saved.id])
             #expect(snapshot.accounts.map(\.label) == [edited.label])
-            #expect(snapshot.accounts.map(\.googleSignIn) == [mode == .google || mode == .stagedToken])
+            #expect(snapshot.accounts.map(\.signedIn) == [mode == .google || mode == .stagedToken])
         }
     }
 
@@ -137,7 +137,7 @@ private enum SecretOperation: Equatable {
         for snapshot in [model, fixture.makeModel()] {
             #expect(snapshot.accounts.map(\.id) == [saved.id])
             #expect(snapshot.accounts.map(\.label) == [saved.label])
-            #expect(snapshot.accounts.map(\.googleSignIn) == [saved.googleSignIn])
+            #expect(snapshot.accounts.map(\.signedIn) == [saved.signedIn])
         }
     }
 }
