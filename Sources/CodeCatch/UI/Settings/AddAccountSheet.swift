@@ -35,7 +35,7 @@ struct AddAccountSheet: View {
                 }
                 Divider().padding(.leading, 52)
                 row(icon: AnyView(logo("microsoft.com", fallback: "m.circle.fill", color: .blue)), name: "Microsoft",
-                    detail: "Outlook, Hotmail and Microsoft 365 · Sign in with Microsoft (beta)") {
+                    detail: "Outlook and Hotmail · Sign in with Microsoft (beta)") {
                     dismiss()
                     edit(MailAccount(label: "Outlook", host: MailAccount.outlookHost, user: ""))
                 }
