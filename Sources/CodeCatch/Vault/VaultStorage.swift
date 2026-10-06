@@ -45,7 +45,7 @@ final class DeviceAuthentication {
         let context = LAContext()
         self.context = context
         defer { if self.context === context { self.context = nil } }
-        guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "Unlock your saved verification codes in CodeCatch.") else {
+        guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: "show your verification codes") else {
             throw LAError(.authenticationFailed)
         }
     }

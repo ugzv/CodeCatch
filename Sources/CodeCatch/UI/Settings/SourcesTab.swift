@@ -61,7 +61,7 @@ struct SourcesTab: View {
                                title: account.label, subtitle: [account.user, problem(status)].compactMap { $0 }.joined(separator: " · "),
                                info: about, status: status,
                                details: sourceDetails(account.id.uuidString, about: about, enabled: account.enabled && model.receiving) { editing = account }) {
-                        Toggle("Monitor \(account.label)", isOn: Binding(get: { account.enabled }, set: { enabled in
+                        Toggle("Watch \(account.label)", isOn: Binding(get: { account.enabled }, set: { enabled in
                             var updated = account
                             updated.enabled = enabled
                             model.save(updated)
@@ -130,8 +130,8 @@ struct SourcesTab: View {
     }
 
     private var aboutBitwarden: String {
-        let about = "Shows two-step codes for your saved Bitwarden logins. Codes are made on this Mac and stay hidden until you unlock with \(DeviceAuthentication.unlockMethods)."
-        return model.hasVault ? about + " Turning this off hides the codes and keeps your import. It also locks CodeCatch." : about
+        let about = "Shows Bitwarden codes for your saved logins. Codes are made on this Mac and stay hidden until you unlock with \(DeviceAuthentication.unlockMethods)."
+        return model.hasVault ? about + " Turning this off hides the codes and keeps them saved. It also locks CodeCatch." : about
     }
 
     private var bitwardenDetails: AnyView {
@@ -147,7 +147,7 @@ struct SourcesTab: View {
                     else { model.unlocked {} }
                 }.disabled(model.vaultSession.isBusy || (!model.vaultSession.isUnlocked && !model.monitoring(Prefs.bitwarden)))
                 Spacer()
-                PopoverButton("Remove Import…", role: .destructive) {
+                PopoverButton("Remove Bitwarden Codes…", role: .destructive) {
                     vaultError = nil
                     guard confirmed("Remove Bitwarden codes?", "CodeCatch forgets the logins it imported. Your Bitwarden vault doesn't change. To get them back, import again.",
                                     action: "Remove") else { return }
@@ -161,7 +161,7 @@ struct SourcesTab: View {
 
     private var vaultSubtitle: String? {
         guard model.hasVault else { return nil }
-        guard model.monitoring(Prefs.bitwarden) else { return "Off · import kept" }
+        guard model.monitoring(Prefs.bitwarden) else { return "Off · codes kept" }
         let state = model.vaultSession.isUnlocked ? "\(model.vault.count) codes" : "Locked"
         guard let imported = UserDefaults.standard.object(forKey: Prefs.vaultImportedAt) as? Date else { return state }
         return state + " · imported " + imported.formatted(.relative(presentation: .named))
@@ -174,7 +174,7 @@ struct SourcesTab: View {
     @ViewBuilder private func diskAccessRow(_ status: SourceStatus) -> some View {
         if status == .attention(SourceStatus.needsDiskAccess) {
             SettingRow(symbol: "lock.shield.fill", color: .orange, title: "Full Disk Access Needed",
-                       subtitle: "Turn on CodeCatch in Privacy & Security") {
+                       subtitle: "Drag CodeCatch into the list that opens, then turn it on.") {
                 Button("Open Settings") { SystemSettings.fullDiskAccess() }
             }
         }

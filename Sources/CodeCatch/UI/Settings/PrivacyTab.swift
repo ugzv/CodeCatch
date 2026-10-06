@@ -31,7 +31,7 @@ struct PrivacyTab: View {
             }
             Section("History") {
                 SettingRow(symbol: "clock.fill", color: .teal, title: "Keep Codes For",
-                           info: "History is read again from Messages and mail. It is never saved to disk.") {
+                           info: "CodeCatch rereads Messages and mail when it starts. It never saves codes to disk.") {
                     Picker("Keep Codes For", selection: $historyDays) {
                         Text("1 Day").tag(1)
                         Text("7 Days").tag(7)

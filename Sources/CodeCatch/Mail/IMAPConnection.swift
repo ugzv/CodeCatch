@@ -5,11 +5,11 @@ enum IMAPError: LocalizedError {
     case closed, timeout, invalidPort, invalidCredentials, invalidResponse, rejected(String)
     var errorDescription: String? {
         switch self {
-        case .closed: "Connection closed"
+        case .closed: "The mail server closed the connection"
         case .timeout: "Server stopped responding"
         case .invalidPort: "The IMAP port must be between 1 and 65535"
-        case .invalidCredentials: "The IMAP credentials contain unsupported control characters"
-        case .invalidResponse: "The mail server sent an invalid or oversized response"
+        case .invalidCredentials: "The email or password has a character that can't be sent. Type it again."
+        case .invalidResponse: "The mail server sent a reply CodeCatch can't read. It will try again."
         case .rejected: "The mail server rejected the request"
         }
     }

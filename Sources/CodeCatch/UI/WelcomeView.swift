@@ -21,7 +21,7 @@ struct WelcomeView: View {
                         .frame(width: 44, height: 44)
                         .accessibilityHidden(true)
                     Text("Welcome to \(AppBrand.name)").font(.title2.weight(.semibold))
-                    Text("Verification codes and sign-in links are caught as they arrive, one click or ⌘V away. CodeCatch lives in the menu bar.")
+                    Text("CodeCatch catches verification codes and sign-in links as they arrive, one click or ⌘V away. Find it in the menu bar.")
                         .foregroundStyle(.secondary).multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -39,7 +39,7 @@ struct WelcomeView: View {
                 let messages = model.status[MessagesStore.sourceKey] ?? .off
                 SettingRow(symbol: "message.fill", color: .green, title: "Messages",
                            subtitle: messages == .attention(SourceStatus.needsDiskAccess)
-                               ? "Needs Full Disk Access: drag CodeCatch into the list that opens."
+                               ? "Needs Full Disk Access: drag CodeCatch into the list that opens, then turn it on."
                                : "iMessage, and SMS once Text Message Forwarding is on in your iPhone’s Messages settings", status: messages) {
                     switch messages {
                     case .live:
@@ -58,8 +58,8 @@ struct WelcomeView: View {
                     Toggle("Apple Mail", isOn: $appleMailEnabled).labelsHidden()
                         .onChange(of: appleMailEnabled) { model.restartAppleMail() }
                 }
-                SettingRow(symbol: "envelope.fill", color: .blue, title: "Gmail, IMAP and Bitwarden",
-                           subtitle: "Mail accounts and authenticator codes") {
+                SettingRow(symbol: "envelope.fill", color: .blue, title: "Mail Accounts and Bitwarden",
+                           subtitle: "Gmail, iCloud, Yahoo, other mail and Bitwarden codes") {
                     Button("Set Up…") {
                         SettingsTab.sources.select()
                         openSettings()
@@ -81,7 +81,7 @@ struct WelcomeView: View {
         .formStyle(.grouped)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             HStack {
-                Text("Reopen this from the ••• menu.").font(.caption).foregroundStyle(.secondary)
+                Text("Reopen it from ••• → Welcome Guide.").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
             }

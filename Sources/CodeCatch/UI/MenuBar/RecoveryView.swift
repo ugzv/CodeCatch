@@ -17,9 +17,9 @@ struct RecoveryView: View {
         let count = enabledAccounts.count
         let accounts = "\(count) email \(count == 1 ? "account" : "accounts")"
         if model.monitoring(Prefs.appleMail) {
-            return count == 0 ? "Monitoring Apple Mail" : "Monitoring \(accounts) + Apple Mail"
+            return count == 0 ? "Watching Apple Mail" : "Watching \(accounts) + Apple Mail"
         }
-        return "Monitoring \(accounts)"
+        return "Watching \(accounts)"
     }
 
     var body: some View {
@@ -29,9 +29,9 @@ struct RecoveryView: View {
                     HStack(spacing: 4) {
                         Text("Recent Emails").font(.title3.weight(.semibold))
                         SettingInfo(title: "Recent Emails") {
-                            Text("Only emails from the last 30 minutes with verification-related wording appear here, when no code or sign-in link was detected. This is not your full inbox.")
+                            Text("Emails from the last 30 minutes that look like they hold a code, where CodeCatch didn't find one. This isn't your full inbox.")
                             Text("Detected codes and sign-in links appear in the main menu. Select a code in an email here and press ⌘C to copy it.")
-                            Text("Up to 20 matching emails are kept in memory only. If nothing appears, request a new code and check again.")
+                            Text("CodeCatch keeps up to 20 of these and never saves them to disk. If nothing appears, request a new code and check again.")
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -40,7 +40,7 @@ struct RecoveryView: View {
                         Text("·").foregroundStyle(.tertiary)
                         Button(monitoringSummary) { showSettings(.sources) }
                             .buttonStyle(.link)
-                            .help("Open Sources to manage monitored email accounts")
+                            .help("Choose which accounts to watch")
                     }
                     .font(.caption)
                 }
@@ -56,7 +56,7 @@ struct RecoveryView: View {
             Divider()
             Group {
                 if !model.monitoring(Prefs.receivedCodes) {
-                    notice("Verification Codes is off.") {
+                    notice("Turn on Verification Codes to see recent emails.") {
                         Button("Open Sources") { showSettings(.sources) }
                     }
                 } else if !model.isUnlocked {
@@ -69,7 +69,7 @@ struct RecoveryView: View {
                         Button("Open Sources") { showSettings(.sources) }
                     }
                 } else if model.recovery.entries.isEmpty {
-                    notice(checking ? "Checking your inboxes…" : "No recent verification emails.") {
+                    notice(checking ? "Checking your inboxes…" : "No recent verification emails. Request a new code, then Check Again.") {
                         if let problem = model.sources.first(where: { model.mailSourceKeys.contains($0.key) && $0.status.needsAttention }) {
                             Text("\(problem.label): \(problem.status.summary)")
                                 .font(.caption).foregroundStyle(.secondary)

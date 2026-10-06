@@ -83,7 +83,7 @@ enum BitwardenCLI {
             let out = try execute("/usr/bin/env", ["bw"] + args + ["--nointeraction"], env: env.merging(["PATH": path]) { $1 }, timeout: timeout)
             guard out.status == 0 else {
                 let message = String(decoding: out.stderr.isEmpty ? out.stdout : out.stderr, as: UTF8.self)
-                    .split(separator: "\n").first.map(String.init) ?? "bw exited with \(out.status)"
+                    .split(separator: "\n").first.map(String.init) ?? "Bitwarden CLI stopped with error \(out.status)"
                 throw Failure(errorDescription: out.status == 127 ? "Bitwarden CLI not found" : message)
             }
             return out.stdout

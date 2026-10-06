@@ -23,7 +23,7 @@ struct BitwardenSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Bitwarden Codes").font(.title3.weight(.semibold))
-                Text("CodeCatch copies only each login's name, username, site and TOTP secret into your Keychain, and makes the codes itself. The CLI's decrypted response is processed in memory; login passwords are not saved.")
+                Text("CodeCatch saves only each login's name, username, site and authenticator key to your Keychain, then makes the codes itself. Login passwords are never saved.")
                     .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             VStack(alignment: .leading, spacing: 12) {

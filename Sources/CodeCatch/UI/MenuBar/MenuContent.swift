@@ -57,7 +57,7 @@ struct MenuContent: View {
             if let problem = model.sources.first(where: \.status.needsAttention) {
                 attention(problem.label, problem.status).padding(.horizontal, 10).padding(.bottom, 10)
             } else if model.receiving, !hasLogins, model.sources.allSatisfy({ $0.status == .off }) {
-                attention("All sources off", .attention("Choose what to monitor and enable a source in Settings"))
+                attention("All sources off", .attention("Turn on a source in Settings."))
                     .padding(.horizontal, 10).padding(.bottom, 10)
             }
             if model.items.count > Self.recent || hasLogins || searchRequested { searchField }
@@ -258,12 +258,12 @@ struct MenuContent: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label(!model.receiving && model.vault.isEmpty ? "Monitoring Paused" : model.vault.isEmpty ? "No Codes Yet" : "Find a Saved Login", systemImage: "key.viewfinder")
+            Label(!model.receiving && model.vault.isEmpty ? "Catching Paused" : model.vault.isEmpty ? "No Codes Yet" : "Find a Saved Login", systemImage: "key.viewfinder")
         } description: {
             Text(!model.receiving && model.vault.isEmpty
-                 ? (hasLogins ? "Unlock to search your saved Bitwarden logins." : "Choose what to catch in Settings → Monitoring.")
+                 ? (hasLogins ? "Unlock to search your saved Bitwarden logins." : "Choose what to catch in Settings → Sources.")
                  : model.vault.isEmpty
-                 ? "New codes and sign-in links from your enabled sources appear here as they arrive."
+                 ? "New codes and links show up here as they arrive."
                  : "Search by service or account. Pin a login to keep it here.")
         }
         .padding(.bottom, 8)

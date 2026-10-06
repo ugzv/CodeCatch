@@ -8,7 +8,7 @@ enum Secrets {
     struct Failure: LocalizedError {
         let status: OSStatus
         var errorDescription: String? {
-            "The Keychain request failed (\(status))."
+            "Couldn't use your Keychain (\(status)). Try again."
         }
     }
 

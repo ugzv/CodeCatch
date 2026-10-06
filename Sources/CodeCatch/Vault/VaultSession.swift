@@ -8,7 +8,7 @@ import Foundation
 final class VaultSession: ObservableObject {
     enum Failure: LocalizedError {
         case locked, busy
-        var errorDescription: String? { self == .locked ? "Unlock saved codes first." : "Unlock is already in progress." }
+        var errorDescription: String? { self == .locked ? "Unlock CodeCatch first." : "Unlock is already in progress." }
     }
 
     @Published private(set) var codes: [VaultCode] = []
