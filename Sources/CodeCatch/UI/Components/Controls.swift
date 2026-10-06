@@ -26,25 +26,85 @@ struct ActionButtonStyle: ButtonStyle {
     }
 }
 
+extension Color {
+    /// The fill behind whatever the pointer is over, the same strength everywhere.
+    static func hoverFill(_ hovering: Bool, resting: Double = 0) -> Color { .primary.opacity(hovering ? 0.08 : resting) }
+}
+
+private struct HoverHighlight<S: Shape>: ViewModifier {
+    let shape: S
+    let outset: CGFloat
+    @Local private var hovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .background(shape.fill(Color.hoverFill(hovering)).padding(-outset))
+            .onHover { hovering = $0 }
+    }
+}
+
+extension View {
+    /// Highlights the view in `shape` while the pointer is over it; `outset` grows the highlight past the view.
+    func hoverHighlight(in shape: some Shape, outset: CGFloat = 0) -> some View {
+        modifier(HoverHighlight(shape: shape, outset: outset))
+    }
+}
+
+/// A toolbar-weight glyph: the face of GlyphButton and of the ••• and ? menus.
+struct GlyphLabel: View {
+    let symbol: String
+
+    var body: some View {
+        Image(systemName: symbol)
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(.secondary)
+            .frame(width: 24, height: 24)
+    }
+}
+
 /// Toolbar-weight glyph button that only shows a background on hover.
 struct GlyphButton: View {
     let symbol: String
     let help: String
     let action: () -> Void
-    @Local private var hovering = false
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: 24, height: 24)
-                .background(Circle().fill(.primary.opacity(hovering ? 0.08 : 0)))
+            GlyphLabel(symbol: symbol)
+                .hoverHighlight(in: Circle())
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .onHover { hovering = $0 }
         .help(help)
+        .accessibilityLabel(help)
+    }
+}
+
+/// An error or warning, drawn the same everywhere: orange, with a warning sign. The caller
+/// sets the font. `compact` keeps it to one line, with the full text on hover.
+struct WarningText: View {
+    let message: String
+    var compact = false
+
+    var body: some View {
+        Label(message, systemImage: "exclamationmark.triangle.fill")
+            .foregroundStyle(.orange)
+            .lineLimit(compact ? 1 : nil)
+            .fixedSize(horizontal: false, vertical: !compact)
+            .help(compact ? message : "")
+    }
+}
+
+/// Unlock, showing the same busy state wherever it is while Touch ID or the password is up.
+struct VaultUnlockButton: View {
+    let isBusy: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(isBusy ? "Unlocking…" : "Unlock", systemImage: "lock.fill")
+        }
+        .disabled(isBusy)
     }
 }
 
@@ -60,6 +120,14 @@ enum CatchKind {
 
 extension CodeItem {
     var kind: CatchKind { !isLink ? .code : resetsPassword ? .passwordReset : .signIn }
+}
+
+/// Where codes come from, drawn the same in Welcome and Settings → Sources.
+enum SourceKind {
+    case messages, appleMail, mail
+
+    var symbol: String { switch self { case .messages: "message.fill"; case .appleMail: "tray.fill"; case .mail: "envelope.fill" } }
+    var color: Color { switch self { case .messages: .green; case .appleMail: .cyan; case .mail: .blue } }
 }
 
 struct IconTile: View {

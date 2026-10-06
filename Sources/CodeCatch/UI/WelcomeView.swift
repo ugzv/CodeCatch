@@ -9,7 +9,6 @@ struct WelcomeView: View {
     @ObservedObject private var model = AppModel.shared
     @Environment(\.openSettings) private var openSettings
     @Environment(\.dismiss) private var dismiss
-    @AppStorage(Prefs.appleMail) private var appleMailEnabled = false
     @AppStorage(Prefs.launchAtLogin) private var launchAtLogin = true
     @AppStorage(Prefs.hotkeys) private var hotkeys = true
 
@@ -37,7 +36,7 @@ struct WelcomeView: View {
             }
             Section("What to Catch") {
                 let messages = model.status[MessagesStore.sourceKey] ?? .off
-                SettingRow(symbol: "message.fill", color: .green, title: "Messages",
+                SettingRow(symbol: SourceKind.messages.symbol, color: SourceKind.messages.color, title: "Messages",
                            subtitle: messages == .attention(SourceStatus.needsDiskAccess)
                                ? "Needs Full Disk Access: drag CodeCatch into the list that opens, then turn it on."
                                : "iMessage, and SMS once Text Message Forwarding is on in your iPhone’s Messages settings", status: messages) {
@@ -52,18 +51,14 @@ struct WelcomeView: View {
                         Text(messages.summary).foregroundStyle(.secondary)
                     }
                 }
-                SettingRow(symbol: "tray.fill", color: .cyan, title: "Apple Mail",
+                SettingRow(symbol: SourceKind.appleMail.symbol, color: SourceKind.appleMail.color, title: "Apple Mail",
                            subtitle: "Mail app inboxes, with the same Full Disk Access",
                            status: model.status[AppleMailStore.sourceKey] ?? .off) {
-                    Toggle("Apple Mail", isOn: $appleMailEnabled).labelsHidden()
-                        .onChange(of: appleMailEnabled) { model.restartAppleMail() }
+                    AppleMailToggle()
                 }
-                SettingRow(symbol: "envelope.fill", color: .blue, title: "Mail Accounts and Bitwarden",
+                SettingRow(symbol: SourceKind.mail.symbol, color: SourceKind.mail.color, title: "Mail Accounts and Bitwarden",
                            subtitle: "Gmail, iCloud, Yahoo, other mail and Bitwarden codes") {
-                    Button("Set Up…") {
-                        SettingsTab.sources.select()
-                        openSettings()
-                    }
+                    Button("Set Up…") { openSettings(at: .sources) }
                 }
             }
             Section("Good to Know") {

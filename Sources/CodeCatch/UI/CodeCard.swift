@@ -19,10 +19,7 @@ struct CodeCard: View {
             header
             well
             if let warning = item.linkWarning {
-                Label(warning, systemImage: "exclamationmark.triangle.fill")
-                    .font(.subheadline)
-                    .foregroundStyle(.orange)
-                    .lineLimit(2)
+                WarningText(message: warning).font(.subheadline)
             }
             HStack(spacing: 8) {
                 if item.isLink {
@@ -64,7 +61,7 @@ struct CodeCard: View {
                 Text(item.service).font(.headline).lineLimit(1)
                 // The banner has no footer, so a failed unlock shows here, in the same one line.
                 if style == .banner, locked, let error = model.unlockError {
-                    Text(error).font(.subheadline).foregroundStyle(.orange).lineLimit(1).help(error)
+                    WarningText(message: error, compact: true).font(.subheadline)
                 } else {
                     Text([item.origination, item.isLink ? item.kind.title : nil].compactMap { $0 }.joined(separator: " · "))
                         .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
@@ -118,7 +115,7 @@ struct CodeCard: View {
         .padding(.leading, 16)
         .padding(.trailing, 14)
         .frame(height: 60)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.primary.opacity(hoveringCode ? 0.085 : 0.05)))
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.hoverFill(hoveringCode, resting: 0.05)))
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .onHover { on in withAnimation(.easeOut(duration: 0.12)) { hoveringCode = on } }
         .onTapGesture(perform: item.isLink ? open : copy)

@@ -28,12 +28,13 @@ struct BitwardenSheet: View {
             }
             VStack(alignment: .leading, spacing: 12) {
                 if let pending { review(pending) }
-                else if let status { steps(status) }
+                // Nothing to change mid-read: a typed password is cleared when the import ends.
+                else if let status { steps(status).disabled(working) }
                 else { ProgressView().controlSize(.small).frame(maxWidth: .infinity) }
             }
             .padding(14)
             .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.primary.opacity(0.04)))
-            if let error { Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout) }
+            if let error { WarningText(message: error).font(.callout) }
             HStack {
                 Button("Check Again") { pending = nil; Task { await refresh() } }.disabled(working)
                 Spacer()
@@ -150,9 +151,8 @@ struct BitwardenSheet: View {
         }
         if !unreadable.isEmpty {
             let named = unreadable.prefix(5) + (unreadable.count > 5 ? ["\(unreadable.count - 5) more"] : [])
-            Label("Skipped \(unreadable.count == 1 ? "1 login" : "\(unreadable.count) logins") with a key CodeCatch can't read: \(named.formatted(.list(type: .and))). Check the key in Bitwarden.",
-                  systemImage: "exclamationmark.triangle.fill")
-                .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+            WarningText(message: "Skipped \(unreadable.count == 1 ? "1 login" : "\(unreadable.count) logins") with a key CodeCatch can't read: \(named.formatted(.list(type: .and))). Check the key in Bitwarden.")
+                .font(.caption)
         }
         Text("Your saved codes stay unchanged until you save.")
             .font(.caption).foregroundStyle(.secondary)

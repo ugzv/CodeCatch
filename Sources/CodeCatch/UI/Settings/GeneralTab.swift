@@ -50,7 +50,7 @@ struct GeneralTab: View {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("CodeCatch \(AppBrand.version ?? "")")
                         if let checked = updater?.lastUpdateCheckDate {
-                            Text("Last checked \(checked.formatted(.relative(presentation: .named)))").font(.system(size: 11)).foregroundStyle(.secondary)
+                            Text("Last checked \(checked.formatted(.relative(presentation: .named)))").font(.subheadline).foregroundStyle(.secondary)
                         }
                     }
                     Spacer(minLength: 12)

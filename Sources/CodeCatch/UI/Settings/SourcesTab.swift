@@ -36,7 +36,7 @@ struct SourcesTab: View {
                 let status = model.status[MessagesStore.sourceKey] ?? .off
                 let codes = model.monitoring(Prefs.receivedCodes)
                 let about = "Reads codes from iMessage and SMS on this Mac. For SMS, turn on Text Message Forwarding in your iPhone’s Messages settings. Needs Full Disk Access."
-                SettingRow(symbol: "message.fill", color: .green, title: "Messages",
+                SettingRow(symbol: SourceKind.messages.symbol, color: SourceKind.messages.color, title: "Messages",
                            subtitle: codes ? problem(status) : "Paused while Verification Codes is off", info: about, status: status,
                            details: sourceDetails(MessagesStore.sourceKey, about: about, enabled: messagesEnabled && codes)) {
                     Toggle("Messages", isOn: $messagesEnabled).labelsHidden()
@@ -48,16 +48,15 @@ struct SourcesTab: View {
             Section("Mail") {
                 let appleMail = model.status[AppleMailStore.sourceKey] ?? .off
                 let aboutMail = "Reads new mail in the Mail app on this Mac, with no sign-in. Nothing is changed or marked as read. Mail fetches new mail only while it is open. Needs Full Disk Access."
-                SettingRow(symbol: "tray.fill", color: .cyan, title: "Apple Mail", subtitle: problem(appleMail), info: aboutMail, status: appleMail,
+                SettingRow(symbol: SourceKind.appleMail.symbol, color: SourceKind.appleMail.color, title: "Apple Mail", subtitle: problem(appleMail), info: aboutMail, status: appleMail,
                            details: sourceDetails(AppleMailStore.sourceKey, about: aboutMail, enabled: appleMailEnabled && model.receiving)) {
-                    Toggle("Apple Mail", isOn: $appleMailEnabled).labelsHidden()
-                        .onChange(of: appleMailEnabled) { model.restartAppleMail() }
+                    AppleMailToggle()
                 }
                 if appleMailEnabled { diskAccessRow(appleMail) }
                 ForEach(model.accounts) { account in
                     let status = model.status[account.id.uuidString] ?? .off
                     let about = "Nothing is changed or marked as read. Your password stays in your Keychain."
-                    SettingRow(symbol: "envelope.fill", color: account.isGmail ? .red : .blue,
+                    SettingRow(symbol: SourceKind.mail.symbol, color: account.isGmail ? .red : SourceKind.mail.color,
                                title: account.label, subtitle: [account.user, problem(status)].compactMap { $0 }.joined(separator: " · "),
                                info: about, status: status,
                                details: sourceDetails(account.id.uuidString, about: about, enabled: account.enabled && model.receiving) { editing = account }) {
@@ -106,7 +105,7 @@ struct SourcesTab: View {
                     }
                 }
                 if let error = vaultError ?? (model.isUnlocked ? nil : model.unlockError) {
-                    Text(error).font(.caption).foregroundStyle(.orange)
+                    WarningText(message: error).font(.caption)
                 }
             }
 
@@ -141,11 +140,12 @@ struct SourcesTab: View {
             HStack {
                 PopoverButton("Refresh…") { bitwarden = true }
                     .disabled(!model.monitoring(Prefs.bitwarden))
-                Button(model.vaultSession.isUnlocked ? "Lock" : "Unlock") {
-                    vaultError = nil
-                    if model.vaultSession.isUnlocked { model.vaultSession.lock() }
-                    else { model.unlocked {} }
-                }.disabled(model.vaultSession.isBusy || (!model.vaultSession.isUnlocked && !model.monitoring(Prefs.bitwarden)))
+                if model.vaultSession.isUnlocked {
+                    Button("Lock") { vaultError = nil; model.vaultSession.lock() }
+                } else {
+                    VaultUnlockButton(isBusy: model.vaultSession.isBusy) { vaultError = nil; model.unlocked {} }
+                        .disabled(!model.monitoring(Prefs.bitwarden))
+                }
                 Spacer()
                 PopoverButton("Remove Bitwarden Codes…", role: .destructive) {
                     vaultError = nil
@@ -215,4 +215,14 @@ struct SourcesTab: View {
         }
     }
     #endif
+}
+
+/// Apple Mail on or off, restarting its watcher on change. Shared by Welcome and Settings → Sources.
+struct AppleMailToggle: View {
+    @AppStorage(Prefs.appleMail) private var enabled = false
+
+    var body: some View {
+        Toggle("Apple Mail", isOn: $enabled).labelsHidden()
+            .onChange(of: enabled) { AppModel.shared.restartAppleMail() }
+    }
 }

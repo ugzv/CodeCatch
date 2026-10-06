@@ -3,7 +3,7 @@ import SwiftUI
 
 struct MenuContent: View {
     @ObservedObject private var model = AppModel.shared
-    @Environment(\.openSettings) private var openSettingsWindow
+    @Environment(\.openSettings) private var openSettings
     @Environment(\.openWindow) private var openWindow
     @Local private var query = ""
     @Local private var selectedID: UUID?
@@ -78,7 +78,7 @@ struct MenuContent: View {
                         } else if rest.isEmpty, searching {
                             // Saved logins are only loaded once unlocked: say so rather than "no match".
                             Text(hasLogins && !model.isUnlocked ? "Unlock to search your Bitwarden logins." : "No codes match “\(query)”")
-                                .font(.system(size: 12)).foregroundStyle(.secondary)
+                                .font(.callout).foregroundStyle(.secondary)
                                 .padding(.vertical, 24)
                         } else if !rest.isEmpty || !shortcuts.isEmpty {
                             LazyVStack(alignment: .leading, spacing: 0) {
@@ -213,15 +213,11 @@ struct MenuContent: View {
         if model.vaultSession.isUnlocked {
             GlyphButton(symbol: "lock.open", help: "Lock: hide codes until you unlock again") { model.vaultSession.lock() }
         } else {
-            Button {
-                Task { try? await model.unlock() }
-            } label: {
-                Label(model.vaultSession.isBusy ? "Unlocking…" : "Unlock", systemImage: "lock.fill")
-            }
-            .controlSize(.small)
-            .disabled(model.vaultSession.isBusy)
-            .help("Codes are hidden until you unlock")
-            if let error = model.unlockError { Text(error).font(.caption).foregroundStyle(.secondary).lineLimit(1).help(error) }
+            // Unlocking here also copies the newest code, as a fresh one would be.
+            VaultUnlockButton(isBusy: model.vaultSession.isBusy) { Task { try? await model.unlock() } }
+                .controlSize(.small)
+                .help("Codes are hidden until you unlock")
+            if let error = model.unlockError { WarningText(message: error, compact: true).font(.caption) }
         }
     }
 
@@ -236,8 +232,7 @@ struct MenuContent: View {
             Spacer(minLength: 6)
             Button("Fix…") {
                 if status == .attention(SourceStatus.needsDiskAccess) { return SystemSettings.fullDiskAccess() }
-                SettingsTab.sources.select()
-                openSettings()
+                openSettings(at: .sources)
             }
             .controlSize(.small)
         }
@@ -284,7 +279,7 @@ struct MenuContent: View {
                 .foregroundStyle(.secondary)
                 Spacer()
             }
-            GlyphButton(symbol: "gearshape", help: "Settings", action: openSettings)
+            GlyphButton(symbol: "gearshape", help: "Settings") { openSettings(at: nil) }
             Menu {
                 Button("Show Test Code") { model.showTestCode() }
                     .disabled(!model.monitoring(Prefs.receivedCodes))
@@ -294,7 +289,7 @@ struct MenuContent: View {
                 Button("Clear History…") { confirmClearHistory(model) }
                     .disabled(!model.hasHistory)
                 Divider()
-                Button("Settings…", action: openSettings).keyboardShortcut(",")
+                Button("Settings…") { openSettings(at: nil) }.keyboardShortcut(",")
                 Button("Welcome Guide") {
                     NSApp.activate()
                     openWindow(id: WelcomeView.windowID)
@@ -311,7 +306,7 @@ struct MenuContent: View {
                 .disabled(Updater.controller == nil)
                 Button("Quit CodeCatch") { NSApp.terminate(nil) }
             } label: {
-                Image(systemName: "ellipsis").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
+                GlyphLabel(symbol: "ellipsis")
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
@@ -321,11 +316,5 @@ struct MenuContent: View {
         .padding(.vertical, 9)
         .overlay(alignment: .top) { Divider().padding(.horizontal, 12) }
         .padding(.top, 8)
-    }
-
-    /// A menu-bar app isn't active, so activate first or Settings opens behind other windows.
-    private func openSettings() {
-        NSApp.activate()
-        openSettingsWindow()
     }
 }

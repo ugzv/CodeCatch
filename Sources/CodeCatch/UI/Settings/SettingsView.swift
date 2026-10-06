@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum SettingsTab: String {
@@ -5,6 +6,16 @@ enum SettingsTab: String {
     static let storageKey = "settingsTab"
     /// The tab Settings shows when it opens next.
     func select() { UserDefaults.standard.set(rawValue, forKey: Self.storageKey) }
+}
+
+extension OpenSettingsAction {
+    /// Opens Settings in front, at `tab` when given. A menu-bar app isn't active, so
+    /// without activating first Settings opens behind other windows.
+    @MainActor func callAsFunction(at tab: SettingsTab?) {
+        tab?.select()
+        NSApp.activate()
+        callAsFunction()
+    }
 }
 
 struct SettingsView: View {
@@ -35,7 +46,7 @@ private struct SettingsBrandFooter: ViewModifier {
                     Button("Report a Bug…") { AppBrand.openIssue(.bug) }
                     Button("Suggest a Feature…") { AppBrand.openIssue(.feature) }
                 } label: {
-                    Image(systemName: "questionmark.circle").font(.system(size: 15)).foregroundStyle(.secondary)
+                    GlyphLabel(symbol: "questionmark.circle")
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)

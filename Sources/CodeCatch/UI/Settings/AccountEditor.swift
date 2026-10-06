@@ -58,7 +58,7 @@ struct AccountEditor: View {
                     }
                 }
                 Toggle("Enabled", isOn: $account.enabled)
-                if let error { Text(error).font(.caption).foregroundStyle(.red) }
+                if let error { WarningText(message: error).font(.caption) }
             }
             .formStyle(.grouped)
             .disabled(google.isBusy)

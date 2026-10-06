@@ -12,15 +12,13 @@ struct SettingRow<Trailing: View>: View {
     var details: AnyView?
     @ViewBuilder var trailing: Trailing
     @Local private var presented = false
-    @Local private var hovered = false
 
     var body: some View {
         HStack(spacing: 10) {
             if let details {
                 Button { presented.toggle() } label: { label }
                     .buttonStyle(.plain)
-                    .background(RoundedRectangle(cornerRadius: 6).fill(.primary.opacity(hovered ? 0.06 : 0)).padding(-4))
-                    .onHover { hovered = $0 }
+                    .hoverHighlight(in: RoundedRectangle(cornerRadius: 6), outset: 4)
                     .accessibilityHint("Shows status and options")
                     .popover(isPresented: $presented, arrowEdge: .bottom) { InfoCard(title: title) { details } }
             } else {
@@ -43,7 +41,7 @@ struct SettingRow<Trailing: View>: View {
                 }
                 .accessibilityElement(children: .combine)
                 if let subtitle {
-                    Text(subtitle).font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    Text(subtitle).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 12)
@@ -72,14 +70,8 @@ struct SettingInfo<Content: View>: View {
     @Local private var presented = false
 
     var body: some View {
-        Button { presented.toggle() } label: {
-            Image(systemName: "info.circle").foregroundStyle(.secondary)
-                .frame(width: 24, height: 24).contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(title) information")
-        .help("\(title) information")
-        .popover(isPresented: $presented) { InfoCard(title: title) { content } }
+        GlyphButton(symbol: "info.circle", help: "\(title) information") { presented.toggle() }
+            .popover(isPresented: $presented) { InfoCard(title: title) { content } }
     }
 }
 

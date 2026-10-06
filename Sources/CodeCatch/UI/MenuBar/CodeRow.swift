@@ -45,8 +45,7 @@ struct CodeRow: View {
                     .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
                 if let warning = item.linkWarning {
                     // Never cut short: it is a phishing warning, and its end says what to check.
-                    Label(warning, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+                    WarningText(message: warning).font(.caption)
                 } else if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                 }
@@ -80,12 +79,9 @@ struct CodeRow: View {
                     }
                     .font(.system(size: 14))
                     .frame(width: 14)
-                    Text(locked ? hiddenCode(item.code) : groupedCode(item.code, wide: true))
+                    CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
                         .foregroundStyle(copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
-                        .blur(radius: concealed && !locked ? 4 : 0)
                 }
-                .font(.system(size: 15, weight: .medium).monospacedDigit())
-                .lineLimit(1)
             }
         }
         .padding(.horizontal, 10)
@@ -95,7 +91,7 @@ struct CodeRow: View {
             if selected {
                 shape.fill(Color.accentColor.opacity(0.14)).matchedGeometryEffect(id: "selection", in: selection)
             } else {
-                shape.fill(.primary.opacity(hovering ? 0.07 : 0))
+                shape.fill(Color.hoverFill(hovering))
             }
         }
         .animation(.snappy(duration: 0.3, extraBounce: 0.2), value: copied)

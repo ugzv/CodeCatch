@@ -38,7 +38,7 @@ struct RecoveryView: View {
                     HStack(spacing: 6) {
                         Text("Last 30 minutes").foregroundStyle(.secondary)
                         Text("·").foregroundStyle(.tertiary)
-                        Button(monitoringSummary) { showSettings(.sources) }
+                        Button(monitoringSummary) { openSettings(at: .sources) }
                             .buttonStyle(.link)
                             .help("Choose which accounts to watch")
                     }
@@ -57,24 +57,23 @@ struct RecoveryView: View {
             Group {
                 if !model.monitoring(Prefs.receivedCodes) {
                     notice("Turn on Verification Codes to see recent emails.") {
-                        Button("Open Sources") { showSettings(.sources) }
+                        Button("Open Sources") { openSettings(at: .sources) }
                     }
                 } else if !model.isUnlocked {
-                    notice(model.unlockError ?? "Unlock to view recent emails.") {
-                        Button(model.vaultSession.isBusy ? "Unlocking…" : "Unlock") { model.unlocked {} }
-                            .disabled(model.vaultSession.isBusy)
+                    notice("Unlock to view recent emails.") {
+                        if let error = model.unlockError { WarningText(message: error).font(.caption) }
+                        VaultUnlockButton(isBusy: model.vaultSession.isBusy) { model.unlocked {} }
                     }
                 } else if model.mailSourceKeys.isEmpty {
                     notice("No email accounts enabled.") {
-                        Button("Open Sources") { showSettings(.sources) }
+                        Button("Open Sources") { openSettings(at: .sources) }
                     }
                 } else if model.recovery.entries.isEmpty {
                     notice(checking ? "Checking your inboxes…" : "No recent verification emails. Request a new code, then Check Again.") {
                         if let problem = model.sources.first(where: { model.mailSourceKeys.contains($0.key) && $0.status.needsAttention }) {
-                            Text("\(problem.label): \(problem.status.summary)")
-                                .font(.caption).foregroundStyle(.secondary)
+                            WarningText(message: "\(problem.label): \(problem.status.summary)").font(.caption)
                         }
-                        Button("Open Sources") { showSettings(.sources) }
+                        Button("Open Sources") { openSettings(at: .sources) }
                             .buttonStyle(.bordered)
                     }
                 } else {
@@ -150,11 +149,6 @@ struct RecoveryView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private func showSettings(_ tab: SettingsTab) {
-        tab.select()
-        NSApp.activate()
-        openSettings()
-    }
     private func refresh() {
         model.recovery.prune()
         guard model.monitoring(Prefs.receivedCodes) else { return }
