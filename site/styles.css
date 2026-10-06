@@ -139,6 +139,7 @@ section[id] { scroll-margin-top: 60px; }
   border-radius: 22px;
   overflow: hidden;
   isolation: isolate;
+  container-type: inline-size;
   /* A ring outside the wallpaper: a border would let the gradient tint the edge. */
   box-shadow: var(--shadow), 0 0 0 1px var(--line);
   background:
@@ -207,9 +208,29 @@ section[id] { scroll-margin-top: 60px; }
 .caret { width: 1px; height: 17px; background: #1f1f1f; animation: blink 1.1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 .page-button { justify-self: end; display: grid; place-items: center; height: 30px; padding: 0 20px; margin-top: 4px; border-radius: 999px; background: #0b57d0; color: #fff; font-weight: 500; font-size: 12px; }
+/* Notion's login page for the email code, Slack's for the link. */
+.window[data-brand="notion"] .page, .window[data-brand="slack"] .page { background: #fff; }
+.window[data-brand="notion"] .page-title { font-weight: 600; }
+.window[data-brand="notion"] .page-input, .window[data-brand="notion"] .page-button { border-radius: 6px; }
+.window[data-brand="notion"] .page-button { background: #2383e2; }
+.window[data-brand="notion"] .page-input.on { border-color: #2383e2; box-shadow: inset 0 0 0 1px #2383e2; }
+.window[data-brand="notion"] .page-input em { color: #2383e2; }
+.window[data-brand="slack"] .page-title { font-weight: 700; }
+.window[data-brand="slack"] .page-input { display: none; }
+.window[data-brand="slack"] .page-button { justify-self: stretch; border-radius: 6px; background: #611f69; }
 .keys { position: absolute; right: 5%; bottom: 6%; padding: 6px 10px; border-radius: 12px; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); opacity: 0; transform: translateY(4px) scale(0.96); transition: opacity 0.25s, transform 0.25s; font-size: 15px; }
 .keys.on { opacity: 1; transform: none; }
 .keys kbd { background: var(--surface); box-shadow: 0 1px 0 var(--line); }
+/* One chip per scene; the playing one is lit. */
+.types { position: absolute; top: 38px; left: 12px; display: grid; gap: 6px; }
+.types button { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px 0 5px; border: 0; border-radius: 999px; overflow: hidden; background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); color: var(--text); font: 500 12px/1 var(--font); opacity: 0.55; cursor: pointer; transition: opacity 0.25s; }
+.types button.on { background: var(--surface); opacity: 1; }
+.types button:hover { opacity: 1; }
+.types img { width: 19px; height: 19px; }
+/* The Gmail logo has no tile of its own; give it one the size of the app icons beside it. */
+.types img[src$="gmail.png"] { width: 15px; height: 15px; margin: 0 2px; padding: 2px; border-radius: 4px; background: #fff; }
+@container (max-width: 500px) { .types span { display: none; } .types button { padding: 0 4.5px; } }
+@container (max-width: 360px) { .types { display: none; } }
 
 /* ---------- App components ---------- */
 .cc { zoom: 1.12; font: 13px/1.25 var(--font); color: var(--text); }
@@ -258,6 +279,7 @@ section[id] { scroll-margin-top: 60px; }
   filter: drop-shadow(0 0.500px 1px rgba(0, 0, 0, 0.2));
 }
 .tile .badge[src$="bitwarden.png"] { border-radius: 26%; }
+.tile .badge[src$="gmail.png"] { padding: calc(var(--size) * 0.07); border-radius: 26%; background: #fff; transform: scale(0.84); }
 
 .well {
   display: flex;
@@ -362,8 +384,6 @@ section[id] { scroll-margin-top: 60px; }
     var(--tint);
 }
 .feature-art .cc { max-width: 100%; }
-.feature-art.stack .cc { display: grid; gap: 14px; }
-.card.behind { transform: scale(0.94); transform-origin: top center; }
 .ticks { display: grid; gap: 8px; }
 .ticks li { position: relative; padding-left: 28px; }
 /* List bullets are the CodeCatch mark: orange for what CodeCatch does, grey for plain lists. */
@@ -404,10 +424,10 @@ section[id] { scroll-margin-top: 60px; }
 .compare { display: grid; gap: 14px; padding-top: 88px !important; padding-bottom: 96px !important; border-top: 1px solid var(--line); }
 .compare h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 720; max-width: 720px; }
 .table-wrap { margin-top: 20px; overflow-x: auto; border-radius: 22px; border: 1px solid var(--line); background: var(--surface); }
-.compare table { width: 100%; min-width: 680px; border-collapse: collapse; table-layout: fixed; font-size: 16px; }
+.compare table { width: 100%; min-width: 840px; border-collapse: collapse; table-layout: fixed; font-size: 16px; }
 .compare th, .compare td { padding: 15px 20px; text-align: left; vertical-align: top; }
 .compare thead th { padding-top: 20px; padding-bottom: 16px; font-size: 15px; font-weight: 650; color: var(--muted); vertical-align: baseline; }
-.compare thead th:first-child { width: 22%; }
+.compare thead th:first-child { width: 18%; }
 .compare thead th.us { color: var(--text); font-size: 17px; }
 .compare thead .mark { position: absolute; left: 18px; top: calc(50% + 2px); translate: 0 -50%; font-size: 20px; }
 .compare tbody tr { border-top: 1px solid var(--line); }

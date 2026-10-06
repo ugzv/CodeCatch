@@ -33,7 +33,7 @@
    "description": "Why text message codes stopped autofilling in Chrome, Firefox and other browsers on Mac, what fixes it on macOS 26, and a way that works on any version.",
    "image": "https://codecatch.app/assets/og.png",
    "datePublished": "2026-10-03",
-   "dateModified": "2026-10-03",
+   "dateModified": "2026-10-06",
    "inLanguage": "en",
    "author": {
     "@id": "https://codecatch.app/#author"
@@ -194,16 +194,20 @@
       <li><b>macOS 26 (Tahoe):</b> Apple added code autofill for other browsers, as <a href="https://www.macrumors.com/2025/06/12/ios-26-macos-tahoe-expand-one-time-code-autofill/" rel="noopener">MacRumors reported</a>. Then it stopped working for many people. Read on.</li>
     </ul>
 
-    <h2>1. Check the code reaches your Mac</h2>
+    <h2 id="sms-codes">1. Check the code reaches your Mac</h2>
     <p>Open Messages on your Mac and ask for a new code. If the text does not show up there, no browser can fill it.</p>
     <p>For codes sent by SMS, turn on forwarding on your iPhone: <b>Settings → Apps → Messages → Text Message Forwarding</b>, then switch on your Mac. Both devices must use the same Apple Account.</p>
 
-    <p>If it still does not arrive, check three things:</p>
-    <ul class="ticks">
-      <li>The iPhone is switched on and online. It is the one that receives the SMS.</li>
-      <li>Messages on the Mac is signed in: <b>Messages → Settings → iMessage</b>.</li>
-      <li>Your Mac is ticked in the Text Message Forwarding list on the iPhone.</li>
+    <p>If it still does not arrive, or Text Message Forwarding is missing, work through these:</p>
+    <ul class="ticks plain">
+      <li><b>The iPhone is on and online.</b> It receives the SMS and forwards it.</li>
+      <li><b>Same Apple Account.</b> On the Mac, open <b>Messages → Settings → iMessage</b>. The account there must match the one under <b>Send &amp; Receive</b> on the iPhone.</li>
+      <li><b>Your Mac is switched on</b> in the Text Message Forwarding list.</li>
+      <li><b>No Text Message Forwarding option, or your Mac is missing from it:</b> turn iMessage off and back on, then tap <b>Send &amp; Receive</b> and sign in again.</li>
+      <li><b>Messages in iCloud is on:</b> then forwarding is already on for that Mac.</li>
+      <li><b>Still nothing:</b> restart both devices, install updates, and check the date and time on your Mac.</li>
     </ul>
+    <p class="fine">From Apple Support: <a href="https://support.apple.com/en-us/102545" rel="noopener">Forward text messages from your iPhone to other devices</a>.</p>
 
     <h2>2. Update macOS 26</h2>
     <p>In late 2025, people on <a href="https://discussions.apple.com/thread/256153253" rel="noopener">Apple’s support forum</a> found that codes had stopped appearing in Chrome, Firefox, Brave and Opera on macOS 26, while Safari kept working. They later reported it fixed in a newer release, and a <a href="https://forums.macrumors.com/threads/google-chrome-sms-totp-autofill.2467686/" rel="noopener">MacRumors forum thread</a> says codes came back in Chrome with macOS 26.2.</p>
@@ -243,7 +247,7 @@
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
 </section>
 </main>
 

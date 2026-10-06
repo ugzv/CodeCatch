@@ -145,6 +145,14 @@
     },
     {
      "@type": "Question",
+     "name": "Codes from text messages don’t show up. What do I check?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Your Mac only gets texts that your iPhone forwards. On your iPhone, open Settings → Apps → Messages → Text Message Forwarding and turn on your Mac. If the option or your Mac is missing, check that both use the same Apple Account (on the Mac: Messages → Settings → iMessage), then turn iMessage off and on again on the iPhone. The iPhone must also be on and online."
+     }
+    },
+    {
+     "@type": "Question",
      "name": "What if CodeCatch misses a code?",
      "acceptedAnswer": {
       "@type": "Answer",
@@ -179,18 +187,18 @@
   <div class="hero-copy">
     <p class="eyebrow">For macOS</p>
     <h1>Sign-in codes, caught the moment they arrive.</h1>
-    <p class="lede">A menu bar app that copies sign-in codes from your texts and email the moment they arrive, and shows sign-in links too. Press <kbd>⌘</kbd><kbd>V</kbd> and you’re in, in any browser or app.</p>
+    <p class="lede">A menu bar app that copies each code from your texts and email, and shows sign-in links too. Press <kbd>⌘</kbd><kbd>V</kbd> and you’re in, in any browser or app.</p>
     <div class="actions">
       <a class="button" href="/download/CodeCatch.dmg" data-download>
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
       </a>
       <a class="button quiet" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>View the source</a>
     </div>
-    <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+    <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
   </div>
 
   <!-- The app's own banner and menu bar label, ported from CodeCard.swift and MenuBarLabel.swift. -->
-  <div class="stage" id="stage" role="img" aria-label="A Google verification code arrives by text message, CodeCatch shows it in a banner, and Command-V pastes it into the sign-in page. Then a Slack sign-in link arrives by email and CodeCatch shows where it leads">
+  <div class="stage" id="stage" role="img" aria-label="A Google verification code arrives by text message, CodeCatch shows it in a banner, and Command-V pastes it into the sign-in page. Then a Notion login code arrives by email and is pasted the same way. Then, on the Slack sign-in page, a sign-in link arrives by email and CodeCatch shows where it leads">
     <div class="menubar" aria-hidden="true">
       <span class="menubar-app">Chrome</span><span>File</span><span>Edit</span><span>View</span><span>History</span>
       <span class="menubar-right">
@@ -201,25 +209,31 @@
 
     <div class="window" aria-hidden="true">
       <div class="tabs"><i class="light r"></i><i class="light y"></i><i class="light g"></i>
-        <span class="tab"><img src="/assets/services/google.png" alt="">Sign in – Google Accounts</span></div>
-      <div class="toolbar"><span class="url"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg>accounts.google.com/signin/challenge</span></div>
+        <span class="tab"><img src="/assets/services/google.png" alt="" data-fill="icon"><span data-fill="tab">Sign in – Google Accounts</span></span></div>
+      <div class="toolbar"><span class="url"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg><span data-fill="url">accounts.google.com/signin/challenge</span></span></div>
       <div class="page">
         <div class="page-box">
-          <img class="page-logo" src="/assets/services/google.png" alt="">
-          <p class="page-title">2-Step Verification</p>
-          <p class="page-note">A text message with a 6-digit verification code was just sent to •••• ••41.</p>
-          <div class="page-input" id="otp"><b>G-</b><span id="otp-text"></span><i class="caret"></i><em>Enter the code</em></div>
-          <div class="page-button">Next</div>
+          <img class="page-logo" src="/assets/services/google.png" alt="" data-fill="icon">
+          <p class="page-title" data-fill="title">2-Step Verification</p>
+          <p class="page-note" data-fill="note">A text message with a 6-digit verification code was just sent to •••• ••41.</p>
+          <div class="page-input" id="otp"><b data-fill="prefix">G-</b><span id="otp-text"></span><i class="caret"></i><em>Enter the code</em></div>
+          <div class="page-button" data-fill="button">Next</div>
         </div>
       </div>
     </div>
     <div class="keys" id="keys" aria-hidden="true"><kbd>⌘</kbd><kbd>V</kbd></div>
 
+    <div class="types" id="types" aria-hidden="true">
+      <button type="button" tabindex="-1"><img src="/assets/services/messages.png" alt=""><span>Text code</span></button>
+      <button type="button" tabindex="-1"><img src="/assets/services/gmail.png" alt=""><span>Email code</span></button>
+      <button type="button" tabindex="-1"><img src="/assets/services/mail.png" alt=""><span>Sign-in link</span></button>
+    </div>
+
     <div class="cc banner" id="banner" aria-hidden="true">
       <div class="card">
         <div class="card-head">
-          <div class="tile "><img src="/assets/services/google.png" alt=""><img class="badge" src="/assets/services/messages.png" alt="" loading="lazy"></div>
-          <div class="card-who"><b>Google</b><span>Messages · 22000</span></div>
+          <div class="tile "><img src="/assets/services/google.png" alt="" data-fill="icon"><img class="badge" src="/assets/services/messages.png" alt="" data-fill="via"></div>
+          <div class="card-who"><b data-fill="who">Google</b><span data-fill="from">Messages · 22000</span></div>
           <span class="card-age">now</span>
         </div>
         <div class="well">
@@ -307,24 +321,9 @@
       </ul>
       <p class="fine"><a href="/guides/magic-link-safety/">How to check a sign-in link before you click</a></p>
     </div>
-    <div class="feature-art stack">
+    <div class="feature-art">
       <div class="cc">
         <div class="card floating">
-          <div class="card-head">
-            <div class="tile  bleed"><img src="/assets/services/slack.png" alt="" loading="lazy"><img class="badge" src="/assets/services/mail.png" alt="" loading="lazy"></div>
-            <div class="card-who"><b>Slack</b><span>Work</span></div>
-            <span class="card-age">now</span>
-          </div>
-          <div class="well">
-            <span class="link-text"><b>slack.com</b><span>app.slack.com/x-p482…/magic-login</span></span>
-            <span class="well-time">29:51<svg class="ring " viewBox="0 0 22 22" style="--p:.99"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg></span>
-          </div>
-          <div class="card-actions">
-            <button class="pill prominent" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg><span>Open Link</span></button>
-            <button class="pill" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg><span>Copy Link</span></button>
-          </div>
-        </div>
-        <div class="card floating behind">
           <div class="card-head">
             <div class="tile  bleed"><img src="/assets/services/notion.png" alt="" loading="lazy"><img class="badge" src="/assets/services/mail.png" alt="" loading="lazy"></div>
             <div class="card-who"><b>Notion</b><span>Personal</span></div>
@@ -466,22 +465,22 @@
       <thead>
         <tr><th scope="col"><span class="sr-only">Feature</span></th>
           <th scope="col" class="us"><svg class="mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>CodeCatch</th>
-          <th scope="col">Built-in macOS autofill</th><th scope="col">Other code catchers</th></tr>
+          <th scope="col">Built-in macOS autofill</th><th scope="col">2FHey</th><th scope="col">MessAuto</th></tr>
       </thead>
       <tbody>
-        <tr><th scope="row">Works in</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Safari (other browsers on macOS 26)</td><td class="has" data-label="Other code catchers"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td></tr>
-        <tr><th scope="row">Email codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail, Gmail, other mail</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail only</td><td class="no" data-label="Other code catchers">Rarely</td></tr>
-        <tr><th scope="row">Sign-in links</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, and shows where they lead</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="Other code catchers">No</td></tr>
-        <tr><th scope="row">Code history</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>7 days, searchable</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="Other code catchers">Rarely</td></tr>
-        <tr><th scope="row">Two-step codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Bitwarden</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Passwords</td><td class="no" data-label="Other code catchers">No</td></tr>
-        <tr><th scope="row">Touch ID lock</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="Other code catchers">No</td></tr>
-        <tr><th scope="row">Languages</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>35</td><td class="no" data-label="Built-in macOS autofill">Not stated</td><td class="has" data-label="Other code catchers"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Up to 6</td></tr>
-        <tr><th scope="row">Open source</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="has" data-label="Other code catchers"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Some</td></tr>
-        <tr><th scope="row">Needs Accessibility access</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Only to type for you</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>No</td><td class="has" data-label="Other code catchers"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Usually</td></tr>
+        <tr><th scope="row">Works in</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Safari (other browsers on macOS 26)</td><td class="has" data-label="2FHey"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Any app</td></tr>
+        <tr><th scope="row">Email codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail, Gmail, other mail</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail only</td><td class="no" data-label="2FHey">No</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Mail only</td></tr>
+        <tr><th scope="row">Sign-in links</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes, and shows where they lead</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="2FHey">No</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Code history</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>7 days, searchable</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="2FHey">No</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Two-step codes</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Bitwarden</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Apple Passwords</td><td class="no" data-label="2FHey">No</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Touch ID lock</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="no" data-label="2FHey">No</td><td class="no" data-label="MessAuto">No</td></tr>
+        <tr><th scope="row">Languages</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>35</td><td class="no" data-label="Built-in macOS autofill">Not stated</td><td class="has" data-label="2FHey"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>6</td><td class="no" data-label="MessAuto">Not stated</td></tr>
+        <tr><th scope="row">Open source</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="no" data-label="Built-in macOS autofill">No</td><td class="has" data-label="2FHey"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td></tr>
+        <tr><th scope="row">Needs Accessibility access</th><td class="us" data-label="CodeCatch"><svg class="yes mark" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Only to type for you</td><td class="has" data-label="Built-in macOS autofill"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>No</td><td class="has" data-label="2FHey"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>To paste and for its shortcut</td><td class="has" data-label="MessAuto"><svg class="yes grey" viewBox="208 208 608 608" aria-hidden="true"><use href="#mark"/></svg>Yes</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="fine">Other code catchers: the apps we compared in October 2026. Details: <a href="/vs/2fhey/">CodeCatch vs 2FHey</a>, <a href="/vs/messauto/">CodeCatch vs MessAuto</a>.</p>
+  <p class="fine">As of October 2026. The details: <a href="/vs/2fhey/">CodeCatch vs 2FHey</a>, <a href="/vs/messauto/">CodeCatch vs MessAuto</a>.</p>
 </section>
 
 <section class="steps">
@@ -554,6 +553,10 @@
     <p>macOS 15 or later, on Apple silicon or Intel. To get SMS codes on your Mac, turn on Text Message Forwarding on your iPhone.</p>
   </details>
   <details>
+    <summary>Codes from text messages don’t show up. What do I check?</summary>
+    <p>Your Mac only gets texts that your iPhone forwards. On your iPhone, open Settings → Apps → Messages → <b>Text Message Forwarding</b> and turn on your Mac. If the option or your Mac is missing, check that both use the same Apple Account (on the Mac: Messages → Settings → iMessage), then turn iMessage off and on again on the iPhone. The iPhone must also be on and online. <a href="/guides/verification-code-autofill-chrome-mac/#sms-codes">More fixes</a>.</p>
+  </details>
+  <details>
     <summary>What if CodeCatch misses a code?</summary>
     <p><a href="https://github.com/ugzv/CodeCatch/issues/new?template=bug_report.yml" rel="noopener">Report it on GitHub</a>. Send the message with the code replaced by another number. It becomes a test, so the next version catches it.</p>
   </details>
@@ -569,7 +572,7 @@
     </a>
     <a class="button quiet" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>View the source</a>
   </div>
-  <p class="fine">macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
 </section>
 
 </main>

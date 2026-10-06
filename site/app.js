@@ -1,5 +1,5 @@
 // The hero plays what the app does: a code arrives, the banner slides in with the code
-// already copied, ⌘V pastes it into the page. Then a sign-in link arrives. With reduced motion it shows the end state, still.
+// already copied, ⌘V pastes it into the page. Then a code by email, then a sign-in link. With reduced motion it shows the end state, still.
 (() => {
   const $ = (id) => document.getElementById(id);
   const banner = $("banner"), code = $("banner-code"), left = $("banner-left"), menubar = $("menubar-code");
@@ -9,7 +9,8 @@
   const grouped = (digits) => digits.slice(0, 3) + " " + digits.slice(3);
   let timers = [], digits = "482913", seconds = 598;
 
-  const after = (ms, run) => timers.push(setTimeout(run, ms));
+  // With reduced motion every step runs at once, so a scene shows its end state, still.
+  const after = (ms, run) => still ? run() : timers.push(setTimeout(run, ms));
   const setCopied = (on) => {
     copy.classList.toggle("copied", on);
     copy.querySelector("span").textContent = on ? "Copied" : "Copy";
@@ -22,42 +23,91 @@
     ring.style.setProperty("--p", seconds / 600);
   };
 
-  function play() {
-    timers.forEach(clearTimeout);
-    timers = [];
-    digits = String(Math.floor(100000 + Math.random() * 900000));
-    seconds = 599;
-    tick();
-    code.textContent = grouped(digits);
+  // Every scene sets the sign-in page it happens on; the code scenes also set who sent
+  // the code. The text scene's values are the ones in the HTML.
+  const page = $("stage").querySelector(".window"), tile = banner.querySelector(".tile");
+  const read = (el) => el.tagName === "IMG" ? el.getAttribute("src") : el.textContent;
+  const texted = { ...Object.fromEntries([...$("stage").querySelectorAll("[data-fill]")].map((el) => [el.dataset.fill, read(el)])), brand: "google" };
+  const emailed = {
+    brand: "notion", icon: "/assets/services/notion.png", tab: "Log in – Notion", url: "notion.so/login",
+    title: "Log in", note: "We sent a login code to y•••@gmail.com. Check your inbox.", prefix: "", button: "Continue",
+    via: "/assets/services/gmail.png", who: "Notion", from: "Personal",
+  };
+  const linked = {
+    brand: "slack", icon: "/assets/services/slack.png", tab: "Check your email – Slack", url: "slack.com/signin",
+    title: "Check your email", note: "We sent a sign-in link to you@work.com. It expires in 30 minutes.", prefix: "", button: "Open Mail",
+  };
+  const fill = (root, values) => {
+    for (const el of root.querySelectorAll("[data-fill]")) el.tagName === "IMG" ? el.src = values[el.dataset.fill] : el.textContent = values[el.dataset.fill];
+  };
+  const setPage = (values) => {
+    fill(page, values);
+    page.dataset.brand = values.brand;
     typed.textContent = "";
     field.classList.remove("on");
+  };
+  const codeScene = (values) => ({ length: 5500, run() {
+    setPage(values);
+    after(350, () => {  // once the last banner has faded out
+      fill(banner, values);
+      tile.classList.toggle("bleed", values !== texted);
+      digits = String(Math.floor(100000 + Math.random() * 900000));
+      seconds = 599;
+      tick();
+      code.textContent = grouped(digits);
+      setCopied(false);
+    });
+    after(550, () => { banner.classList.add("on"); menubar.textContent = grouped(digits); });
+    after(1100, () => setCopied(true));  // auto-copy: on the clipboard as the banner lands
+    after(1900, () => keys.classList.add("on"));
+    after(2300, paste);
+    after(3300, () => keys.classList.remove("on"));
+  } });
+
+  // Each scene runs alone and the next starts when its time is up;
+  // hovering a chip stops that clock and holds its scene on screen.
+  const chips = [...$("types").children];
+  const scenes = [
+    codeScene(texted),
+    codeScene(emailed),
+    { length: 4800, run() { setPage(linked); after(550, () => linkBanner.classList.add("on")); } },
+  ];
+  let current = 0, next, due, remaining;
+
+  const wait = (ms) => {
+    clearTimeout(next);
+    if (still) return;
+    due = Date.now() + ms;
+    next = setTimeout(() => show((current + 1) % scenes.length), ms);
+  };
+  function stop() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    clearTimeout(next);
+  }
+  function show(index) {
+    stop();
+    current = index;
     banner.classList.remove("on");
     linkBanner.classList.remove("on");
     keys.classList.remove("on");
     menubar.textContent = "";
-    setCopied(false);
-    after(900, () => { banner.classList.add("on"); menubar.textContent = grouped(digits); });
-    after(1500, () => setCopied(true));  // auto-copy: on the clipboard as the banner lands
-    after(2600, () => keys.classList.add("on"));
-    after(3100, paste);
-    after(4300, () => keys.classList.remove("on"));
-    after(7000, () => { banner.classList.remove("on"); menubar.textContent = ""; });
-    after(7700, () => linkBanner.classList.add("on"));
-    after(12200, () => linkBanner.classList.remove("on"));
-    after(13200, play);
+    chips.forEach((chip, i) => chip.classList.toggle("on", i === index));
+    scenes[index].run();
+    wait(scenes[index].length);
   }
+  chips.forEach((chip, i) => {
+    chip.addEventListener("mouseenter", () => { if (i !== current) show(i); clearTimeout(next); remaining = due - Date.now(); });
+    chip.addEventListener("mouseleave", () => wait(remaining));
+    chip.addEventListener("click", () => show(i));
+  });
 
-  if (still) {
-    code.textContent = grouped(digits);
-    menubar.textContent = grouped(digits);
-    banner.classList.add("on");
-    setCopied(true);
-    paste();
-  } else {
+  if (still) show(0);
+  else {
     setInterval(tick, 1000);
     // Only while the stage is on screen: no timers running behind the fold.
     new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) play(); else { timers.forEach(clearTimeout); timers = []; }
+      if (entry.isIntersecting) show(0); else stop();
     }, { threshold: 0.35 }).observe($("stage"));
   }
   // The popover's search really filters its rows, as in the app.
