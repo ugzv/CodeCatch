@@ -85,6 +85,14 @@ struct CodeRow: View {
                         .foregroundStyle(copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
                 }
             }
+            // The right-click actions, findable: in a fixed slot so the code never shifts as it appears.
+            Menu { CodeMenu(item: item) } label: { GlyphLabel(symbol: "ellipsis") }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .frame(width: 24, height: 24)
+                .opacity(hovering || selected ? 1 : 0)
+                .help("More")
+                .accessibilityLabel("More actions")
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 7)
