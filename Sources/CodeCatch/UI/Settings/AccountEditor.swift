@@ -49,6 +49,11 @@ struct AccountEditor: View {
                                 .padding(.horizontal, 5).padding(.vertical, 1).background(Capsule().fill(.blue.opacity(0.12)))
                         }
                     }
+                    // Google and Microsoft require this notice right before their consent screen.
+                    if !usesSignIn {
+                        Text("CodeCatch reads your inbox on this Mac to find codes and sign-in links. It can't send, change or delete mail, and your mail is never sent to us.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 if usesSignIn {
                     // The provider fills in the address, and its API needs no server settings.
