@@ -11,6 +11,8 @@ import Testing
     let search: CodeSearch
     private(set) var copied: [String] = []
     private(set) var typed: [String] = []
+    private(set) var opened: [URL] = []
+    var onConfirmLink: (() -> Bool)?
     private(set) var writes = 0
     private(set) var removals = 0
     var authenticationAllowed = true
@@ -35,13 +37,16 @@ import Testing
 
     func makeModel(session: VaultSession? = nil) -> AppModel {
         let monitor = SourceMonitor(watchMail: { _, _ in }, hasCredential: { _ in false }, defaults: defaults)
+        let policy = UnlockPolicy(load: { false }, save: { _ in }, authenticate: { [self] in
+            ownerChecks += 1
+            if !ownerConfirms { throw CancellationError() }
+        })
         return AppModel(vaultSession: session ?? self.session, monitor: monitor, search: search,
                         defaults: defaults, copyToClipboard: { [weak self] value, _ in self?.copied.append(value) },
                         typeCode: { [weak self] code in self?.typed.append(code) },
-                        confirmOwner: { [self] in
-                            ownerChecks += 1
-                            if !ownerConfirms { throw CancellationError() }
-                        })
+                        unlockPolicy: policy,
+                        confirmLink: { [self] _, _, _, _ in onConfirmLink?() ?? true },
+                        openURL: { [weak self] in self?.opened.append($0) })
     }
 
     func storedSession() -> VaultSession {
@@ -80,7 +85,7 @@ private func monitoringMessage() -> IncomingMessage {
     func turningOnUnlockWithMacAlwaysAsksTheOwner(scenario: (unlocked: Bool, confirms: Bool)) async throws {
         let fixture = try MonitoringFixture()
         defer { fixture.cleanUp() }
-        if scenario.unlocked { try await fixture.model.authenticate() }
+        if scenario.unlocked { try await fixture.session.unlock() }
         fixture.ownerConfirms = scenario.confirms
         await fixture.model.setUnlockWithMac(true)
 
@@ -101,6 +106,93 @@ private func monitoringMessage() -> IncomingMessage {
         #expect(fixture.ownerChecks == 1)
         #expect(!fixture.model.monitoring(Prefs.unlockWithMac))
         #expect(!fixture.model.isUnlocked)
+    }
+
+    @Test func writableUnlockPreferenceCannotBypassProtectedConsentOrAuthentication() async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        fixture.defaults.set(true, forKey: Prefs.unlockWithMac)
+        fixture.authenticationAllowed = false
+        let model = fixture.makeModel(session: fixture.storedSession())
+        #expect(!model.monitoring(Prefs.unlockWithMac))
+        await #expect(throws: (any Error).self) { try await model.authenticate() }
+        #expect(!model.isUnlocked)
+    }
+
+    enum RetainedRemoval: CaseIterable { case ignore, dismiss, clear, disableFeatures }
+
+    @Test(arguments: RetainedRemoval.allCases)
+    func removedReceivedRowCannotCopyCodeCopyLinkOrOpen(_ removal: RetainedRemoval) async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        fixture.model.ingest(monitoringMessage())
+        let retained = try #require(fixture.model.items.first { !$0.code.isEmpty && $0.link != nil })
+        try await fixture.session.unlock()
+        switch removal {
+        case .ignore: fixture.model.ignore("support@example.com")
+        case .dismiss: fixture.model.dismiss(retained)
+        case .clear: fixture.model.clearHistory()
+        case .disableFeatures:
+            fixture.model.setMonitoring(Prefs.receivedCodes, enabled: false)
+            fixture.model.setMonitoring(Prefs.signInLinks, enabled: false)
+        }
+        try #require(fixture.model.items.isEmpty)
+        fixture.model.copy(retained)
+        fixture.model.copyLink(retained)
+        fixture.model.open(retained)
+        #expect(fixture.copied.isEmpty)
+        #expect(fixture.opened.isEmpty)
+    }
+
+    @Test(arguments: RetainedRemoval.allCases)
+    func removalDuringLinkConfirmationPreventsLateOpen(_ removal: RetainedRemoval) async throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        var message = monitoringMessage()
+        message.senderID = "support@other.example"
+        fixture.model.ingest(message)
+        let retained = try #require(fixture.model.items.first { $0.link != nil })
+        try #require(retained.linkNotice?.warns == true)
+        try await fixture.session.unlock()
+        var confirmations = 0
+        fixture.onConfirmLink = {
+            confirmations += 1
+            switch removal {
+            case .ignore: fixture.model.ignore("support@other.example")
+            case .dismiss: fixture.model.dismiss(retained)
+            case .clear: fixture.model.clearHistory()
+            case .disableFeatures: fixture.model.setMonitoring(Prefs.signInLinks, enabled: false)
+            }
+            return true
+        }
+        fixture.model.open(retained)
+        #expect(confirmations == 1)
+        #expect(fixture.opened.isEmpty)
+    }
+
+    @Test(arguments: [false, true])
+    func identicalCodeAndDateFromDifferentSendersOrAccountsStaySeparate(_ differentAccount: Bool) throws {
+        let fixture = try MonitoringFixture()
+        defer { fixture.cleanUp() }
+        let first = monitoringMessage()
+        var second = first
+        if differentAccount {
+            second.sourceKey = "other-mail-account"
+            second.sourceLabel = "Other account"
+        } else {
+            second.senderID = "security@other.example"
+        }
+        fixture.model.ingest(first)
+        fixture.model.ingest(second)
+        let rows = fixture.model.items.filter { $0.code == "482913" }
+        #expect(rows.count == 2)
+        #expect(Set(rows.map(\.id)).count == 2)
+        if differentAccount {
+            #expect(Set(rows.map(\.sourceKey)) == Set([first.sourceKey, second.sourceKey]))
+        } else {
+            #expect(rows.contains { $0.sender == first.senderID })
+            #expect(rows.contains { $0.sender == second.senderID })
+        }
     }
 
     @Test(arguments: [(true, true), (true, false), (false, true), (false, false)])
@@ -296,7 +388,8 @@ private func monitoringMessage() -> IncomingMessage {
         let session = fixture.storedSession()
         let model = fixture.makeModel(session: session)
         model.setMonitoring(Prefs.bitwarden, enabled: false)
-        let item = CodeItem(monitoringMessage(), code: "482913", link: nil)
+        model.ingest(monitoringMessage())
+        let item = try #require(model.items.first { !$0.code.isEmpty })
         fixture.authenticationAllowed = false
         model.copy(item)
         await model.unlocked { model.copy(item) }?.value

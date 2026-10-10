@@ -106,12 +106,12 @@ struct AgentsTab: View {
             .disabled(!access.config.enabled)
             Section("Permissions") {
                 SettingRow(symbol: "exclamationmark.shield.fill", color: .red, title: "Allow All Without Asking",
-                           subtitle: access.config.allowAll ? "Any agent gets codes without asking." : nil,
-                           info: "Like skipping permission prompts in Claude Code. Every code goes to any agent that asks, and sign-in links too if they are on. You still see each one in a banner and in Request History. A text that doesn't name its site still asks. Turning this on asks for \(DeviceAuthentication.unlockMethods).",
+                           subtitle: access.config.allowAll ? "Automatic sharing is on." : nil,
+                           info: "Any agent can receive codes automatically, and sign-in links too if they are on. Email needs a verified sender; Apple Mail and generic IMAP codes still ask. A text that doesn't name its site also asks. You see each release in a banner and Request History. Turning this on asks for \(DeviceAuthentication.unlockMethods).",
                            isOn: Binding(get: { access.config.allowAll }, set: { on in Task { await access.setAllowAll(on) } }))
                     .disabled(!access.config.enabled)
                 SettingRow(symbol: "checkmark.shield.fill", color: .green, title: "Always Allowed", subtitle: rulesSummary,
-                           info: "Apps that get codes without asking you. To add one, choose Always Allow on a request. Rules and Allow All give out at most 20 codes an hour in all. After that, CodeCatch asks again.") {
+                           info: "Apps that get codes without asking you. Unverified email always asks. To add an app, choose Always Allow on a request. Rules and Allow All give out at most 20 codes an hour in all. After that, CodeCatch asks again.") {
                     Button("Edit…") { showingRules = true }
                 }
                 SettingRow(symbol: "clock.arrow.circlepath", color: .teal, title: "Request History", subtitle: historySummary,
@@ -159,7 +159,7 @@ struct AgentsTab: View {
     }
 
     private var rulesSummary: String {
-        if access.config.allowAll { return "Everything, while Allow All is on" }
+        if access.config.allowAll { return "All agents, while Allow All is on" }
         let rules = access.config.rules
         guard let first = rules.first else { return "None" }
         let name = first.site ?? "All codes from \(first.app.name)"

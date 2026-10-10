@@ -244,3 +244,184 @@ private actor FakeGmail: MailAPI {
     #expect(late.first?.text.contains("Use 482913") == true)
     #expect(try store.newMessages().isEmpty)
 }
+
+private actor BurstyAPIInbox: MailAPI {
+    let completed: AsyncStream<String>.Continuation
+    var failOnce: Bool
+    let count: Int
+    var cursors: [String] = []
+    init(failOnce: Bool, count: Int, completed: AsyncStream<String>.Continuation) {
+        self.failOnce = failOnce
+        self.count = count
+        self.completed = completed
+    }
+    func cursor() -> String { "start" }
+    func inbox(since date: Date, limit: Int) -> [String] { [] }
+    func added(since cursor: String) throws -> (ids: [String], cursor: String) {
+        cursors.append(cursor)
+        if cursor == "end" { completed.yield(cursor); throw CancellationError() }
+        return ((1...count).map(String.init), "end")
+    }
+    func message(_ id: String, account: MailAccount) throws -> IncomingMessage? {
+        if id == String(count > 50 ? 58 : 8), failOnce { failOnce = false; throw IMAPError.timeout }
+        return burstMessage(id, account: account)
+    }
+}
+
+private actor BurstyIMAPInbox: MailConnection {
+    let capabilities: Set<String> = ["IDLE"]
+    let completed: AsyncStream<String>.Continuation
+    var failOnce: Bool
+    let count: Int
+    var fetches: [[Int]] = []
+    init(failOnce: Bool, count: Int, completed: AsyncStream<String>.Continuation) {
+        self.failOnce = failOnce
+        self.count = count
+        self.completed = completed
+    }
+    func openInbox(_ account: MailAccount) -> [IMAPConnection.Response] {
+        [.init(text: "* OK [UIDVALIDITY 1]", literals: []), .init(text: "* OK [UIDNEXT 1]", literals: [])]
+    }
+    func search(_ criteria: String) throws -> [Int] {
+        if criteria.hasPrefix("SINCE") { return [] }
+        if criteria == "UID \(count + 1):*" { completed.yield(criteria); throw CancellationError() }
+        let first = Int(criteria.dropFirst(4).prefix(while: { $0 != ":" }))!
+        return Array(first...count)
+    }
+    func fetch(_ uids: [Int], account: MailAccount) throws -> [IncomingMessage] {
+        guard !uids.isEmpty else { return [] }
+        fetches.append(uids)
+        if failOnce, uids.contains(count > 50 ? 58 : 8) { failOnce = false; throw IMAPError.timeout }
+        return uids.map { burstMessage(String($0), account: account) }
+    }
+    func idle(renewAfter: TimeInterval) {}
+    func command(_ cmd: String, timeout: TimeInterval) -> [IMAPConnection.Response] { [] }
+    func close() {}
+}
+
+private func burstMessage(_ id: String, account: MailAccount) -> IncomingMessage {
+    IncomingMessage(text: "Your code is 482913", senderName: "Example", senderID: "example.com",
+                    sourceKey: account.id.uuidString, sourceLabel: "Test", date: Date(), isMail: true, messageID: id)
+}
+
+@Test(arguments: [false, true], [16, 76]) @MainActor
+func apiCursorCannotSkipFreshMailAfterBurstOrFailedFetch(failOnce: Bool, count: Int) async {
+    let completed = AsyncStream<String>.makeStream()
+    let inbox = BurstyAPIInbox(failOnce: failOnce, count: count, completed: completed.continuation)
+    var delivered: [String] = []
+    let watcher = Task {
+        await APIWatcher.watch(MailAccount(label: "Test", host: MailAccount.gmailHost, user: "test@example.invalid"),
+                               status: { _ in }, deliver: { if let id = $0.messageID { delivered.append(id) } },
+                               mailbox: inbox, poll: 0.001, retryDelay: 0)
+    }
+    let deadline = Task { try? await Task.sleep(for: .seconds(2)); completed.continuation.finish() }
+    var result: String?
+    for await value in completed.stream { result = value; break }
+    watcher.cancel()
+    deadline.cancel()
+    await watcher.value
+    #expect(result == "end")
+    #expect(delivered == (1...count).map(String.init))
+    #expect(await inbox.cursors.prefix(failOnce ? 3 : 2) == (failOnce ? ["start", "start", "end"] : ["start", "end"]))
+}
+
+@Test(arguments: [false, true], [16, 76]) @MainActor
+func imapCursorCannotSkipFreshMailAfterBurstOrFailedFetch(failOnce: Bool, count: Int) async {
+    let completed = AsyncStream<String>.makeStream()
+    let inbox = BurstyIMAPInbox(failOnce: failOnce, count: count, completed: completed.continuation)
+    var delivered: [String] = []
+    let watcher = Task {
+        await MailWatcher.watch(MailAccount(label: "Test", host: "example.invalid", user: "test@example.invalid"),
+                                status: { _ in }, deliver: { if let id = $0.messageID { delivered.append(id) } },
+                                connection: { inbox }, retryDelay: 0)
+    }
+    let deadline = Task { try? await Task.sleep(for: .seconds(2)); completed.continuation.finish() }
+    var result: String?
+    for await value in completed.stream { result = value; break }
+    watcher.cancel()
+    deadline.cancel()
+    await watcher.value
+    #expect(result == "UID \(count + 1):*")
+    #expect(delivered == (1...count).map(String.init))
+    var expected = stride(from: 1, through: count, by: 50).map { Array($0...min($0 + 49, count)) }
+    if failOnce { expected.append(expected.last!) }
+    #expect(await inbox.fetches == expected)
+}
+
+private actor GraphPages {
+    var requests: [URL] = []
+    let pages: [Data]
+    init(_ pages: [[String: Any]]) throws {
+        self.pages = try pages.map { try JSONSerialization.data(withJSONObject: $0) }
+    }
+    func send(_ request: URLRequest) throws -> Data {
+        requests.append(request.url!)
+        guard requests.count <= pages.count else { throw IMAPError.timeout }
+        return pages[requests.count - 1]
+    }
+}
+
+private let graphInbox = "https://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages"
+
+@Test(arguments: [graphInbox, "https://graph.microsoft.com/v1.0/users/mailbox-id/mailFolders/folder-id/messages"])
+func outlookTimestampTiesCannotHideMailOnLaterPages(endpoint: String) async throws {
+    let time = "2026-10-10T12:00:00Z"
+    let first = (1...50).map { ["id": String($0), "receivedDateTime": time] }
+    let last = [["id": "51", "receivedDateTime": time], ["id": "52", "receivedDateTime": "2026-10-10T12:00:01Z"]]
+    let pages = try GraphPages([["value": first, "@odata.nextLink": endpoint + "?$skiptoken=opaque%2Btoken"], ["value": last]])
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    let result = try await api.added(since: time)
+    #expect(result.ids == (1...52).map(String.init))
+    #expect(result.cursor == "2026-10-10T12:00:01Z")
+    #expect(await pages.requests.last?.absoluteString == endpoint + "?$skiptoken=opaque%2Btoken")
+}
+
+@Test(arguments: [
+    "https://attacker.invalid/v1.0/me/mailFolders/inbox/messages?$skip=50",
+    "http://graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$skip=50",
+    "https://graph.microsoft.com:8443/v1.0/me/mailFolders/inbox/messages?$skip=50",
+    "https://attacker@graph.microsoft.com/v1.0/me/mailFolders/inbox/messages?$skip=50",
+    "https://graph.microsoft.com/v1.0/me/messages?$skip=50#fragment",
+])
+func outlookUnsafeNextLinkCannotReceiveAnAuthenticatedRequest(nextLink: String) async throws {
+    let pages = try GraphPages([["value": [["id": "1", "receivedDateTime": "2026-10-10T12:00:00Z"]],
+                                 "@odata.nextLink": nextLink]])
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    await #expect(throws: (any Error).self) { try await api.added(since: "2026-10-10T11:00:00Z") }
+    #expect(await pages.requests.count == 1)
+}
+
+@Test func outlookIncompletePageCannotAdvanceTheCursor() async throws {
+    let pages = try GraphPages([["value": [["id": "1", "receivedDateTime": "2026-10-10T12:00:00Z"]],
+                                 "@odata.nextLink": graphInbox + "?$skip=50"]])
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    await #expect(throws: (any Error).self) { try await api.added(since: "2026-10-10T11:00:00Z") }
+    #expect(await pages.requests.count == 2)
+}
+
+@Test func outlookPaginationCycleCannotPollForeverOrReturnPartialMail() async throws {
+    let next = graphInbox + "?$skip=50"
+    let pages = try GraphPages(Array(repeating: ["value": [], "@odata.nextLink": next], count: 3))
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    await #expect(throws: (any Error).self) { try await api.added(since: "2026-10-10T11:00:00Z") }
+    #expect(await pages.requests.count == 2)
+}
+
+@Test func outlookLargeBacklogCannotStallAtAnArbitraryPageLimit() async throws {
+    let pages = try GraphPages((1...101).map {
+        var page: [String: Any] = ["value": [["id": String($0), "receivedDateTime": "2026-10-10T12:00:00Z"]]]
+        if $0 < 101 { page["@odata.nextLink"] = graphInbox + "?$skip=\($0)" }
+        return page
+    })
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    let result = try await api.added(since: "2026-10-10T11:00:00Z")
+    #expect(result.ids == (1...101).map(String.init))
+    #expect(result.cursor == "2026-10-10T12:00:00Z")
+    #expect(await pages.requests.count == 101)
+}
+
+@Test func outlookMalformedPageCannotSilentlySkipMail() async throws {
+    let pages = try GraphPages([["value": [["id": "missing-received-time"]]]])
+    let api = OutlookAPI(auth: .issued("fixture-unused"), send: { try await pages.send($0) })
+    await #expect(throws: (any Error).self) { try await api.added(since: "2026-10-10T11:00:00Z") }
+}

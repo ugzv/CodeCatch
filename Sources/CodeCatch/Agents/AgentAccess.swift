@@ -43,6 +43,8 @@ struct AgentConfig: Codable, Equatable {
     /// Sign-in links may go to agents at all. A link signs the agent in as the user, so it's off until
     /// turned on; then links follow the same card, rules and Allow All as codes.
     var links = false
+    /// Automatic releases share the protected store with the grants they consume.
+    var releases: [Date] = []
 
     init(enabled: Bool = false, rules: [AgentRule] = [], allowAll: Bool = false, links: Bool = false) {
         self.enabled = enabled; self.rules = rules; self.allowAll = allowAll; self.links = links
@@ -55,6 +57,7 @@ struct AgentConfig: Codable, Equatable {
         rules = try c.decodeIfPresent([AgentRule].self, forKey: .rules) ?? []
         allowAll = try c.decodeIfPresent(Bool.self, forKey: .allowAll) ?? false
         links = try c.decodeIfPresent(Bool.self, forKey: .links) ?? false
+        releases = try c.decodeIfPresent([Date].self, forKey: .releases) ?? []
     }
 }
 
@@ -118,7 +121,7 @@ final class AgentAccess: ObservableObject {
     /// Set by a lock, sleep or turning access off once a code is on the card; ends the request even
     /// after Allow, up to the release itself.
     private var cancelled: String?
-    private static let logKey = "agentLog", releasesKey = "agentRuleReleases"
+    private static let logKey = "agentLog"
 
     private enum Decision { case allow(Always?), deny, timeout, cancelled(String) }
 
@@ -207,11 +210,16 @@ final class AgentAccess: ObservableObject {
         // A rule, or Allow All; never for an SMS that names no site, and past the hourly cap the user is asked.
         // Under Allow All the release is Allow All's, so the notice's Turn Off stops what released it.
         let rule = config.allowAll ? nil : rule(for: item, caller: caller), releases = recentRuleReleases
-        if !unnamed, rule != nil || config.allowAll, releases.count < Self.ruleLimit {
-            defaults.set((releases + [now()]).map(\.timeIntervalSince1970), forKey: Self.releasesKey)
-            release(item, query, caller, log: rule == nil ? "Allowed by Allow All" : "Allowed by rule")
-            present(.notice(item, caller, rule))
-            return .success(item)
+        if !unnamed, item.origin != .mail || item.senderVerified == true,
+           rule != nil || config.allowAll, releases.count < Self.ruleLimit {
+            var updated = config
+            updated.releases = releases + [now()]
+            // Count durably before releasing; a storage failure falls back to explicit approval.
+            if store(updated) {
+                release(item, query, caller, log: rule == nil ? "Allowed by Allow All" : "Allowed by rule")
+                present(.notice(item, caller, rule))
+                return .success(item)
+            }
         }
         self.request?.item = item
         self.request?.unnamed = unnamed
@@ -231,7 +239,8 @@ final class AgentAccess: ObservableObject {
             }
             denials = 0
             // A site rule needs the sender's domain; without one it must not quietly become "every site".
-            if let always, let app = caller.app, !unnamed, always == .allSites || item.domain != nil {
+            if let always, let app = caller.app, !unnamed, item.origin != .mail || item.senderVerified == true,
+               always == .allSites || item.domain != nil {
                 addRule(AgentRule(app: app, site: always == .site ? item.domain : nil, added: now()))
             }
             release(item, query, caller, log: always == nil ? "Allowed" : "Allowed, and always from now on")
@@ -256,8 +265,7 @@ final class AgentAccess: ObservableObject {
 
     /// Releases by rule in the last hour. Kept across restarts, so quitting doesn't reset the cap.
     private var recentRuleReleases: [Date] {
-        (defaults.array(forKey: Self.releasesKey) as? [Double] ?? []).map(Date.init(timeIntervalSince1970:))
-            .filter { now().timeIntervalSince($0) < 3600 }
+        config.releases.filter { now().timeIntervalSince($0) < 3600 }
     }
 
     private func release(_ item: CodeItem, _ query: SiteQuery, _ caller: AgentCaller, log outcome: String) {

@@ -11,7 +11,7 @@ final class AppModel: ObservableObject {
     #else
     static let shared = AppModel()
     #endif
-    /// Lifetime when the message doesn't state one; also the duplicate window.
+    /// Lifetime when the message doesn't state one.
     nonisolated static let defaultValidity: TimeInterval = 600
     /// Sign-in links usually live longer than codes.
     nonisolated static let linkValidity: TimeInterval = 1800
@@ -39,7 +39,7 @@ final class AppModel: ObservableObject {
     private let defaults: UserDefaults
     private let copyToClipboard: (String, UUID) -> Void
     private let typeCode: (String) -> Void
-    private let confirmOwner: @MainActor () async throws -> Void
+    private let unlockPolicy: UnlockPolicy
     /// Asks before a suspect link opens: (site, warning, details, the email's "Show in …" button) → go ahead.
     typealias LinkConfirmation = @MainActor (String, String, String, (title: String, run: () -> Void)?) -> Bool
     private let confirmLink: LinkConfirmation
@@ -63,7 +63,7 @@ final class AppModel: ObservableObject {
          accounts: [MailAccount]? = nil,
          copyToClipboard: @escaping (String, UUID) -> Void = { Clipboard.copy($0, id: $1) },
          typeCode: (@MainActor (String) -> Void)? = nil,
-         confirmOwner: (@MainActor () async throws -> Void)? = nil,
+         unlockPolicy: UnlockPolicy? = nil,
          confirmLink: LinkConfirmation? = nil,
          openURL: (@MainActor (URL) -> Void)? = nil) {
         self.defaults = defaults
@@ -74,11 +74,12 @@ final class AppModel: ObservableObject {
         self.accounts = accounts ?? MailAccount.load(from: defaults)
         Prefs.register(in: defaults)
         ignoredSenders = defaults.stringArray(forKey: Prefs.ignoredSenders) ?? []
-        self.vaultSession = vaultSession ?? VaultStorage.session(defaults: defaults)
+        let policy = unlockPolicy ?? VaultStorage.unlockPolicy()
+        self.unlockPolicy = policy
+        self.vaultSession = vaultSession ?? VaultStorage.session(defaults: defaults, unlockPolicy: policy)
         self.monitor = monitor ?? SourceMonitor(defaults: defaults)
         self.search = search ?? CodeSearch(defaults: defaults)
         self.copyToClipboard = copyToClipboard
-        self.confirmOwner = confirmOwner ?? { try await DeviceAuthentication().authenticate(reason: "show codes without asking each time") }
         let session = self.vaultSession
         self.typeCode = typeCode ?? { code in
             // Re-check the same session and settings when queued typing begins.
@@ -136,6 +137,7 @@ final class AppModel: ObservableObject {
         DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsUnlocked"), object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in self?.unlockWithMac() }
         }
+        unlockPolicy.restore()
         unlockWithMac()
         agents.restore()
         agents.present = AgentPanel.present
@@ -160,7 +162,7 @@ final class AppModel: ObservableObject {
 
     // MARK: - Sources
 
-    func monitoring(_ key: String) -> Bool { defaults.bool(forKey: key) }
+    func monitoring(_ key: String) -> Bool { key == Prefs.unlockWithMac ? unlockPolicy.enabled : defaults.bool(forKey: key) }
     var receiving: Bool { [Prefs.receivedCodes, Prefs.signInLinks, Prefs.resetLinks].contains(where: monitoring) }
 
     func setMonitoring(_ key: String, enabled: Bool) {
@@ -302,11 +304,6 @@ final class AppModel: ObservableObject {
             items[index] = updated
             return
         }
-        guard !items.contains(where: { seen in
-                  abs(seen.received.timeIntervalSince(message.date)) < Self.defaultValidity
-                      && (item.isLink ? seen.link == item.link : seen.code == item.code)
-              })
-        else { return }
         items.append(item)
         items.sort { $0.received > $1.received }
 
@@ -348,20 +345,15 @@ final class AppModel: ObservableObject {
     /// Turning the prompt off asks for it one last time, even while unlocked, so no one at an
     /// unlocked Mac can switch it off for later. Turning it back on locks now.
     func setUnlockWithMac(_ enabled: Bool) async {
-        guard enabled else {
-            objectWillChange.send()
-            defaults.set(false, forKey: Prefs.unlockWithMac)
-            vaultSession.lock()
-            return
-        }
+        if !enabled { vaultSession.lock() }
         unlockError = nil
-        do { try await confirmOwner() } catch {
+        defer { objectWillChange.send() }
+        do {
+            try await unlockPolicy.setEnabled(enabled)
+            if enabled { try await authenticate() }
+        } catch {
             if !Self.isCancel(error) { unlockError = error.localizedDescription }
-            return
         }
-        objectWillChange.send()
-        defaults.set(true, forKey: Prefs.unlockWithMac)
-        try? await authenticate()
     }
 
     /// On wake the lock screen may still be up; codes wait for it.
@@ -395,6 +387,10 @@ final class AppModel: ObservableObject {
             guard let saved = vault.first(where: { $0.id == item.sourceKey }), let fresh = CodeItem(saved, at: date) else { return }
             current = fresh
             search.recordUse(current)
+        } else {
+            guard let retained = items.first(where: { $0.id == item.id && $0.copyValue == item.copyValue }),
+                  !isIgnored(retained.sender) else { return }
+            current = retained
         }
         objectWillChange.send()  // the clipboard is not observed: redraw the "Copied" marks now, not on the next tick
         copyToClipboard(current.copyValue, current.id)
@@ -402,8 +398,14 @@ final class AppModel: ObservableObject {
     }
 
     func copyLink(_ item: CodeItem) {
-        guard isUnlocked, monitoring(item.linkSetting), let link = item.link else { return }
+        guard let item = retainedLink(item), let link = item.link else { return }
         copyToClipboard(link.absoluteString, item.id)
+    }
+
+    private func retainedLink(_ item: CodeItem) -> CodeItem? {
+        guard isUnlocked, let current = items.first(where: { $0.id == item.id && $0.link == item.link }),
+              current.link != nil, monitoring(current.linkSetting), !isIgnored(current.sender) else { return nil }
+        return current
     }
 
     /// Manual selection only; re-check retained state after an unlock or source change.
@@ -429,7 +431,7 @@ final class AppModel: ObservableObject {
 
     /// Only ever on the user's click: links are never opened automatically.
     func open(_ item: CodeItem, leavingMenu: Bool = false) {
-        guard isUnlocked, monitoring(item.linkSetting), let link = item.link else { return }
+        guard let item = retainedLink(item), let link = item.link else { return }
         // The row only marks a suspect site; the full warning stops the click itself, with what a check
         // needs (sender, subject, the real address) and a way to read the email first.
         if let notice = item.linkNotice, notice.warns, let destination = item.destination, let host = destination.host {
@@ -439,7 +441,7 @@ final class AppModel: ObservableObject {
                            "Link: \(address.count > 60 ? address.prefix(59) + "…" : address)"].joined(separator: "\n")
             let email = source(of: item).map { source in (title: source.title, run: { [openURL] in openURL(source.url) }) }
             guard confirmLink(ServiceIdentity.registrable(host), notice.text, details, email),
-                  isUnlocked else { return }  // the Mac may have locked while the alert was up
+                  retainedLink(item) != nil else { return }
         }
         if leavingMenu { NSApp.hide(nil) }
         openURL(link)

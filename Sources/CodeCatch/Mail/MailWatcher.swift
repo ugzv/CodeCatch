@@ -62,10 +62,14 @@ enum MailWatcher {
                     backoff = retryDelay
                     let canIdle = await conn.capabilities.contains("IDLE")
                     while !Task.isCancelled {
-                        let new = try await conn.search("UID \(lastUID! + 1):*").filter { $0 > lastUID! }
-                        // After a long outage only the newest can still hold a live code.
-                        try await receive(Array(new.suffix(15)))
-                        lastUID = new.max() ?? lastUID
+                        let new = try await conn.search("UID \(lastUID! + 1):*").filter { $0 > lastUID! }.sorted()
+                        if new.isEmpty { try await receive([]) }
+                        // Commit each delivered batch so a later fetch failure resumes at that boundary.
+                        for start in stride(from: 0, to: new.count, by: 50) {
+                            let batch = Array(new[start..<min(start + 50, new.count)])
+                            try await receive(batch)
+                            lastUID = batch.last
+                        }
                         if canIdle { try await conn.idle(renewAfter: 540) } else {
                             try await Task.sleep(for: .seconds(20))
                             _ = try await conn.command("NOOP", timeout: 30)

@@ -33,6 +33,27 @@ private func copyVault(_ id: String = "saved-login",
 }
 
 @MainActor @Suite struct AppModelCopyTests {
+    @Test func removingReceivedRowDuringAuthenticationPreventsLateCopy() async throws {
+        let suite = "AppModelCopyTests.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        for key in [Prefs.showBanner, Prefs.autoCopy, Prefs.sound] { defaults.set(false, forKey: key) }
+        Prefs.register(in: defaults)
+        var duringAuthentication: (() -> Void)?
+        let session = VaultSession(authenticate: { duringAuthentication?() }, read: { [] }, write: { _ in }, remove: {})
+        let sink = CopySink()
+        let model = AppModel(vaultSession: session, search: CodeSearch(defaults: defaults), defaults: defaults, copyToClipboard: sink.copy)
+        model.ingest(IncomingMessage(text: "Your verification code is 482913", senderName: "Example",
+                                     senderID: "support@example.com", sourceKey: "test-mail", sourceLabel: "Test",
+                                     date: Date().addingTimeInterval(-300), isMail: true))
+        let retained = try #require(model.items.first)
+        duringAuthentication = { model.ignore("support@example.com") }
+        await model.unlocked { model.copy(retained) }?.value
+        #expect(model.isUnlocked)
+        #expect(model.items.isEmpty)
+        #expect(sink.values.isEmpty)
+    }
+
     @Test func lockedVaultRejectsBothSuppliedAndPreviouslyVisibleRows() async throws {
         let vault = copyVault()
         let date = Date(timeIntervalSince1970: 60)
@@ -98,15 +119,19 @@ private func copyVault(_ id: String = "saved-login",
 
     /// A locked app must not hand out a received code, and a refused authentication must not run the action.
     @Test func receivedCodeCopiesOnlyAfterAuthentication() async throws {
-        let item = CodeItem(IncomingMessage(text: "Your code is 482913", senderName: "", senderID: "Example", sourceKey: "s",
-                                            sourceLabel: "Messages", date: Date(), isMail: false), code: "482913", link: nil)
+        let message = IncomingMessage(text: "Your code is 482913", senderName: "", senderID: "Example", sourceKey: "s",
+                                      sourceLabel: "Messages", date: Date().addingTimeInterval(-300), isMail: false)
         var allowed = false
         let session = VaultSession(authenticate: { if !allowed { throw CancellationError() } }, read: { [] }, write: { _ in }, remove: {})
         let suite = "AppModelCopyTests.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
+        for key in [Prefs.showBanner, Prefs.autoCopy, Prefs.sound] { defaults.set(false, forKey: key) }
+        Prefs.register(in: defaults)
         let sink = CopySink()
         let model = AppModel(vaultSession: session, search: CodeSearch(defaults: defaults), defaults: defaults, copyToClipboard: sink.copy)
+        model.ingest(message)
+        let item = try #require(model.items.first)
 
         model.copy(item)
         await model.unlocked { model.copy(item) }?.value

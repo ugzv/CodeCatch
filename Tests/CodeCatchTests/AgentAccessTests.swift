@@ -413,6 +413,117 @@ private extension Result where Success == CodeItem, Failure == AgentError {
 
     enum CapSource: String, CaseIterable { case rule, allowAll, ruleThenAllowAll }
 
+    @Test(arguments: [false, true], [Optional<Bool>.none, .some(false)])
+    func unverifiedMailSenderCannotUseAutomaticApproval(_ allowAll: Bool, _ senderVerified: Bool?) async throws {
+        let h = Harness(AgentConfig(enabled: true, rules: [AgentRule(app: agentApp, site: "github.com")],
+                                    allowAll: allowAll))
+        h.add(item(senderVerified: senderVerified))
+        let task = h.start()
+        try await h.waitForCard()
+        #expect(h.marked.isEmpty)
+        #expect(h.notices == 0)
+        h.access.deny()
+        #expect(await task.value.code == .denied)
+    }
+
+    enum MailIngressTrust: CaseIterable { case verifiedGmail, missingReceiver, forgedIssuer }
+
+    @Test(arguments: MailIngressTrust.allCases, [false, true])
+    func onlyTrustedReceiverVerificationSurvivesMailIngressToAutomaticRelease(
+        _ trust: MailIngressTrust, _ allowAll: Bool
+    ) async throws {
+        let issuer = trust == .forgedIssuer ? "attacker.invalid" : "mx.google.com"
+        let raw = "Authentication-Results: \(issuer); dmarc=pass header.from=github.com\r\n"
+            + "Received: from mail.github.com\r\nFrom: GitHub <no-reply@github.com>\r\n"
+            + "Subject: Your GitHub verification code\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n"
+            + "Your GitHub verification code is 482913."
+        let parsed = MIME.parse(Data(raw.utf8), receiver: trust == .missingReceiver ? nil : .gmail)
+        var message = IncomingMessage(text: parsed.text, subject: parsed.subject, senderName: parsed.fromName,
+                                      senderID: parsed.fromAddress, sourceKey: "test-mail", sourceLabel: "Test",
+                                      date: Date().addingTimeInterval(-1), isMail: true, links: parsed.links)
+        message.senderVerified = parsed.senderVerified
+        let h = Harness(AgentConfig(enabled: true, rules: [AgentRule(app: agentApp, site: "github.com")],
+                                    allowAll: allowAll))
+        for key in ["autoCopy", "showHUD", "sound", "autoType"] { h.defaults.set(false, forKey: key) }
+        Prefs.register(in: h.defaults)
+        let model = AppModel(
+            vaultSession: VaultSession(authenticate: {}, read: { [] }, write: { _ in }, remove: {}),
+            monitor: SourceMonitor(watchMail: { _, _ in }, hasCredential: { _ in false }, defaults: h.defaults),
+            defaults: h.defaults, accounts: [], copyToClipboard: { _, _ in })
+        model.ingest(message)
+        let extracted = try #require(model.items.first { $0.code == "482913" })
+        h.items = model.items
+        let task = h.start()
+        if trust == .verifiedGmail {
+            #expect(extracted.senderVerified == true)
+            #expect(await task.value.item?.id == extracted.id)
+            #expect(h.cards == 0)
+            #expect(h.marked.map(\.id) == [extracted.id])
+        } else {
+            #expect(extracted.senderVerified != true)
+            try await h.waitForCard()
+            #expect(h.marked.isEmpty)
+            #expect(h.notices == 0)
+            h.access.deny()
+            #expect(await task.value.code == .denied)
+        }
+        #expect(h.authCalls == 0)
+    }
+
+    @Test(arguments: [false, true])
+    func clearingDefaultsCannotResetPersistedAutomaticReleaseLimit(_ allowAll: Bool) async throws {
+        let h = Harness(AgentConfig(enabled: true, rules: [AgentRule(app: agentApp, site: nil)],
+                                    allowAll: allowAll))
+        for _ in 0..<20 {
+            h.add(item())
+            try #require(await h.start().value.item != nil)
+        }
+        let persisted = try #require(h.saved.last)
+        #expect(persisted.releases.count == 20)
+        h.defaults.removeObject(forKey: "agentRuleReleases")
+
+        let restarted = Harness(persisted)
+        restarted.defaults.set([], forKey: "agentRuleReleases")
+        restarted.add(item())
+        let task = restarted.start()
+        try await restarted.waitForCard()
+        #expect(restarted.marked.isEmpty)
+        #expect(restarted.notices == 0)
+        restarted.access.deny()
+        #expect(await task.value.code == .denied)
+    }
+
+    @Test(arguments: [false, true])
+    func failedReleaseHistorySaveCannotReleaseAutomatically(_ allowAll: Bool) async {
+        let h = Harness(AgentConfig(enabled: true, rules: [AgentRule(app: agentApp, site: nil)],
+                                    allowAll: allowAll))
+        h.saveFails = true
+        h.add(item())
+        let task = h.start(timeout: 0.2)
+        _ = await h.until { h.access.request?.item != nil || h.finished }
+        if h.access.request?.item != nil { h.access.deny() }
+        #expect(await task.value.item == nil)
+        #expect(h.marked.isEmpty)
+        #expect(h.notices == 0)
+    }
+
+    @Test func persistedReleaseHistorySurvivesCodableRoundTrip() throws {
+        var config = AgentConfig(enabled: true)
+        config.releases = [Date(timeIntervalSince1970: 1_790_000_000)]
+        let decoded = try JSONDecoder().decode(AgentConfig.self, from: JSONEncoder().encode(config))
+        #expect(decoded.releases == config.releases)
+    }
+
+    @Test func legacyConfigWithoutReleaseHistoryStillDecodes() throws {
+        let config = AgentConfig(enabled: true)
+        let encoded = try JSONEncoder().encode(config)
+        var legacy = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        legacy.removeValue(forKey: "releases")
+        let decoded = try JSONDecoder().decode(AgentConfig.self, from: JSONSerialization.data(withJSONObject: legacy))
+        #expect(decoded.enabled)
+        #expect(decoded.releases.isEmpty)
+    }
+
     /// Allow All must count against the same hourly cap as rules, not get a fresh one.
     @Test(arguments: CapSource.allCases)
     func pastHourlyRuleLimitTheUserIsAskedAgain(_ source: CapSource) async throws {
@@ -475,6 +586,27 @@ private extension Result where Success == CodeItem, Failure == AgentError {
         _ = try await h.decide(item(), caller: unverified) { await $0.allow(always) }
         #expect(h.access.config.rules.isEmpty)
         #expect(h.saved.allSatisfy { $0.rules.isEmpty })
+    }
+
+    @Test(arguments: [AgentAccess.Always.site, .allSites], [Optional<Bool>.none, .some(false)])
+    func unverifiedSenderAllowsOnlyThisCodeAndCannotCreateAutomaticApproval(
+        _ always: AgentAccess.Always, _ senderVerified: Bool?
+    ) async throws {
+        let h = Harness()
+        let first = item(senderVerified: senderVerified)
+        let result = try await h.decide(first) { await $0.allow(always) }
+        #expect(result.item?.id == first.id)
+        #expect(h.authCalls == 1)
+        #expect(h.access.config.rules.isEmpty)
+        #expect(h.saved.allSatisfy { $0.rules.isEmpty })
+
+        h.add(item(senderVerified: senderVerified))
+        let next = h.start()
+        try await h.waitForCard()
+        #expect(h.marked.map(\.id) == [first.id])
+        #expect(h.notices == 0)
+        h.access.deny()
+        #expect(await next.value.code == .denied)
     }
 
     @Test(arguments: [AgentAccess.Always.site, .allSites])

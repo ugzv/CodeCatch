@@ -66,7 +66,7 @@ final class AppleMailStore: LocalStore {
                 """
             return try db.query(sql, position) { s -> IncomingMessage? in
                 let id = sqlite3_column_int64(s, 0)
-                let mail = Self.body(of: id, mailbox: text(s, 6), in: version).map(MIME.parse)
+                let mail = Self.body(of: id, mailbox: text(s, 6), in: version).map { MIME.parse($0) }
                 if mail != nil {
                     waiting[id] = nil
                 } else if waiting[id] != nil {

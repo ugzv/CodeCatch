@@ -94,8 +94,12 @@ enum APIWatcher {
                 backoff = retryDelay
                 while !Task.isCancelled {
                     let (added, next) = try await mailbox.added(since: cursor!)
-                    // After a long outage only the newest can still hold a live code.
-                    try await receive(Array(added.filter { !seen.contains($0) }.suffix(15)))
+                    let pending = added.filter { !seen.contains($0) }
+                    if pending.isEmpty { try await receive([]) }
+                    // Bound memory while keeping every fresh message, including recovery bursts.
+                    for start in stride(from: 0, to: pending.count, by: 50) {
+                        try await receive(Array(pending[start..<min(start + 50, pending.count)]))
+                    }
                     cursor = next
                     try await Task.sleep(for: .seconds(poll))
                 }

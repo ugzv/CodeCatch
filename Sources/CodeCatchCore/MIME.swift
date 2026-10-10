@@ -26,31 +26,69 @@ public struct MailLink: Equatable, Sendable {
 /// Just enough RFC 5322/2045/2047 to turn a raw email into readable text:
 /// multipart walking, base64 / quoted-printable, charsets, encoded-word headers, HTML to text.
 public enum MIME {
-    public static func parse(_ raw: Data) -> MailMessage {
+    /// Only direct, authenticated receiver APIs establish this trust boundary. Never infer it from a message header.
+    public enum Receiver: Sendable { case gmail, microsoft }
+
+    public static func parse(_ raw: Data, receiver: Receiver? = nil) -> MailMessage {
         let (headers, body, results) = split(latin1(raw))
         let (name, address) = parseAddress(header(headers["from"]))
         let (text, links) = bodyText(headers: headers, body: body)
         let id = headers["message-id"]?.trimmingCharacters(in: CharacterSet(charactersIn: "<> \t\r\n"))
         return MailMessage(fromName: name, fromAddress: address, subject: header(headers["subject"]), text: text, links: links,
-                           senderVerified: senderVerified(results), messageID: id?.isEmpty == false ? id : nil)
+                           senderVerified: senderVerified(results, receiver: receiver, fromAddress: address), messageID: id?.isEmpty == false ? id : nil)
     }
 
-    /// The receiving server's DMARC verdict on the From domain (RFC 8601). Only the top block, from the
-    /// user's own server, counts: headers below it came with the message and can be forged. A bare DKIM
-    /// or SPF failure is not a verdict: forwarding breaks signatures on genuine mail. nil without one.
-    static func senderVerified(_ results: [String]) -> Bool? {
-        guard let top = results.first else { return nil }
-        let server = authServer(top)
-        let own = results.prefix { authServer($0) == server }.flatMap { $0.lowercased().split(separator: ";") }
-            .map { $0.replacingOccurrences(of: #"\s*=\s*"#, with: "=", options: .regularExpression).trimmingCharacters(in: .whitespaces) }
-        if own.contains(where: { $0.hasPrefix("dmarc=pass") }) { return true }
-        return own.contains(where: { $0.hasPrefix("dmarc=fail") }) ? false : nil
+    /// Receiver identity comes from the authenticated API, never from the message. Receivers must
+    /// remove forged results claiming their identity (RFC 8601 section 7.1). Only their first header
+    /// counts; combining later headers lets an attacker override a genuine failure.
+    static func senderVerified(_ results: [String], receiver: Receiver?, fromAddress: String) -> Bool? {
+        guard let receiver, let top = results.first, let parts = authenticationParts(top), let first = parts.first else { return nil }
+        switch receiver {
+        case .gmail:
+            guard first.lowercased() == "mx.google.com" else { return nil }
+        case .microsoft:
+            guard first.range(of: #"^(spf|dkim|dmarc|compauth)\s*="#, options: [.regularExpression, .caseInsensitive]) != nil else { return nil }
+        }
+        let verdicts = parts.filter { $0.range(of: #"^dmarc(?:\s|=|$)"#, options: [.regularExpression, .caseInsensitive]) != nil }
+        guard verdicts.count == 1, let verdict = verdicts.first,
+              let result = verdict.range(of: #"^dmarc\s*=\s*(pass|fail)(?=\s|$)"#, options: [.regularExpression, .caseInsensitive]),
+              let domain = fromAddress.split(separator: "@", omittingEmptySubsequences: false).last,
+              fromAddress.filter({ $0 == "@" }).count == 1 else { return nil }
+        let property = try! NSRegularExpression(pattern: #"(?:^|\s)header\.from\s*=\s*(?:"([^"]+)"|([^\s]+))(?=\s|$)"#, options: .caseInsensitive)
+        let ns = verdict as NSString
+        let matches = property.matches(in: verdict, range: NSRange(location: 0, length: ns.length))
+        guard matches.count == 1, let match = matches.first else { return nil }
+        let value = ns.substring(with: match.range(at: match.range(at: 1).location == NSNotFound ? 2 : 1))
+        guard !domain.isEmpty, value.lowercased() == domain.lowercased() else { return nil }
+        return verdict[result].lowercased().trimmingCharacters(in: .whitespaces).hasSuffix("pass")
     }
 
-    /// "mx.google.com; dkim=pass …" → "google.com"; iCloud's several hosts share one. Microsoft writes none.
-    private static func authServer(_ result: String) -> String? {
-        let id = result.split(separator: ";").first?.trimmingCharacters(in: .whitespaces) ?? ""
-        return id.contains("=") ? nil : ServiceIdentity.registrable(String(id.split(separator: " ").first ?? ""))
+    /// Split method results without treating quoted or commented semicolons as new methods.
+    private static func authenticationParts(_ value: String) -> [String]? {
+        var parts: [String] = [], part = "", comments = 0, quoted = false, escaped = false
+        for c in value {
+            if escaped {
+                if comments == 0 { part.append(c) }
+                escaped = false
+            } else if c == "\\", quoted || comments > 0 {
+                if comments == 0 { part.append(c) }
+                escaped = true
+            } else if comments > 0 {
+                if c == "(" { comments += 1 }
+                if c == ")" { comments -= 1 }
+            } else if c == "\"" {
+                quoted.toggle(); part.append(c)
+            } else if !quoted, c == "(" {
+                comments = 1; part.append(" ")
+            } else if !quoted, c == ";" {
+                parts.append(part.trimmingCharacters(in: .whitespacesAndNewlines)); part = ""
+            } else {
+                part.append(c)
+            }
+        }
+        guard !quoted, comments == 0, !escaped else { return nil }
+        parts.append(part.trimmingCharacters(in: .whitespacesAndNewlines))
+        return parts
     }
 
     /// Encoded words, or raw UTF-8 (RFC 6532), which the Latin-1 read left as mojibake.
@@ -95,30 +133,16 @@ public enum MIME {
     private static func bodyText(headers: [String: String], body: String) -> (String, [MailLink]) {
         var plain: String?, html: String?
         collect(headers: headers, body: body, plain: &plain, html: &html, depth: 0)
-        let links = html.map(anchors) ?? plain.map(bareLinks) ?? []
+        let parsedHTML = html.map(readHTML)
+        let links = parsedHTML?.links ?? plain.map(bareLinks) ?? []
         if let plain, !plain.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return (plain, links) }
-        return (html.map(htmlToText) ?? "", links)
+        return (parsedHTML?.text ?? "", links)
     }
 
-    private static let anchor = try! NSRegularExpression(
-        pattern: #"<a\b[^>]*?\bhref\s*=\s*["']([^"']+)["'][^>]*>(.*?)</a>"#, options: [.caseInsensitive, .dotMatchesLineSeparators])
-    private static let altText = try! NSRegularExpression(pattern: #"\balt\s*=\s*["']([^"']*)["']"#, options: .caseInsensitive)
     private static let bareURL = try! NSRegularExpression(pattern: #"https?://[^\s<>"'\])]+"#)
 
     /// `<a href>` with its visible text (or an image button's alt text).
-    static func anchors(_ html: String) -> [MailLink] {
-        let ns = html as NSString
-        return anchor.matches(in: html, range: NSRange(location: 0, length: ns.length)).map { m in
-            let inner = ns.substring(with: m.range(at: 2))
-            var label = htmlToText(inner).replacingOccurrences(of: "\n", with: " ")
-            if label.isEmpty, let alt = altText.firstMatch(in: inner, range: NSRange(location: 0, length: (inner as NSString).length)) {
-                label = (inner as NSString).substring(with: alt.range(at: 1))
-            }
-            // Browsers drop tabs and newlines anywhere in a URL.
-            let url = decodeEntities(ns.substring(with: m.range(at: 1))).replacingOccurrences(of: #"[\t\r\n]"#, with: "", options: .regularExpression)
-            return MailLink(url: url, label: label)
-        }
-    }
+    static func anchors(_ html: String) -> [MailLink] { readHTML(html).links }
 
     /// Plain-text mail: each URL labelled by the rest of its line, or, alone on its line,
     /// by the text line above it ("Sign in here:" then the URL).
@@ -241,16 +265,115 @@ public enum MIME {
     /// "&amp;" last, so "&amp;lt;" stays the text "&lt;".
     private static let entities = [("&nbsp;", " "), ("&lt;", "<"), ("&gt;", ">"), ("&quot;", "\""), ("&#39;", "'"), ("&apos;", "'"), ("&zwnj;", ""), ("&shy;", ""), ("&amp;", "&")]
 
-    static func htmlToText(_ html: String) -> String {
-        var s = html
-        for (pattern, template) in [
-            (#"(?is)<(head|style|script|title)\b.*?</\1>"#, " "),
-            (#"(?i)<br\s*/?>|</(p|div|tr|td|th|h\d|li|table|center)>"#, "\n"),
-            (#"(?s)<[^>]+>"#, " "),
-        ] {
-            s = s.replacingOccurrences(of: pattern, with: template, options: .regularExpression)
+    /// A forward-only scan keeps malformed markup from repeatedly searching the remaining message.
+    /// This extracts text and links; it does not render or execute HTML.
+    private static func readHTML(_ html: String) -> (text: String, links: [MailLink]) {
+        let bytes = Array(html.utf8)
+        var i = 0, text = "", links: [MailLink] = [], hidden: [UInt8]?
+        var anchor: (url: String, text: String, alt: String?)?
+        func append(_ value: String) { text += value; anchor?.text += value }
+        func string(_ range: Range<Int>) -> String { String(decoding: bytes[range], as: UTF8.self) }
+        let commentStart: [UInt8] = [60, 33, 45, 45], commentEnd: [UInt8] = [45, 45, 62]
+        func matches(_ expected: [UInt8], at offset: Int) -> Bool {
+            guard offset + expected.count <= bytes.count else { return false }
+            return expected.enumerated().allSatisfy { j, b in
+                let actual = bytes[offset + j]
+                return (actual >= 65 && actual <= 90 ? actual + 32 : actual) == b
+            }
         }
-        return decodeEntities(s).split(separator: "\n")
+        while i < bytes.count {
+            if let close = hidden {
+                if !matches(close, at: i) { i += 1; continue }
+                let end = i + close.count
+                guard end < bytes.count, htmlSpace(bytes[end]) || bytes[end] == 62 else { i += 1; continue }
+            }
+            if bytes[i] != 60 {
+                let start = i
+                while i < bytes.count, bytes[i] != 60 { i += 1 }
+                append(string(start..<i)); continue
+            }
+            if matches(commentStart, at: i) {
+                i += 4
+                while i < bytes.count, !matches(commentEnd, at: i) { i += 1 }
+                i = min(i + 3, bytes.count); continue
+            }
+            let start = i + 1
+            var end = start, quote: UInt8?
+            while end < bytes.count {
+                let c = bytes[end]
+                if let q = quote { if c == q { quote = nil } }
+                else if c == 34 || c == 39 { quote = c }
+                else if c == 62 { break }
+                end += 1
+            }
+            guard end < bytes.count else { break }
+            i = end + 1
+            var cursor = start
+            while cursor < end, htmlSpace(bytes[cursor]) { cursor += 1 }
+            let closing = cursor < end && bytes[cursor] == 47
+            if closing { cursor += 1 }
+            let nameStart = cursor
+            while cursor < end, !htmlSpace(bytes[cursor]), bytes[cursor] != 47 { cursor += 1 }
+            let name = string(nameStart..<cursor).lowercased()
+            if hidden != nil { hidden = nil; append(" "); continue }
+            if !closing, ["style", "script", "title"].contains(name) {
+                hidden = Array(("</" + name).utf8); append(" "); continue
+            }
+            if name == "br" || closing && ["p", "div", "tr", "td", "th", "h1", "h2", "h3", "h4", "h5", "h6", "li", "table", "center"].contains(name) {
+                append("\n")
+            } else { append(" ") }
+            if name == "a", closing {
+                if let current = anchor {
+                    let label = readableHTMLText(current.text).replacingOccurrences(of: "\n", with: " ")
+                    links.append(MailLink(url: current.url, label: label.isEmpty ? decodeEntities(current.alt ?? "") : label))
+                }
+                anchor = nil
+            } else if !closing, name == "a" || name == "img" {
+                let attributes = htmlAttributes(bytes, start: cursor, end: end)
+                if name == "a" {
+                    anchor = attributes["href"].map {
+                        (decodeEntities($0).filter { $0 != "\t" && $0 != "\r" && $0 != "\n" }, "", nil)
+                    }
+                } else if anchor?.alt == nil { anchor?.alt = attributes["alt"] }
+            }
+        }
+        return (readableHTMLText(text), links)
+    }
+
+    private static func htmlSpace(_ byte: UInt8) -> Bool { byte == 32 || (byte >= 9 && byte <= 13) }
+
+    /// Only href and alt are needed. Consume each attribute once, including unquoted values.
+    private static func htmlAttributes(_ bytes: [UInt8], start: Int, end: Int) -> [String: String] {
+        var result: [String: String] = [:], i = start
+        while i < end {
+            while i < end, htmlSpace(bytes[i]) || bytes[i] == 47 { i += 1 }
+            let start = i
+            while i < end, !htmlSpace(bytes[i]), bytes[i] != 61, bytes[i] != 47 { i += 1 }
+            let name = String(decoding: bytes[start..<i], as: UTF8.self).lowercased()
+            while i < end, htmlSpace(bytes[i]) { i += 1 }
+            guard i < end, bytes[i] == 61 else { continue }
+            i += 1
+            while i < end, htmlSpace(bytes[i]) { i += 1 }
+            let quote = i < end && (bytes[i] == 34 || bytes[i] == 39) ? bytes[i] : nil
+            if quote != nil { i += 1 }
+            let valueStart = i
+            while i < end {
+                if let quote { if bytes[i] == quote { break } }
+                else if htmlSpace(bytes[i]) { break }
+                i += 1
+            }
+            if (name == "href" || name == "alt"), result[name] == nil {
+                result[name] = String(decoding: bytes[valueStart..<i], as: UTF8.self)
+            }
+            if quote != nil, i < end { i += 1 }
+        }
+        return result
+    }
+
+    static func htmlToText(_ html: String) -> String { readHTML(html).text }
+
+    private static func readableHTMLText(_ text: String) -> String {
+        decodeEntities(text).split(separator: "\n")
             .map { $0.split(whereSeparator: { $0 == " " || $0 == "\t" || $0 == "\r" }).joined(separator: " ") }
             .filter { !$0.isEmpty }
             .joined(separator: "\n")

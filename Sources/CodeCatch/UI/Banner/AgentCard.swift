@@ -90,8 +90,12 @@ struct AgentRequestCard: View {
                 if request.unnamed {
                     note("This text doesn't say which site it is for. Allow it only if you just asked \(request.query.label) for a code.")
                 }
+                if item.origin == .mail, item.senderVerified != true {
+                    note("The sender isn't verified. Check the email before allowing this code.")
+                }
                 HStack {
-                    if request.caller.app != nil, !request.unnamed, !item.isLink {
+                    if request.caller.app != nil, !request.unnamed, !item.isLink,
+                       item.origin != .mail || item.senderVerified == true {
                         Menu("Always Allow") {
                             if let domain = item.domain {
                                 Button("\(domain) Codes from \(request.caller.name)") { Task { await access.allow(.site) } }

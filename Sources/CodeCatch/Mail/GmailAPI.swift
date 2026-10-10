@@ -46,7 +46,7 @@ struct GmailAPI: MailAPI {
         let json: [String: Any]
         do { json = try await get("messages/\(id)", ["format": "raw"]) } catch MailAPIError.gone { return nil }
         guard let raw = (json["raw"] as? String).flatMap(Data.init(base64URL:)) else { return nil }
-        let m = MIME.parse(raw.prefix(262_144))
+        let m = MIME.parse(raw.prefix(262_144), receiver: .gmail)
         let received = (json["internalDate"] as? String).flatMap(Double.init).map { Date(timeIntervalSince1970: $0 / 1000) }
         return IncomingMessage(text: m.text, subject: m.subject, senderName: m.fromName, senderID: m.fromAddress,
                                sourceKey: account.id.uuidString, sourceLabel: account.label, date: received ?? Date(),

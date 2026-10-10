@@ -7,12 +7,17 @@ import LocalAuthentication
 enum VaultStorage {
     private static let key = "bitwarden.codes"
 
-    static func session(defaults: UserDefaults = .standard) -> VaultSession {
+    static func unlockPolicy() -> UnlockPolicy {
         let authentication = DeviceAuthentication()
-        let session = VaultSession(authenticate: {
-            // "Unlock with Your Mac": being past the Mac's own lock screen is enough.
-            if !defaults.bool(forKey: Prefs.unlockWithMac) { try await authentication.authenticate() }
-        }, read: {
+        return UnlockPolicy(load: { try Secrets.read("unlock-with-mac") == "true" },
+                            save: { try Secrets.set($0 ? "true" : "false", for: "unlock-with-mac") },
+                            authenticate: { try await authentication.authenticate() },
+                            cancel: { authentication.cancel() })
+    }
+
+    static func session(defaults: UserDefaults = .standard, unlockPolicy: UnlockPolicy? = nil) -> VaultSession {
+        let policy = unlockPolicy ?? self.unlockPolicy()
+        let session = VaultSession(authenticate: { try await policy.authenticate() }, read: {
             guard defaults.bool(forKey: Prefs.bitwarden) else { return [] }
             guard let json = try Secrets.read(key) else { return [] }
             return try JSONDecoder().decode([VaultCode].self, from: Data(json.utf8))
@@ -24,7 +29,7 @@ enum VaultStorage {
             try Secrets.remove(key)
             defaults.removeObject(forKey: Prefs.vaultImportedAt)
         })
-        session.cancelAuthentication = { authentication.cancel() }
+        session.cancelAuthentication = { policy.cancelAuthentication() }
         session.didLock = { _ in Clipboard.clearIfOurs() }
         return session
     }

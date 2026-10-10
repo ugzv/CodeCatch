@@ -54,22 +54,56 @@ import Testing
     #expect(MIME.parse(Data(bare.utf8)) == MailMessage(fromName: "", fromAddress: "", subject: "Vaša koda", text: "Your code: 482913\n"))
 }
 
-/// The receiving server's DMARC verdict on the From domain. Only the top block counts (lower ones came with
-/// the message and can be forged); anything short of a DMARC verdict stays unknown, or genuine mail would warn.
+/// Raw headers do not establish trust; only the first result from the explicitly selected receiver can.
 @Test(arguments: [
-    (["mx.google.com; dkim=pass header.i=@notion.so; spf=pass smtp.mailfrom=notion.so; dmarc=pass (p=REJECT) header.from=notion.so"], true),
-    (["mx.google.com; spf=softfail smtp.mailfrom=evil.com; dmarc=fail (p=NONE) header.from=notion.so"], false),
-    // A forwarding server breaks DKIM on most genuine mail: no verdict, not a failure.
-    (["mail.example.net; dkim=fail reason=\"signature verification failed\" header.d=notion.so"], nil),
-    // Microsoft writes no server id.
-    (["spf=pass (sender IP is 1.2.3.4) smtp.mailfrom=notion.so; dkim=pass (signature was verified) header.d=notion.so;dmarc=pass action=none header.from=notion.so;compauth=pass"], true),
-    // iCloud splits its verdict over several headers from its own hosts.
-    (["dkim-verifier.icloud.com; dkim=none", "dmarc.icloud.com; dmarc=pass header.from=notion.so"], true),
-    // A forged "pass" further down, below the server's own fail, is ignored.
-    (["mx.google.com; dmarc=fail header.from=notion.so", "attacker.example; dmarc=pass header.from=notion.so"], false),
-    ([], nil),
-] as [([String], Bool?)])
-func readsSenderVerdict(results: [String], expected: Bool?) {
-    let raw = results.map { "Authentication-Results: \($0)\r\n" }.joined() + "Received: from x\r\nFrom: Notion <team@mail.notion.so>\r\n\r\nHi"
-    #expect(MIME.parse(Data(raw.utf8)).senderVerified == expected)
+    (.gmail, ["mx.google.com; dmarc=pass header.from=notion.so"], true),
+    (.gmail, ["mx.google.com; dmarc=fail header.from=notion.so"], false),
+    (.gmail, ["mx.google.com; dkim=fail header.d=notion.so"], nil),
+    (.microsoft, ["spf=pass smtp.mailfrom=notion.so; dkim=pass header.d=notion.so; dmarc=pass action=none header.from=notion.so"], true),
+    (.microsoft, ["spf=fail; dmarc=fail header.from=notion.so", "dkim=pass; dmarc=pass header.from=notion.so"], false),
+    (.gmail, ["mx.google.com; dmarc=fail header.from=notion.so", "mx.google.com; dmarc=pass header.from=notion.so"], false),
+    (.gmail, ["attacker.invalid; dmarc=pass header.from=notion.so", "mx.google.com; dmarc=pass header.from=notion.so"], nil),
+    (.gmail, ["mx.google.com.attacker.invalid; dmarc=pass header.from=notion.so"], nil),
+    (.microsoft, ["attacker.invalid; dmarc=pass header.from=notion.so"], nil),
+    (.gmail, ["mx.google.com; dmarc=passjunk header.from=notion.so"], nil),
+    (.gmail, ["mx.google.com; spf=pass (forged; dmarc=pass header.from=notion.so)"], nil),
+    (.gmail, ["mx.google.com; dmarc=pass (receiver verdict) header.from=\"notion.so\""], true),
+    (.gmail, ["mx.google.com; dmarc=pass header.from=attacker.invalid"], nil),
+    (.gmail, ["mx.google.com; dmarc=pass"], nil),
+    (.gmail, ["mx.google.com; dmarc=pass header.from=notion.so; dmarc=fail header.from=notion.so"], nil),
+    (.gmail, ["mx.google.com; dmarc=pass header.from=notion.so header.from=attacker.invalid"], nil),
+    (nil, ["mx.google.com; dmarc=pass header.from=notion.so"], nil),
+    (nil, ["spf=pass; dmarc=pass header.from=notion.so"], nil),
+    (nil, ["dmarc.icloud.com; dmarc=pass header.from=notion.so"], nil),
+    (nil, ["attacker.invalid; dmarc=pass header.from=notion.so"], nil),
+    (nil, [], nil),
+] as [(MIME.Receiver?, [String], Bool?)])
+func untrustedOrConflictingHeadersCannotVerifySender(receiver: MIME.Receiver?, results: [String], expected: Bool?) {
+    let raw = results.map { "Authentication-Results: \($0)\r\n" }.joined() + "Received: from x\r\nFrom: Notion <team@notion.so>\r\n\r\nHi"
+    #expect(MIME.parse(Data(raw.utf8), receiver: receiver).senderVerified == expected)
+}
+
+/// Repeated unclosed tags must not monopolize the mailbox worker or expose hidden markup as codes.
+@Test func malformedHTMLCannotStallMailProcessing() {
+    let start = ContinuousClock.now
+    let styles = String(repeating: "<style>x", count: 20_000)
+    #expect(MIME.htmlToText("Your code: 482913" + styles) == "Your code: 482913")
+    let anchors = String(repeating: "<a href=\"https://example.invalid/\">", count: 6_000)
+    #expect(MIME.anchors(anchors).isEmpty)
+    #expect(start.duration(to: .now) < .seconds(2))
+}
+
+@Test func missingHeadEndTagCannotHideTheMessageBody() {
+    let html = "<head><meta charset=utf-8><title>Hidden</title><style>Hidden</style><body>482913 <a href='https://example.com/login'>Sign in</a>"
+    #expect(MIME.htmlToText(html) == "482913 Sign in")
+    #expect(MIME.anchors(html) == [MailLink(url: "https://example.com/login", label: "Sign in")])
+}
+
+/// A quoted greater-than sign is an attribute value, not the end of a tag.
+@Test func quotedAttributesDoNotExposeHiddenTextOrBreakLinks() {
+    #expect(MIME.htmlToText("<style data-example='>'>482913</style><p>Visible</p>") == "Visible")
+    #expect(MIME.anchors("<a title='>' href='https://example.com/login'><span>Sign in</span></a>")
+        == [MailLink(url: "https://example.com/login", label: "Sign in")])
+    #expect(MIME.anchors("<!-- <a href='https://evil.invalid/login'>Sign in</a> -->").isEmpty)
+    #expect(MIME.anchors("<script><a href='https://evil.invalid/login'>Sign in</a></script>").isEmpty)
 }
