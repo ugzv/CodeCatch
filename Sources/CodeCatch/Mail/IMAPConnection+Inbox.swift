@@ -34,7 +34,8 @@ extension IMAPConnection {
             return IncomingMessage(text: m.text, subject: m.subject, senderName: m.fromName, senderID: m.fromAddress,
                                    sourceKey: account.id.uuidString, sourceLabel: account.label,
                                    date: internalDate.date(from: dateText) ?? Date(), isMail: true, links: m.links,
-                                   messageID: r.number(after: "UID ").map { "\(uidValidity ?? 0):\($0)" }, senderVerified: m.senderVerified)
+                                   messageID: r.number(after: "UID ").map { "\(uidValidity ?? 0):\($0)" }, senderVerified: m.senderVerified,
+                                   internetMessageID: m.messageID)
         }
     }
 }

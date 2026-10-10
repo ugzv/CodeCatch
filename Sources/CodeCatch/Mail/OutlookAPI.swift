@@ -37,14 +37,15 @@ struct OutlookAPI: MailAPI {
     func message(_ id: String, account: MailAccount) async throws -> IncomingMessage? {
         let info: [String: Any], raw: Data
         do {
-            info = try await json("me/messages/\(id)", ["$select": "receivedDateTime"])
+            info = try await json("me/messages/\(id)", ["$select": "receivedDateTime,webLink"])
             raw = try await get("me/messages/\(id)/$value")
         } catch MailAPIError.gone { return nil }
         let m = MIME.parse(raw.prefix(262_144))
         let received = (info["receivedDateTime"] as? String).flatMap { try? Date($0, strategy: .iso8601) }
         return IncomingMessage(text: m.text, subject: m.subject, senderName: m.fromName, senderID: m.fromAddress,
                                sourceKey: account.id.uuidString, sourceLabel: account.label, date: received ?? Date(),
-                               isMail: true, links: m.links, messageID: "outlook:\(id)", senderVerified: m.senderVerified)
+                               isMail: true, links: m.links, messageID: "outlook:\(id)", senderVerified: m.senderVerified,
+                               internetMessageID: m.messageID, webURL: (info["webLink"] as? String).flatMap(URL.init(string:)))
     }
 
     private func list(_ query: [String: String]) async throws -> [(id: String, received: String)] {

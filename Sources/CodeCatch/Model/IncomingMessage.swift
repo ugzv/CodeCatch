@@ -16,6 +16,10 @@ struct IncomingMessage {
     var messageID: String? = nil
     /// The mail server's verdict on the From domain; nil when it left none.
     var senderVerified: Bool? = nil
+    /// The Message-ID header, for opening the email in Mail.
+    var internetMessageID: String? = nil
+    /// The email's own page at its provider (Gmail, Outlook on the web).
+    var webURL: URL? = nil
 
     /// Subject and body: what codes and service names are read from.
     var fullText: String { [subject, text].compactMap { $0 }.joined(separator: "\n") }

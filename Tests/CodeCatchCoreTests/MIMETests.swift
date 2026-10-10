@@ -25,6 +25,7 @@ import Testing
     From: =?UTF-8?Q?GitHub_Securit=C3=A9?= <noreply@github.com>\r
     Subject: =?UTF-8?B?WW91ciBjb2Rl?= is\r
      here\r
+    Message-ID: <a1b2.c3@mail.github.com>\r
     Content-Type: multipart/alternative; boundary="b1"\r
     \r
     --b1\r
@@ -38,6 +39,8 @@ import Testing
     #expect(m.fromName == "GitHub Securité")
     #expect(m.fromAddress == "noreply@github.com")
     #expect(m.subject == "Your code is here")
+    // Kept bare: "Show in Mail" wraps it in its own brackets for message://.
+    #expect(m.messageID == "a1b2.c3@mail.github.com")
     #expect(m.text == "Code:\n482913\n—")
 
     let qp = "Content-Type: text/plain; charset=iso-8859-2\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nVa=B9a koda je 4829=\r\n13"

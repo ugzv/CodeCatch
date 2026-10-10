@@ -50,7 +50,17 @@ struct GmailAPI: MailAPI {
         let received = (json["internalDate"] as? String).flatMap(Double.init).map { Date(timeIntervalSince1970: $0 / 1000) }
         return IncomingMessage(text: m.text, subject: m.subject, senderName: m.fromName, senderID: m.fromAddress,
                                sourceKey: account.id.uuidString, sourceLabel: account.label, date: received ?? Date(),
-                               isMail: true, links: m.links, messageID: "gmail:\(id)", senderVerified: m.senderVerified)
+                               isMail: true, links: m.links, messageID: "gmail:\(id)", senderVerified: m.senderVerified,
+                               internetMessageID: m.messageID, webURL: Self.webURL(id, account: account))
+    }
+
+    /// The message in Gmail on the web, in the right account when several are signed in. `authuser`,
+    /// not /mail/u/<address>/, which Gmail answers with a 404.
+    static func webURL(_ id: String, account: MailAccount) -> URL? {
+        var url = URLComponents(string: "https://mail.google.com/mail/")!
+        url.queryItems = [URLQueryItem(name: "authuser", value: account.user)]
+        url.fragment = "all/\(id)"
+        return url.url
     }
 
     private func get(_ path: String, _ query: [String: String] = [:]) async throws -> [String: Any] {

@@ -9,6 +9,8 @@ public struct MailMessage: Equatable, Sendable {
     public var links: [MailLink] = []
     /// The receiving server's verdict on the From domain; nil when it left none.
     public var senderVerified: Bool? = nil
+    /// The Message-ID header without its angle brackets: what a `message://` link opens in Mail.
+    public var messageID: String? = nil
 }
 
 public struct MailLink: Equatable, Sendable {
@@ -28,8 +30,9 @@ public enum MIME {
         let (headers, body, results) = split(latin1(raw))
         let (name, address) = parseAddress(header(headers["from"]))
         let (text, links) = bodyText(headers: headers, body: body)
+        let id = headers["message-id"]?.trimmingCharacters(in: CharacterSet(charactersIn: "<> \t\r\n"))
         return MailMessage(fromName: name, fromAddress: address, subject: header(headers["subject"]), text: text, links: links,
-                           senderVerified: senderVerified(results))
+                           senderVerified: senderVerified(results), messageID: id?.isEmpty == false ? id : nil)
     }
 
     /// The receiving server's DMARC verdict on the From domain (RFC 8601). Only the top block, from the
