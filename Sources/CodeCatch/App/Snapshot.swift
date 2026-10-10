@@ -49,6 +49,16 @@ enum Snapshot {
         for item in model.items { _ = IconStore.shared.icon(for: item.domain) }
         RunLoop.main.run(until: Date().addingTimeInterval(10))  // let the logos arrive
         let id = model.items.first!.id
+        let terminal = AgentApp(id: "com.apple.Terminal", team: nil, name: "Terminal")
+        if let booking = model.items.first(where: { $0.domain == "booking.com" }), let query = SiteQuery("booking.com") {
+            let caller = AgentCaller(app: terminal, appPath: NSWorkspace.shared.urlForApplication(withBundleIdentifier: terminal.id), process: "claude")
+            model.agents.preview(AgentAccess.Request(caller: caller, query: query, asked: Date().addingTimeInterval(-12), item: booking),
+                                 config: AgentConfig(enabled: true, rules: [AgentRule(app: terminal, site: "github.com"), AgentRule(app: terminal, site: "google.com"),
+                                                                            AgentRule(app: AgentApp(id: "com.googlecode.iterm2", team: "H7V7XYVQ7D", name: "iTerm2"), site: nil)]),
+                                 log: [AgentLogEntry(date: Date(), caller: "Terminal · claude", site: "github.com", outcome: "Allowed"),
+                                       AgentLogEntry(date: Date().addingTimeInterval(-600), caller: "Unverified · python3", site: "google.com", outcome: "Denied"),
+                                       AgentLogEntry(date: Date().addingTimeInterval(-90_000), caller: "iTerm2 · codex", site: "slack.com", outcome: "Not approved in time")])
+        }
         for (scheme, appearance) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
             render(AnyView(BannerCard(id: id).padding(20)), "hud-\(scheme)", appearance, dir)
             render(AnyView(BannerCard(id: model.items[1].id).padding(20)), "hud-mail-\(scheme)", appearance, dir)
@@ -61,6 +71,10 @@ enum Snapshot {
             render(AnyView(AddAccountSheet() { _ in }), "add-account-\(scheme)", appearance, dir)
             render(AnyView(IgnoredSendersSheet()), "ignored-senders-\(scheme)", appearance, dir)
             render(AnyView(AddIgnoredSender { _ in }), "ignore-sender-\(scheme)", appearance, dir)
+            render(AnyView(AgentRequestCard().padding(20)), "agent-card-\(scheme)", appearance, dir)
+            render(AnyView(AgentsTab().frame(width: 560, height: 1000)), "agents-\(scheme)", appearance, dir)
+            render(AnyView(AgentHistorySheet()), "agent-history-\(scheme)", appearance, dir)
+            render(AnyView(AgentRulesSheet()), "agent-rules-\(scheme)", appearance, dir)
             render(AnyView(AccountEditor(account: MailAccount.guess(for: "you@example.com"))), "account-editor-\(scheme)", appearance, dir)
         }
         let blurred = ImageRenderer(content: CodeText(code: "482913", size: 36, concealed: true).padding(12).background(Color.white))

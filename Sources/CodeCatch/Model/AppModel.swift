@@ -19,7 +19,9 @@ final class AppModel: ObservableObject {
     /// How far back codes are listed; re-read from the sources on launch, never stored.
     var history: TimeInterval { Prefs.history(in: defaults) }
 
-    @Published private(set) var items: [CodeItem] = []
+    @Published private(set) var items: [CodeItem] = [] {
+        didSet { agents.itemsChanged() }
+    }
     @Published private(set) var now = Date()
     /// Why the last unlock failed; cleared when the next one starts.
     @Published private(set) var unlockError: String?
@@ -29,6 +31,10 @@ final class AppModel: ObservableObject {
     let monitor: SourceMonitor
     let search: CodeSearch
     let recovery = RecoveryInbox()
+    /// `codecatch` requests. Its switch and rules load in `start`, so tests never read the Keychain.
+    lazy var agents = AgentAccess(items: { [unowned self] in items }, markUsed: { [unowned self] in markUsed($0) },
+                                  authenticate: { try await DeviceAuthentication().authenticate(reason: $0) },
+                                  load: AgentStore.load, save: AgentStore.save, defaults: defaults)
     private var observations = Set<AnyCancellable>()
     private let defaults: UserDefaults
     private let copyToClipboard: (String, UUID) -> Void
@@ -112,12 +118,16 @@ final class AppModel: ObservableObject {
             }
         }
         center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
-            Task { @MainActor in self?.vaultSession.lock() }
+            Task { @MainActor in
+                self?.vaultSession.lock()
+                self?.agents.cancel("The Mac went to sleep before the request was approved.")
+            }
         }
         DistributedNotificationCenter.default().addObserver(forName: .init("com.apple.screenIsLocked"), object: nil, queue: .main) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
                 self.vaultSession.lock()
+                self.agents.cancel("The Mac locked before the request was approved.")
                 guard self.monitoring(Prefs.clearOnLock) else { return }
                 self.clearHistory()
                 Clipboard.clearIfOurs()
@@ -127,6 +137,9 @@ final class AppModel: ObservableObject {
             Task { @MainActor in self?.unlockWithMac() }
         }
         unlockWithMac()
+        agents.restore()
+        agents.present = AgentPanel.present
+        CLIServer.start(model: self)
         LoginItem.sync()
         Hotkeys.sync()
         monitor.start(accounts: accounts)
@@ -297,6 +310,9 @@ final class AppModel: ObservableObject {
         items.sort { $0.received > $1.received }
 
         guard item.shouldAnnounce(at: Date()) else { return }  // backfill: list it, don't announce it
+        // While `codecatch` waits, a new code goes only where the user approves: not onto the
+        // clipboard or into a field, and not onto a banner that would cover the request's card.
+        guard !agents.isWaiting else { return }
         if let code, isUnlocked {
             if defaults.bool(forKey: Prefs.autoCopy) { copyToClipboard(code, item.id) }
             // Opt-in: the code goes to whatever field has focus, so only as it arrives, never later.
@@ -512,6 +528,13 @@ final class AppModel: ObservableObject {
 
     /// The launcher handles matching across all sources in one place.
     var vaultItems: [CodeItem] { vault.compactMap { CodeItem($0, at: now) } }
+
+    /// What `codecatch status` reports: counts only, never account names.
+    var agentStatus: AgentStatus {
+        AgentStatus(appVersion: AppBrand.version, access: agents.config.enabled, rules: agents.config.rules.count,
+                    sourcesWorking: sources.filter { $0.status == .live }.count,
+                    sourcesFailing: sources.filter { $0.status.needsAttention }.count, allowAll: agents.config.allowAll)
+    }
 
     var hasHistory: Bool { !items.isEmpty || !recovery.entries.isEmpty }
 

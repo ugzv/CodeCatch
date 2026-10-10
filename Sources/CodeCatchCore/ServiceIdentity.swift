@@ -28,7 +28,12 @@ public enum ServiceIdentity {
             return isHostname(host) ? registrable(host) : nil
         }
         if let origin = CodeExtractor.originDomain(in: text) { return registrable(origin) }
-        return knownDomains[service.lowercased().filter { !$0.isWhitespace }]
+        return knownDomain(for: service)
+    }
+
+    /// "GitHub" → "github.com", for names in the known-service list.
+    public static func knownDomain(for name: String) -> String? {
+        knownDomains[name.lowercased().filter { !$0.isWhitespace }]
     }
 
     /// Dot-separated labels and nothing else: no path, port or query a sender could add to the logo request.

@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 enum SettingsTab: String {
-    case general, sources, privacy
+    case general, sources, privacy, agents
     static let storageKey = "settingsTab"
     /// The tab Settings shows when it opens next.
     func select() { UserDefaults.standard.set(rawValue, forKey: Self.storageKey) }
@@ -29,8 +29,11 @@ struct SettingsView: View {
                 .tag(SettingsTab.sources)
             PrivacyTab().modifier(SettingsBrandFooter()).tabItem { Label("Privacy", systemImage: "hand.raised") }
                 .tag(SettingsTab.privacy)
+            AgentsTab().modifier(SettingsBrandFooter()).tabItem { Label("Agents", systemImage: "terminal") }
+                .tag(SettingsTab.agents)
         }
-        .frame(width: 560, height: 600)
+        // Tall enough that the longest tab isn't cut off, but never taller than the screen.
+        .frame(width: 560, height: min(760, (NSScreen.main?.visibleFrame.height ?? 800) - 80))
     }
 }
 

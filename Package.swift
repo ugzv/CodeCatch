@@ -13,6 +13,8 @@ let package = Package(
             // The rpath finds Sparkle.framework in the app bundle (install.sh copies it there).
             linkerSettings: [.linkedLibrary("sqlite3"), .unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])]
         ),
+        // `codecatch` in the bundle; never name a product that, it is `CodeCatch` on a case-insensitive disk.
+        .executableTarget(name: "CodeCatchCLI", dependencies: ["CodeCatchCore"]),
         .testTarget(name: "CodeCatchCoreTests", dependencies: ["CodeCatchCore"], exclude: ["code-samples.txt"]),
         .testTarget(name: "CodeCatchTests", dependencies: ["CodeCatch"]),
     ],

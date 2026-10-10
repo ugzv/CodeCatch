@@ -68,3 +68,32 @@ func readsTypedIgnoreEntries(text: String, expected: String?) {
 func offersIgnorableDomain(sender: String, expected: String?) {
     #expect(ServiceIdentity.ignorableDomain(of: sender) == expected)
 }
+
+/// What an agent passes to `codecatch get`: a URL, host, port or service name must find the site,
+/// or the request waits for a code that is already there.
+@Test(arguments: [
+    ("github.com", "github.com"), ("https://github.com/login?return_to=x", "github.com"), ("GitHub", "github.com"),
+    ("accounts.google.com", "google.com"), ("WWW.Example.co.uk:443/path", "example.co.uk"), ("github.com.", "github.com"),
+    ("acme", "acme"),
+])
+func readsAgentSite(text: String, label: String) throws {
+    #expect(try #require(SiteQuery(text)).label == label)
+}
+
+/// Junk must be a usage error, not a query that matches some SMS by accident.
+@Test(arguments: ["", "  ", "not a site!", "@@@", String(repeating: "x", count: 65)])
+func rejectsAgentSite(text: String) {
+    #expect(SiteQuery(text) == nil)
+}
+
+/// Only the sender's domain counts for mail: a "GitHub" display name from evil.com, which picks its own
+/// name, must never be handed out as the GitHub code. Aliases cover sites that mail from another domain.
+@Test(arguments: [
+    ("github.com", "github.com", "GitHub", true), ("github.com", "evil.com", "GitHub", false),
+    ("github.com", "github.io", "GitHub", false), ("github.com", nil, "GitHub", true), ("github.com", nil, "Revolut", false),
+    ("claude.ai", "anthropic.com", "Anthropic", true), ("anthropic.com", "claude.ai", "Claude", false),
+    ("acme", "acme.co.uk", "Acme Ltd", true), ("GitHub", "github.com", "noreply", true),
+] as [(String, String?, String, Bool)])
+func matchesAgentSite(site: String, domain: String?, service: String, expected: Bool) throws {
+    #expect(try #require(SiteQuery(site)).matches(domain: domain, service: service) == expected)
+}

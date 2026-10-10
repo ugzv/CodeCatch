@@ -6,8 +6,16 @@ import Foundation
 enum Probe {
     static let all: [String: () async -> Void] = [
         "--probe": sources, "--probe-google": google, "--probe-vault": vault,
-        "--probe-apple-mail": appleMail, "--probe-messages": messages, "--probe-links": links,
+        "--probe-apple-mail": appleMail, "--probe-messages": messages, "--probe-links": links, "--probe-caller": caller,
     ]
+
+    /// `--probe-caller <pid>`: who the card would name for that process, as `codecatch` requests are labeled.
+    static func caller() async {
+        guard let i = CommandLine.arguments.firstIndex(of: "--probe-caller"), i + 1 < CommandLine.arguments.count,
+              let pid = pid_t(CommandLine.arguments[i + 1]) else { return print("Usage: --probe-caller <pid>") }
+        let caller = CallerIdentity.caller(pid: pid)
+        print("app: \(caller.app.map { "\($0.name) (\($0.id), team \($0.team ?? "Apple"))" } ?? "none, unverified") · process: \(caller.process)")
+    }
 
     /// Checks Google and Microsoft sign-in without a consent: the built-in clients are accepted without a
     /// secret, the mail APIs refuse a bad token instead of hanging, and signed-in accounts can read their inbox.

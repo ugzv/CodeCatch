@@ -80,6 +80,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationWillTerminate(_ notification: Notification) { CLIServer.stop() }
+
     /// codecatch:// links. SwiftUI keeps `application(_:open:)` for its own scenes, so take the event directly.
     func applicationWillFinishLaunching(_ notification: Notification) {
         NSAppleEventManager.shared().setEventHandler(self, andSelector: #selector(openURL(_:reply:)),
