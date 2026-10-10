@@ -353,13 +353,22 @@ section[id] { scroll-margin-top: 60px; }
 .row-pill { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 10px; border-radius: 999px; background: var(--tint); box-shadow: inset 0 0 0 0.500px var(--line); color: var(--text); font: 500 12px/1 var(--font); white-space: nowrap; }
 .row-code { font-size: 15px; font-variant-numeric: tabular-nums; }
 .row.expired .row-pill { color: var(--faint); }
+/* On the clipboard: the code turns blue, its ring goes and a checkmark draws in before it. */
+.row-pill .tick { display: none; font-size: 12px; stroke-dasharray: 21; }
+li.copied .row-pill { color: var(--accent); }
+li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
+.row.copied .ring { display: none; }
+@keyframes draw-on { from { stroke-dashoffset: 21; } to { stroke-dashoffset: 0; } }
+#rows .row:has(.row-code) { cursor: pointer; }
 .row:hover .row-pill { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent)); box-shadow: none; color: #fff; }
 .more { flex: none; margin-left: -3px; color: var(--faint); font-size: 14px; letter-spacing: -0.05em; }
+.row:hover .more { color: var(--muted); }  /* quiet until its row is active, as in the app */
 .pin { font-size: 9px; color: var(--faint); align-self: center; }
 .open { border: 0.500px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--surface); color: var(--text); font: 12px var(--font); box-shadow: 0 0.500px 1px rgba(0, 0, 0, 0.1); }
 .empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
 .popover.locked .rows { padding-top: 2px; }
 .popover.locked .row-code { letter-spacing: 0.12em; color: var(--muted); }
+.popover.locked .row:hover .row-code { color: #fff; }  /* white on the blue pill, as in the app */
 .popover-foot { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-top: 0.500px solid var(--line); color: var(--muted); font-size: 11px; }
 .unlock { display: inline-flex; align-items: center; gap: 5px; border: 0.500px solid var(--line); border-radius: 6px; padding: 3px 9px; background: var(--surface); color: var(--text); font: 12px var(--font); box-shadow: 0 0.500px 1px rgba(0, 0, 0, 0.1); }
 .unlock svg { font-size: 10px; }
@@ -389,7 +398,8 @@ section[id] { scroll-margin-top: 60px; }
     radial-gradient(70% 90% at 0% 100%, color-mix(in srgb, var(--brand-2) 18%, transparent), transparent 70%),
     var(--tint);
 }
-.feature-art .cc { max-width: 100%; }
+/* min-width: 0 lets a mockup shrink below its fixed width on the narrowest phones. */
+.feature-art .cc { max-width: 100%; min-width: 0; }
 .ticks { display: grid; gap: 8px; }
 .ticks li { position: relative; padding-left: 28px; }
 /* List bullets are the CodeCatch mark: orange for what CodeCatch does, grey for plain lists. */
@@ -497,7 +507,7 @@ section[id] { scroll-margin-top: 60px; }
 .principles { display: grid; gap: 14px; padding-top: 88px !important; padding-bottom: 96px !important; border-top: 1px solid var(--line); }
 .principles h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 720; }
 .principles .points { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 48px; margin-top: 14px; max-width: 980px; }
-.principles a, .why a, .faq a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand-2) 60%, transparent); text-underline-offset: 3px; }
+.principles a, .why a, .faq a, .lede a { color: var(--text); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand-2) 60%, transparent); text-underline-offset: 3px; }
 .principles .fine { margin-top: 10px; }
 .principles .fine a { color: var(--muted); }
 
@@ -625,11 +635,15 @@ section[id] { scroll-margin-top: 60px; }
   .compare table { min-width: 0; }
   .compare table, .compare tbody, .compare tr, .compare tbody th, .compare td { display: block; width: auto; }
   .compare thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .compare tbody tr { margin-bottom: 12px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
-  .compare tbody th { padding: 0 0 8px; font-size: 17px; }
-  .compare tbody td, .compare tbody td.us { padding: 8px 0 0; background: none; }
-  .compare td::before { content: attr(data-label); display: block; font-size: 12px; font-weight: 600; color: var(--faint); }
-  .compare td.us::before { color: var(--red); }
+  .compare tbody tr { margin-bottom: 12px; padding: 16px 18px 8px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); }
+  .compare tbody th { padding: 0 0 10px; font-size: 17px; }
+  /* One line per app, its name on the left and its answer on the right; CodeCatch's line tinted. */
+  .compare tbody td { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 7px 0; border-top: 1px solid var(--line); text-align: right; }
+  .compare tbody td.us { margin: 0 -10px; padding: 7px 10px; border: 0; border-radius: 10px; }
+  .compare tbody td.us + td { border-top: 0; }
+  .compare td::before { content: attr(data-label); flex: none; white-space: nowrap; text-align: left; font-size: 14px; font-weight: 500; color: var(--faint); }
+  .compare td.us::before { color: var(--red); font-weight: 600; }
+  .compare td.no { color: var(--faint); }
   .compare .yes { display: none; }
   .privacy { padding-bottom: 72px !important; }
   .why { padding-top: 72px !important; padding-bottom: 72px !important; }
@@ -638,14 +652,22 @@ section[id] { scroll-margin-top: 60px; }
   .footer-top { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .feature-art { min-height: 0; padding: 28px 12px; }
 }
+@media (min-width: 600px) and (max-width: 900px) {
+  .compare tbody { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .compare tbody tr { margin: 0; }
+}
 @media (max-width: 520px) {
   .footer nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Taller links for a thumb, about as far apart as before. */
+  .footer nav div { gap: 0; }
+  .footer nav a, .footer-gh { padding-block: 6px; }
   body { font-size: 16px; }
   .lede { font-size: 18px; }
   .cc { zoom: 0.8; }
   .feature-art { padding: 24px 8px; }
   .stage { aspect-ratio: 2 / 3; }
   .window { right: 5%; top: 38%; }
+  .keys { right: auto; left: 12%; bottom: 3%; }  /* beside the page's button, not over it */
   .menubar span:not(.menubar-app):not(.menubar-right):not(.menubar-cc) { display: none; }
   .menubar-right, .menubar-right span { display: inline-flex !important; }
 }
@@ -653,4 +675,5 @@ section[id] { scroll-margin-top: 60px; }
   html { scroll-behavior: auto; }
   .reveal, .banner, .keys, .ring .arc, .button { transition: none; }
   .reveal { opacity: 1; transform: none; }
+  li.copied .tick { animation: none; }
 }

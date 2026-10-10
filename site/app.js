@@ -127,6 +127,24 @@
     empty.hidden = shown > 0;
   });
 
+  // A click plays the app's copy: the pill says "Copied" for a moment, then shows the code again.
+  let flash, restore = () => {};
+  for (const row of rows) {
+    const label = row.querySelector(".row-code > span");
+    if (!label) continue;
+    const digits = label.textContent;
+    row.addEventListener("click", () => {
+      clearTimeout(flash);
+      restore();
+      rows.forEach((other) => other.classList.remove("copied"));
+      void row.offsetWidth;  // restart the checkmark's draw-on
+      row.classList.add("copied");
+      label.textContent = "Copied";
+      restore = () => { label.textContent = digits; };
+      flash = setTimeout(restore, 1200);
+    });
+  }
+
   // The settings panel's switches work, as in the app.
   for (const control of document.querySelectorAll("button.switch")) {
     control.addEventListener("click", () => control.setAttribute("aria-checked", control.getAttribute("aria-checked") !== "true"));
