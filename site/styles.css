@@ -677,3 +677,16 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
   .reveal { opacity: 1; transform: none; }
   li.copied .tick { animation: none; }
 }
+
+/* AgentCard.swift and AgentsTab.swift: an agent's request for a code, and Settings → Agents. */
+.agent-tile { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(180deg, #48484a, #1c1c1e); color: #fff; font-size: 18px; }
+.verified { display: inline-flex; align-items: center; gap: 4px; color: #34c759; }
+.verified svg { font-size: 11px; }
+.card-rows { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; font-size: 12px; }
+.card-rows dt { color: var(--muted); }
+.card-rows dd { margin: 0; }
+.card-actions .menu { margin-right: auto; align-self: center; color: var(--muted); font-size: 12px; font-weight: 600; }
+.card-actions .menu ~ .pill { flex: none; padding: 0 16px; }
+.set-btn { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--surface); border: 0.500px solid var(--line); box-shadow: 0 0.500px 1px rgba(0, 0, 0, 0.1); font-size: 12px; white-space: nowrap; }
+.dot.off { background: #8e8e93; }
+.icon-tile.mono { font-size: 11px; font-weight: 700; }

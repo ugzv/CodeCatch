@@ -168,9 +168,9 @@
   <div class="feature-art article-art" aria-hidden="true">
     <div class="cc">
       <div class="card floating">
-        <div class="card-head"><div class="tile"><img src="/assets/services/github.svg" alt="" loading="lazy"></div><div class="card-who"><b>Terminal wants your github.com code</b><span>Verified app · claude</span></div><span class="card-age">now</span></div>
-        <div class="well"><span class="site">github.com</span></div>
-        <div class="card-actions"><button class="pill" type="button" tabindex="-1"><span>Deny</span></button><button class="pill prominent" type="button" tabindex="-1"><span>Allow</span></button></div>
+        <div class="card-head"><span class="agent-tile"><svg viewBox="0 0 24 24"><use href="#i-terminal"/></svg></span><div class="card-who"><b>Terminal wants your github.com code</b><span class="verified"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg>Verified app</span></div></div>
+        <dl class="card-rows"><dt>From</dt><dd>GitHub · Mail · verified sender</dd><dt>Timing</dt><dd>Asked 4s ago, arrived 2s ago</dd><dt>Program</dt><dd>claude (name not verified)</dd></dl>
+        <div class="card-actions"><span class="menu">Always Allow ⌄</span><button class="pill" type="button" tabindex="-1"><span>Deny</span></button><button class="pill prominent" type="button" tabindex="-1"><span>Allow</span></button></div>
       </div>
     </div>
   </div>
@@ -193,6 +193,35 @@
       <li><b>Open Settings → Agents</b> and turn on <b>Let Agents Ask for Codes</b>. This also installs the <code>codecatch</code> command.</li>
       <li><b>Click Connect</b> next to Claude Code, Codex or Cursor. This adds a small skill the agent reads only when it needs a code. For other agents, copy the text under <b>Other Agents</b> into their instructions.</li>
     </ol>
+    <div class="feature-art article-art" aria-hidden="true">
+      <!-- AgentsTab.swift -->
+      <div class="cc">
+      <div class="settings floating">
+        <div class="settings-tabs" aria-hidden="true"><span>General</span><span>Sources</span><span>Privacy</span><span class="on">Agents</span></div>
+        <p class="set-title">Command Line</p>
+        <ul class="set-group"><li><span class="icon-tile" style="--c:#8e8e93"><svg viewBox="0 0 24 24"><use href="#i-terminal"/></svg></span><span class="set-text"><b>Let Agents Ask for Codes</b><span>Agents can run codecatch</span></span><span class="switch" data-on></span></li></ul>
+        <p class="set-title">Agents</p>
+        <ul class="set-group">
+          <li><span class="icon-tile mono" style="--c:#d97757">C</span><span class="set-text"><b>Claude Code <i class="dot"></i></b></span><span class="set-btn">Disconnect</span></li>
+          <li><span class="icon-tile mono" style="--c:#10a37f">X</span><span class="set-text"><b>Codex <i class="dot off"></i></b></span><span class="set-btn">Connect</span></li>
+          <li><span class="icon-tile mono" style="--c:#3a3a3c">Cu</span><span class="set-text"><b>Cursor <i class="dot"></i></b><span>Uses Claude Code’s skill</span></span></li>
+        </ul>
+        <p class="set-title">What to Share</p>
+        <ul class="set-group">
+          <li><span class="icon-tile" style="--c:#0a7aff"><svg viewBox="0 0 24 24"><use href="#i-hash"/></svg></span><span class="set-text"><b>Verification Codes</b></span><span class="state">Included</span></li>
+          <li><span class="icon-tile" style="--c:#30b0c7"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></span><span class="set-text"><b>Sign-In Links</b></span><span class="switch"></span></li>
+          <li><span class="icon-tile" style="--c:#ff9500"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></span><span class="set-text"><b>Password Reset Links</b></span><span class="state">Never</span></li>
+        </ul>
+        <p class="set-title">Permissions</p>
+        <ul class="set-group">
+          <li><span class="icon-tile" style="--c:#ff3b30"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg></span><span class="set-text"><b>Allow All Without Asking</b></span><span class="switch"></span></li>
+          <li><span class="icon-tile" style="--c:#34c759"><svg viewBox="0 0 24 24"><use href="#i-shield"/></svg></span><span class="set-text"><b>Always Allowed</b><span>github.com</span></span><span class="set-btn">Edit…</span></li>
+          <li><span class="icon-tile" style="--c:#30b0c7"><svg viewBox="0 0 24 24"><use href="#i-history"/></svg></span><span class="set-text"><b>Request History</b><span>github.com: Allowed, now</span></span><span class="set-btn">Show…</span></li>
+        </ul>
+      </div>
+      </div>
+    </div>
+    <p>A green dot means the agent is connected. Cursor also reads Claude Code’s and Codex’s skills, so it is covered once either one is connected. While <b>Let Agents Ask for Codes</b> is off, the rest of the page is dimmed and agents can’t ask.</p>
 
     <h2>What you control</h2>
     <ul class="ticks">
@@ -312,6 +341,9 @@ codecatch get github.com --since $T --json</code></pre>
     <g id="i-updown" fill="none" stroke="currentColor" stroke-width="2.400" stroke-linecap="round" stroke-linejoin="round"><path d="m8 9.500 4-4 4 4M8 14.500l4 4 4-4"/></g>
     <g id="i-clock" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.200 2"/></g>
     <g id="i-eye-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.600 6.200A9.800 9.800 0 0 1 12 6c5.500 0 9 6 9 6a15.600 15.600 0 0 1-2.800 3.500M6.500 7.600A15 15 0 0 0 3 12s3.500 6 9 6a9 9 0 0 0 3.600-.8M9.900 9.900a3 3 0 0 0 4.200 4.200"/></g>
+    <g id="i-terminal" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 4 4-4 4M12 16h7"/></g>
+    <g id="i-hash" fill="none" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"><path d="M9 4 7.500 20M16.500 4 15 20M4.500 9h16M3.500 15h16"/></g>
+    <g id="i-shield" fill="currentColor"><path d="M12 2.500 4.500 5.300v6c0 4.700 3.200 8.900 7.500 10.200 4.300-1.300 7.500-5.500 7.500-10.200v-6L12 2.500Zm-1.200 13.300-3.400-3.400 1.400-1.400 2 2 4.400-4.400 1.400 1.400-5.800 5.800Z"/></g>
   </defs>
 </svg>
 </body>
