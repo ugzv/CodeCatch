@@ -9,45 +9,64 @@ struct ServiceIcon: View {
     @ObservedObject private var icons = IconStore.shared
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: size * 0.27, style: .continuous)
         Group {
             if item.origin == .test {
                 Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: size * 1.2, height: size * 1.2)
             } else if let icon = icons.icon(for: item.domain) {
-                Group {
-                    if icon.fullBleed {
-                        Image(nsImage: icon.image).resizable().interpolation(.high).scaledToFill()
-                    } else {
-                        Color.white.overlay(Image(nsImage: icon.image).resizable().interpolation(.high).scaledToFit().padding(size * 0.17))
-                    }
-                }
-                .frame(width: size, height: size)
-                // The same light-to-dark sheen as a monogram's gradient, so logos and monograms sit together.
-                .overlay(LinearGradient(colors: [.white.opacity(0.14), .black.opacity(0.08)], startPoint: .top, endPoint: .bottom))
-                .clipShape(shape)
-                .overlay(shape.strokeBorder(.black.opacity(0.1), lineWidth: 0.5))
-                .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
+                LogoTile(icon: icon, size: size)
             } else {
                 Monogram(name: item.service, size: size)
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if item.origin != .test, let badge = item.origin.appIcon {
-                Image(nsImage: badge)
-                    .resizable()
-                    .frame(width: size * 0.46, height: size * 0.46)
-                    .shadow(color: .black.opacity(0.2), radius: 1, y: 0.5)
-                    .offset(x: size * 0.13, y: size * 0.12)
+            Group {
+                if let logo = icons.icon(for: mailbox) {
+                    LogoTile(icon: logo, size: size * 0.46)
+                } else if item.origin != .test, let badge = item.origin.appIcon(sourceKey: item.sourceKey) {
+                    Image(nsImage: badge).resizable().frame(width: size * 0.46, height: size * 0.46)
+                }
+            }
+            .shadow(color: .black.opacity(0.2), radius: 1, y: 0.5)
+            .offset(x: size * 0.13, y: size * 0.12)
+        }
+    }
+
+    /// A mail code's badge is the mailbox it came to (Gmail, Outlook, Fastmail), not the app it's read in.
+    private var mailbox: String? {
+        guard item.origin == .mail else { return nil }
+        return AppModel.shared.accounts.first { $0.id.uuidString == item.sourceKey }?.iconDomain
+    }
+}
+
+/// A site's logo as an app-icon tile.
+private struct LogoTile: View {
+    let icon: IconStore.Icon
+    let size: CGFloat
+
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: size * 0.27, style: .continuous)
+        Group {
+            if icon.fullBleed {
+                Image(nsImage: icon.image).resizable().interpolation(.high).scaledToFill()
+            } else {
+                Color.white.overlay(Image(nsImage: icon.image).resizable().interpolation(.high).scaledToFit().padding(size * 0.17))
             }
         }
+        .frame(width: size, height: size)
+        // The same light-to-dark sheen as a monogram's gradient, so logos and monograms sit together.
+        .overlay(LinearGradient(colors: [.white.opacity(0.14), .black.opacity(0.08)], startPoint: .top, endPoint: .bottom))
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(.black.opacity(0.1), lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.12), radius: 1, y: 0.5)
     }
 }
 
 extension CodeItem.Origin {
-    /// Messages, the default mail app, or the vault, shown as a badge.
-    var appIcon: NSImage? {
+    /// Messages, Apple Mail, the default mail app, or the vault, shown as a badge.
+    func appIcon(sourceKey: String) -> NSImage? {
         switch self {
         case .messages: Self.icon("com.apple.MobileSMS")
+        case .mail where sourceKey == AppleMailStore.sourceKey: Self.icon("com.apple.mail")
         case .mail: NSWorkspace.shared.urlForApplication(toOpen: URL(string: "mailto:")!)
             .map { NSWorkspace.shared.icon(forFile: $0.path) }
         case .test: NSApp.applicationIconImage

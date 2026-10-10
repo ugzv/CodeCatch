@@ -1,3 +1,4 @@
+import CodeCatchCore
 import Foundation
 
 struct MailAccount: Codable, Identifiable, Hashable {
@@ -24,6 +25,8 @@ struct MailAccount: Codable, Identifiable, Hashable {
     var isOutlook: Bool { [Self.outlookHost, "imap-mail.outlook.com"].contains(host.lowercased()) }
     /// Who this account can sign in with.
     var provider: OAuth? { isGmail ? .google : isOutlook ? .microsoft : nil }
+    /// The site whose logo stands for this mailbox: the provider's, not the address's (you@company.com on Gmail is Gmail).
+    var iconDomain: String { isGmail ? "gmail.com" : isOutlook ? "outlook.com" : ServiceIdentity.registrable(host) }
 
     static let gmailHost = "imap.gmail.com"
     static let outlookHost = "outlook.office365.com"
