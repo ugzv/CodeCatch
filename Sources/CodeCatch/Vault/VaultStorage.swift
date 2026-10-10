@@ -1,5 +1,5 @@
+import AppKit
 import CodeCatchCore
-import Foundation
 import LocalAuthentication
 
 /// Keep the existing login-Keychain item; macOS authentication gates every session read.
@@ -47,7 +47,17 @@ final class DeviceAuthentication {
     func authenticate(reason: String = "show your verification codes") async throws {
         let context = LAContext()
         self.context = context
-        defer { if self.context === context { self.context = nil } }
+        // The prompt is macOS's own window: it closes the popover and, when done, hands focus
+        // to the app used before. Bring back what was open, unless a lock cancelled the prompt.
+        // Plain activate() is refused here, as no app yields focus to us.
+        let wasActive = NSApp.isActive, popoverWasOpen = MenuBarPopover.isOpen
+        defer {
+            if self.context === context {
+                self.context = nil
+                if wasActive || popoverWasOpen { NSApp.activate(ignoringOtherApps: true) }
+                if popoverWasOpen { MenuBarPopover.open(query: nil) }
+            }
+        }
         guard try await context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) else {
             throw LAError(.authenticationFailed)
         }

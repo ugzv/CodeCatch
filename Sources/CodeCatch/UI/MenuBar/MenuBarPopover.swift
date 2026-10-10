@@ -4,10 +4,15 @@ import AppKit
 /// icon were clicked (SwiftUI's MenuBarExtra has no API for it).
 @MainActor
 enum MenuBarPopover {
-    /// `retries`: a codecatch:// link can launch the app and arrive before the status item exists.
-    static func open(query: String = "", retries: Int = 10) {
-        AppModel.shared.searchRequest = query
-        guard !NSApp.windows.contains(where: { $0.className.contains("MenuBarExtraWindow") && $0.isVisible }) else { return }
+    static var isOpen: Bool {
+        NSApp.windows.contains { $0.className.contains("MenuBarExtraWindow") && $0.isVisible }
+    }
+
+    /// `query: nil` keeps the current search. `retries`: a codecatch:// link can launch the app
+    /// and arrive before the status item exists.
+    static func open(query: String? = "", retries: Int = 10) {
+        if let query { AppModel.shared.searchRequest = query }
+        guard !isOpen else { return }
         // Only the status bar window has this key; asking any other window raises.
         let statusItem = NSApp.windows.lazy.filter { $0.className == "NSStatusBarWindow" && $0.responds(to: NSSelectorFromString("statusItem")) }
             .compactMap { $0.value(forKey: "statusItem") as? NSStatusItem }.first
