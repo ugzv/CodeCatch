@@ -31,7 +31,7 @@
   const emailed = {
     brand: "notion", icon: "/assets/services/notion.png", tab: "Log in – Notion", url: "notion.so/login",
     title: "Log in", note: "We sent a login code to y•••@gmail.com. Check your inbox.", prefix: "", button: "Continue",
-    via: "/assets/services/gmail.png", who: "Notion", from: "Personal",
+    via: "/assets/services/gmail.png", who: "Notion", from: "",  // the Gmail badge already names the inbox
   };
   const linked = {
     brand: "slack", icon: "/assets/services/slack.png", tab: "Check your email – Slack", url: "slack.com/signin",
@@ -114,13 +114,16 @@
   const rows = [...$("rows").children], count = $("count"), empty = $("empty");
   $("search").addEventListener("input", (event) => {
     const query = event.target.value.trim().toLowerCase();
-    let shown = 0;
+    let shown = 0, links = 0;
     for (const row of rows) {
       const match = row.dataset.name.includes(query);
       row.hidden = !match;
       shown += match;
+      links += match && !row.querySelector(".row-code");
     }
-    count.textContent = shown === 1 ? "1 code" : shown + " codes";
+    // As the app counts: "items" once a link is among them, else "codes".
+    const noun = links ? "item" : "code";
+    count.textContent = shown + " " + noun + (shown === 1 ? "" : "s");
     empty.hidden = shown > 0;
   });
 

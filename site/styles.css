@@ -254,6 +254,7 @@ section[id] { scroll-margin-top: 60px; }
 .card-head { display: flex; align-items: center; gap: 12px; height: 38px; }
 .card-who { display: grid; gap: 1px; min-width: 0; }
 .card-who span, .card-age { color: var(--muted); font-size: 11px; }
+.card-who span:empty { display: none; }
 .card-age { margin-left: auto; font-variant-numeric: tabular-nums; }
 
 /* ServiceIcon.swift: the service's own logo on a white squircle, the source app as a badge. */
@@ -300,9 +301,9 @@ section[id] { scroll-margin-top: 60px; }
 .ring .arc { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: var(--p) 1; transition: stroke-dasharray 1s linear; }
 .ring.warn .arc { stroke: var(--orange); }
 
-.link-text { display: grid; gap: 1px; min-width: 0; }
-.link-text b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.link-text span { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A link's site is its well's hero, as a code's digits are; the well is sized to it. */
+.well:has(.site) { height: 48px; }
+.site { min-width: 0; font-size: 20px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .warning { display: flex; gap: 6px; color: var(--orange); font-size: 11px; line-height: 1.3; }
 .warning svg { font-size: 13px; margin-top: 1px; }
 
@@ -318,13 +319,14 @@ section[id] { scroll-margin-top: 60px; }
   border: 0;
   border-radius: 999px;
   background: var(--tint);
+  box-shadow: inset 0 0 0 0.500px var(--line);
   color: var(--text);
   font: 600 13px/1 var(--font);
   cursor: pointer;
   transition: transform 0.15s, opacity 0.15s;
 }
 .pill:active { transform: scale(0.97); opacity: 0.85; }
-.pill.prominent { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent)); color: #fff; }
+.pill.prominent { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent)); box-shadow: none; color: #fff; }
 .pill[tabindex="-1"] { pointer-events: none; }
 
 .banner { zoom: 1; position: absolute; top: 38px; right: 12px; max-width: calc(100% - 24px); transform: translateX(115%); opacity: 0; transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.05), opacity 0.3s; }
@@ -347,8 +349,12 @@ section[id] { scroll-margin-top: 60px; }
 .row-who i { font-style: normal; font-weight: 400; font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
 .row-who em { font-style: normal; font-weight: 500; font-size: 10px; color: var(--faint); }
 .row-who span { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row-code { font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.row.expired .row-code { color: var(--faint); }
+/* CodeRow.swift: a code and a link's Open share one pill, blue on the row a click acts on. */
+.row-pill { flex: none; display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 10px; border-radius: 999px; background: var(--tint); box-shadow: inset 0 0 0 0.500px var(--line); color: var(--text); font: 500 12px/1 var(--font); white-space: nowrap; }
+.row-code { font-size: 15px; font-variant-numeric: tabular-nums; }
+.row.expired .row-pill { color: var(--faint); }
+.row:hover .row-pill { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 86%, #fff), var(--accent)); box-shadow: none; color: #fff; }
+.more { flex: none; margin-left: -3px; color: var(--faint); font-size: 14px; letter-spacing: -0.05em; }
 .pin { font-size: 9px; color: var(--faint); align-self: center; }
 .open { border: 0.500px solid var(--line); border-radius: 999px; padding: 3px 10px; background: var(--surface); color: var(--text); font: 12px var(--font); box-shadow: 0 0.500px 1px rgba(0, 0, 0, 0.1); }
 .empty { padding: 20px; text-align: center; color: var(--muted); font-size: 12px; }
