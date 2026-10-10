@@ -7,6 +7,8 @@ struct CodeRow: View {
     let selection: Namespace.ID
     @ObservedObject private var model = AppModel.shared
     @Local private var hovering = false
+    /// Set by a click: the pill says "Copied" for a moment, then shows the code again.
+    @Local private var clickedAt: Date?
     @AppStorage(Prefs.blurCodes) private var blurCodes = false
     @AppStorage(Prefs.showPreviews) private var showPreviews = true
 
@@ -47,9 +49,7 @@ struct CodeRow: View {
                     if item.origin != .vault {
                         Text(item.age(now: model.now)).font(.subheadline).foregroundStyle(.tertiary).monospacedDigit()
                     }
-                    if copied {
-                        Text("Copied").font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor).transition(.opacity)
-                    } else if !live {
+                    if !live, !copied {
                         Text("Expired").font(.caption.weight(.medium)).foregroundStyle(.tertiary)
                     }
                 }
@@ -77,31 +77,41 @@ struct CodeRow: View {
                     .help(concealed ? item.destination?.host ?? "" : item.link?.absoluteString ?? "")
             }
             if !item.isLink {
-                // On the clipboard: the ring turns into a checkmark; the code itself stays put.
                 HStack(spacing: 8) {
-                    // A fixed slot: the mark pops in without pushing the code aside.
+                    // A fixed slot: the ring comes and goes without pushing the code aside.
                     ZStack {
-                        if copied {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Color.accentColor)
-                                .symbolEffect(.bounce, value: copied)
-                                .transition(.scale(scale: 0.2).combined(with: .opacity))
-                                .help("On the clipboard")
-                                .accessibilityLabel("Copied")
-                        } else if live && item.showsCountdown(now: model.now) {
+                        if live, !copied, item.showsCountdown(now: model.now) {
                             ExpiryRing(item: item, now: model.now, size: 14).transition(.scale(scale: 0.6).combined(with: .opacity))
                         }
                     }
-                    .font(.system(size: 14))
                     .frame(width: 14)
                     // The same pill as a link's Open, blue on the row a click or Return copies.
+                    // On the clipboard, a checkmark draws in before the code, as on the card's Copied.
                     Button(action: activate) {
-                        CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
-                            .foregroundStyle(active ? AnyShapeStyle(.white) : copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
+                        HStack(spacing: 5) {
+                            if copied {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .drawnIn()
+                            }
+                            if clickedAt != nil && copied {
+                                Text("Copied").font(.system(size: 15, weight: .medium)).transition(.opacity)
+                            } else {
+                                CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
+                                    .transition(.opacity)
+                            }
+                        }
+                        .foregroundStyle(active ? AnyShapeStyle(.white) : copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
                     }
                         .buttonStyle(ActionButtonStyle(prominent: active, compact: true))
                         .animation(nil, value: active)
-                        .accessibilityLabel("Copy code")
+                        .help(copied ? "On the clipboard" : "")
+                        .accessibilityLabel(copied ? "Copied" : "Copy code")
+                }
+                // Each click restarts the moment; a cancelled wait leaves it to the newer click.
+                .task(id: clickedAt) {
+                    guard clickedAt != nil, (try? await Task.sleep(for: .seconds(1.2))) != nil else { return }
+                    withAnimation(.snappy(duration: 0.3)) { clickedAt = nil }
                 }
             }
             // The right-click actions, findable. Always there, quiet until hovered: the rows end on one
@@ -137,7 +147,21 @@ struct CodeRow: View {
         if item.isLink, locked { model.unlocked {}; return }
         model.unlocked {
             if item.isLink { return model.open(item, leavingMenu: true) }
-            withAnimation(.snappy(duration: 0.25, extraBounce: 0.15)) { model.copy(item) }
+            withAnimation(.snappy(duration: 0.25, extraBounce: 0.15)) {
+                model.copy(item)
+                clickedAt = Date()
+            }
+        }
+    }
+}
+
+private extension View {
+    /// The mark draws itself in; before macOS 26 it pops in.
+    @ViewBuilder func drawnIn() -> some View {
+        if #available(macOS 26, *) {
+            transition(.symbolEffect(.drawOn))
+        } else {
+            transition(.scale(scale: 0.2).combined(with: .opacity))
         }
     }
 }
