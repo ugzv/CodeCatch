@@ -47,6 +47,7 @@
     "Works in Chrome, Arc, Firefox, Edge and any app that accepts paste",
     "Searchable code history",
     "Bitwarden two-step codes",
+    "Lets AI agents such as Claude Code, Codex and Cursor ask for a code, with your approval",
     "Locks with Touch ID or the Mac password"
    ],
    "@id": "https://codecatch.app/#app",
@@ -149,6 +150,14 @@
      "acceptedAnswer": {
       "@type": "Answer",
       "text": "Your Mac only gets texts that your iPhone forwards. On your iPhone, open Settings → Apps → Messages → Text Message Forwarding and turn on your Mac. If the option or your Mac is missing, check that both use the same Apple Account (on the Mac: Messages → Settings → iMessage), then turn iMessage off and on again on the iPhone. The iPhone must also be on and online."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "Can AI agents like Claude Code get my codes?",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Only if you turn it on in Settings → Agents, and only one code at a time, for the site the agent asks for. You approve each code with Touch ID, unless you allow a site or turn on Allow All. Agents never see your messages."
      }
     },
     {
@@ -393,6 +402,28 @@
       </div>
     </div>
   </article>
+  <article class="feature" id="agents">
+    <div class="feature-copy">
+      <p class="eyebrow">AI agents</p>
+      <h3>Your agent signs in, you say yes</h3>
+      <p>Claude Code, Codex and Cursor can ask CodeCatch for a code while they sign in for you. A card shows which app asked, and you approve with Touch ID.</p>
+      <ul class="ticks">
+        <li>Connect an agent with one click</li>
+        <li>Every code asks first, unless you allow a site</li>
+        <li>Sign-in links stay off until you turn them on</li>
+      </ul>
+      <p class="fine"><a href="/guides/2fa-codes-for-ai-agents/">How agents get 2FA codes</a></p>
+    </div>
+    <div class="feature-art">
+      <div class="cc">
+        <div class="card floating">
+          <div class="card-head"><div class="tile"><img src="/assets/services/github.svg" alt="" loading="lazy"></div><div class="card-who"><b>Terminal wants your github.com code</b><span>Verified app · claude</span></div><span class="card-age">now</span></div>
+          <div class="well"><span class="site">github.com</span></div>
+          <div class="card-actions"><button class="pill" type="button" tabindex="-1"><span>Deny</span></button><button class="pill prominent" type="button" tabindex="-1"><span>Allow</span></button></div>
+        </div>
+      </div>
+    </div>
+  </article>
 </section>
 
 <section id="privacy" class="privacy feature">
@@ -556,6 +587,10 @@
     <p>Your Mac only gets texts that your iPhone forwards. On your iPhone, open Settings → Apps → Messages → <b>Text Message Forwarding</b> and turn on your Mac. If the option or your Mac is missing, check that both use the same Apple Account (on the Mac: Messages → Settings → iMessage), then turn iMessage off and on again on the iPhone. The iPhone must also be on and online. <a href="/guides/verification-code-autofill-chrome-mac/#sms-codes">More fixes</a>.</p>
   </details>
   <details>
+    <summary>Can AI agents like Claude Code get my codes?</summary>
+    <p>Only if you turn it on in Settings → Agents, and only one code at a time, for the site the agent asks for. You approve each code with Touch ID, unless you allow a site or turn on Allow All. Agents never see your messages. <a href="/guides/2fa-codes-for-ai-agents/">How it works</a>.</p>
+  </details>
+  <details>
     <summary>What if CodeCatch misses a code?</summary>
     <p><a href="https://github.com/ugzv/CodeCatch/issues/new?template=bug_report.yml" rel="noopener">Report it on GitHub</a>. Send the message with the code replaced by another number. It becomes a test, so the next version catches it.</p>
   </details>
@@ -596,6 +631,7 @@
         <a href="/guides/bitwarden-codes-mac-menu-bar/">Bitwarden codes on Mac</a>
         <a href="/guides/verification-code-autofill-chrome-mac/">Code autofill in Chrome</a>
         <a href="/guides/magic-link-safety/">Is this sign-in link safe?</a>
+        <a href="/guides/2fa-codes-for-ai-agents/">2FA codes for AI agents</a>
       </div>
       <div>
         <h2>Compare</h2>

@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them</title>
-<meta name="description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
-<link rel="canonical" href="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
+<title>Let Claude Code, Codex and Cursor get 2FA codes on your Mac</title>
+<meta name="description" content="AI agents get stuck when a site sends a verification code. CodeCatch lets Claude Code, Codex, Cursor and scripts ask for the code, and you approve each one with Touch ID.">
+<link rel="canonical" href="https://codecatch.app/guides/2fa-codes-for-ai-agents/">
 <meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#100d0e" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="CodeCatch">
-<meta property="og:url" content="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
-<meta property="og:title" content="Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them">
-<meta property="og:description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
+<meta property="og:url" content="https://codecatch.app/guides/2fa-codes-for-ai-agents/">
+<meta property="og:title" content="Let Claude Code, Codex and Cursor get 2FA codes on your Mac">
+<meta property="og:description" content="AI agents get stuck when a site sends a verification code. CodeCatch lets Claude Code, Codex, Cursor and scripts ask for the code, and you approve each one with Touch ID.">
 <meta property="og:image" content="https://codecatch.app/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch banner showing a verification code ready to paste">
+<meta property="og:image:alt" content="CodeCatch asking you to approve a code for an agent">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -27,13 +27,13 @@
  "@graph": [
   {
    "@type": "TechArticle",
-   "@id": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/#article",
-   "headline": "Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them",
-   "name": "Bitwarden TOTP codes in your Mac menu bar",
-   "description": "Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.",
+   "@id": "https://codecatch.app/guides/2fa-codes-for-ai-agents/#article",
+   "headline": "Let Claude Code, Codex and Cursor get 2FA codes on your Mac",
+   "name": "2FA codes for AI agents",
+   "description": "AI agents get stuck when a site sends a verification code. CodeCatch lets Claude Code, Codex, Cursor and scripts ask for the code, and you approve each one with Touch ID.",
    "image": "https://codecatch.app/assets/og.png",
-   "datePublished": "2026-10-03",
-   "dateModified": "2026-10-03",
+   "datePublished": "2026-10-10",
+   "dateModified": "2026-10-10",
    "inLanguage": "en",
    "author": {
     "@id": "https://codecatch.app/#author"
@@ -41,7 +41,7 @@
    "publisher": {
     "@id": "https://codecatch.app/#org"
    },
-   "mainEntityOfPage": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/",
+   "mainEntityOfPage": "https://codecatch.app/guides/2fa-codes-for-ai-agents/",
    "about": {
     "@type": "SoftwareApplication",
     "name": "CodeCatch",
@@ -87,8 +87,8 @@
     {
      "@type": "ListItem",
      "position": 2,
-     "name": "Bitwarden TOTP codes in your Mac menu bar",
-     "item": "https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/"
+     "name": "Let Claude Code, Codex and Cursor get 2FA codes on your Mac",
+     "item": "https://codecatch.app/guides/2fa-codes-for-ai-agents/"
     }
    ]
   },
@@ -97,50 +97,42 @@
    "mainEntity": [
     {
      "@type": "Question",
-     "name": "Does CodeCatch save my Bitwarden master password?",
+     "name": "Can an agent read all my codes?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards."
+      "text": "No. An agent asks for one site at a time and gets one code, after you approve it. It can’t list or search your codes, and it never sees your messages."
      }
     },
     {
      "@type": "Question",
-     "name": "Do the codes work without an internet connection?",
+     "name": "Does it work when I’m away?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online."
+      "text": "Only if you allow it. Always Allow a site for an app, or turn on Allow All, and codes go out without a prompt, up to 20 an hour. You still see each one in Request History."
      }
     },
     {
      "@type": "Question",
-     "name": "Is it safe to keep codes next to my passwords?",
+     "name": "Which agents work with it?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest."
+      "text": "Claude Code, Codex and Cursor connect with one click. Any other agent or script that can run a command can use it too: paste the short instructions into its settings."
      }
     },
     {
      "@type": "Question",
-     "name": "Why is the code different from the one on my phone?",
+     "name": "Do I need to keep CodeCatch open?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on Set time and date automatically in System Settings → General → Date &amp; Time."
+      "text": "CodeCatch runs in the menu bar. If it isn’t running, the command opens it."
      }
     },
     {
      "@type": "Question",
-     "name": "A login is missing from CodeCatch. Why?",
+     "name": "Can an agent get a password reset link?",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use Refresh… in CodeCatch."
-     }
-    },
-    {
-     "@type": "Question",
-     "name": "I use Bitwarden’s EU server. Does it work?",
-     "acceptedAnswer": {
-      "@type": "Answer",
-      "text": "Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs bw logout first."
+      "text": "No. Reset links never go to agents. Sign-in links do only if you turn on Sign-In Links in Settings → Agents."
      }
     }
    ]
@@ -169,106 +161,79 @@
 <article class="article">
   <header class="vs-hero">
     <p class="eyebrow">Guide</p>
-    <h1>Bitwarden TOTP codes in your Mac menu bar</h1>
-    <p class="lede">Four ways to get your Bitwarden two-step codes on a Mac, from the simplest to the fastest.</p>
-    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-03">Published 3 October 2026</time></span></p>
+    <h1>Let Claude Code, Codex and Cursor get 2FA codes on your Mac</h1>
+    <p class="lede">Your agent can fill in a sign-in form, but the code goes to your phone or inbox. CodeCatch hands it the code, once you say yes.</p>
+    <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-10">Published 10 October 2026</time></span></p>
   </header>
   <div class="feature-art article-art" aria-hidden="true">
     <div class="cc">
-      <div class="popover floating">
-        <div class="popover-head"><svg class="mark" viewBox="208 208 608 608"><use href="#mark"/></svg><b>CodeCatch</b></div>
-        <div class="search"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg><span class="typed">git</span></div>
-        <ul class="rows">
-          <li class="row"><div class="tile s32"><img src="/assets/services/github.svg" alt="" loading="lazy"><img class="badge" src="/assets/services/bitwarden.png" alt="" loading="lazy"></div><div class="row-who"><b>GitHub <svg class="pin" viewBox="0 0 24 24"><use href="#i-pin"/></svg></b><span>you@example.com · Bitwarden</span></div><svg class="ring s14" viewBox="0 0 22 22" style="--p:.6"><circle class="track" cx="11" cy="11" r="9.5"/><circle class="arc" cx="11" cy="11" r="9.5" pathLength="1"/></svg><span class="row-pill row-code">318 842</span><span class="more" aria-hidden="true">•••</span></li>
-        </ul>
+      <div class="card floating">
+        <div class="card-head"><div class="tile"><img src="/assets/services/github.svg" alt="" loading="lazy"></div><div class="card-who"><b>Terminal wants your github.com code</b><span>Verified app · claude</span></div><span class="card-age">now</span></div>
+        <div class="well"><span class="site">github.com</span></div>
+        <div class="card-actions"><button class="pill" type="button" tabindex="-1"><span>Deny</span></button><button class="pill prominent" type="button" tabindex="-1"><span>Allow</span></button></div>
       </div>
     </div>
   </div>
   <div class="prose">
-    <p>Bitwarden can hold the keys for your two-step codes and make the six-digit codes for you. On a Mac there are four ways to get at them. The first three need nothing but Bitwarden.</p>
-    <p class="callout">Bitwarden stores authenticator keys on every plan. Showing the codes needs Premium or a paid organisation plan, according to <a href="https://bitwarden.com/help/integrated-authenticator/" rel="noopener">Bitwarden’s help page</a>.</p>
+    <p>You ask Claude Code to sign in to a site and check something. It finds the page, types your email, clicks <b>Send code</b>, and stops. The code is on your phone, and the agent can’t read it.</p>
 
-    <h2>At a glance</h2>
-    <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">Extension</th><th scope="col">Desktop app</th><th scope="col">Command line</th><th scope="col">CodeCatch</th></tr></thead><tbody>
-<tr><th scope="row">Works in</th><td>The browser</td><td>Any app</td><td>Terminal</td><td>Any app</td></tr>
-<tr><th scope="row">Steps per code</th><td>None, it copies as it fills</td><td>Open app, find login, copy</td><td>Type a command</td><td>Shortcut, type a name, Return</td></tr>
-<tr><th scope="row">Where the keys live</th><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden</td><td>Bitwarden and your Mac’s Keychain</td></tr>
-<tr><th scope="row">Works offline</th><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>Yes</td></tr>
-</tbody></table></div>
+    <p class="callout"><b>Short answer:</b> install CodeCatch, turn on <b>Let Agents Ask for Codes</b> in Settings → Agents, and click <b>Connect</b> next to your agent. When a site sends a code, the agent asks CodeCatch for it, and you approve with Touch ID.</p>
 
-    <h2>How these codes work</h2>
-    <p>When you turn on two-step sign-in, the service gives you a secret key, usually as a QR code. An authenticator mixes that key with the current time and gets a six-digit code that changes every 30 seconds. Anything that holds the key can make the code: your phone, Bitwarden, or CodeCatch.</p>
+    <h2>Why agents get stuck at 2FA</h2>
+    <p>Two-step sign-in is built to stop anyone who only has your password. An agent is in that spot: it can use the browser, but the code goes to your Messages or your inbox. So it waits for you to type the code, or gives up.</p>
 
-    <h2>1. The browser extension</h2>
-    <p>This is the least work. When the extension fills your username and password, it also copies the code. Press <kbd>⌘</kbd><kbd>V</kbd> in the code field.</p>
-    <p>If nothing is copied, open the extension and check <b>Settings → Autofill → Copy TOTP automatically</b>. Bitwarden says it is on by default.</p>
+    <h2>How CodeCatch helps</h2>
+    <p>CodeCatch already catches codes from Messages and mail on your Mac. Now an agent can ask it for one with a short command:</p>
+    <pre><code>codecatch get github.com</code></pre>
+    <p>CodeCatch waits for the github.com code, then shows a card with the app that asked, the sender and the time. You click <b>Allow</b> and confirm with Touch ID. The agent gets the code and types it in.</p>
 
-    <h2>2. The desktop app</h2>
-    <p>Open the login in the Bitwarden app. The code is shown inside the item, counting down. Click it to copy.</p>
-    <p>This works for sign-ins outside the browser, but it means switching apps and searching each time.</p>
-
-    <h2>3. The command line</h2>
-    <p>With the <a href="https://bitwarden.com/help/cli/" rel="noopener">Bitwarden CLI</a> installed and unlocked:</p>
-    <pre><code>bw get totp github.com</code></pre>
-    <p>It prints the current code. Useful in scripts, less so when a code expires in 30 seconds.</p>
-
-    <h2>4. The menu bar, with CodeCatch</h2>
-    <p>CodeCatch puts your Bitwarden codes in the menu bar next to the codes you get by text and email. Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>F</kbd>, type a name, press Return, and the code is copied.</p>
+    <h2>Set it up in three steps</h2>
     <ol class="numbered">
-      <li>Install the Bitwarden CLI: <code>brew install bitwarden-cli</code></li>
-      <li>Sign in once in Terminal: <code>bw login</code></li>
-      <li>In CodeCatch, open <b>Settings → Sources → Bitwarden → Set Up…</b> It checks each step for you.</li>
-      <li>Enter your master password, review the list of logins, and save.</li>
+      <li><b>Install CodeCatch</b> and let it read Messages and your mail, as usual.</li>
+      <li><b>Open Settings → Agents</b> and turn on <b>Let Agents Ask for Codes</b>. This also installs the <code>codecatch</code> command.</li>
+      <li><b>Click Connect</b> next to Claude Code, Codex or Cursor. This adds a small skill the agent reads only when it needs a code. For other agents, copy the text under <b>Other Agents</b> into their instructions.</li>
     </ol>
-    <p>After you change two-step logins in Bitwarden, use <b>Refresh…</b> in the same place.</p>
 
-    <p>Once it is set up:</p>
+    <h2>What you control</h2>
     <ul class="ticks">
-      <li><b>Search</b> by service, account or site.</li>
-      <li><b>Pin</b> the logins you use most, so they sit at the top.</li>
-      <li><b>See the time left</b> on each code before it changes.</li>
-      <li><b>Steam codes</b> work too.</li>
+      <li><b>Every code asks first.</b> Allow takes Touch ID or your Mac password each time.</li>
+      <li><b>Always Allow</b> skips the prompt for one site, or for all sites, from one app.</li>
+      <li><b>Allow All Without Asking</b> lets any agent get codes with no prompt. It also needs Touch ID to turn on.</li>
+      <li><b>Sign-in links</b> have their own switch and start off, because a link signs the agent in as you.</li>
+      <li><b>Password reset links</b> never go to agents.</li>
     </ul>
 
-    <h2>If setup gets stuck</h2>
-    <ul class="ticks">
-      <li><b>“bw: command not found”.</b> The Bitwarden CLI is not installed. Run <code>brew install bitwarden-cli</code>, or get it from Bitwarden’s site.</li>
-      <li><b>“You are not logged in”.</b> Run <code>bw login</code> in Terminal. It also handles your two-step login for Bitwarden itself.</li>
-      <li><b>Wrong server.</b> If your account is on bitwarden.eu, pick it in the server step. Switching needs <code>bw logout</code> first.</li>
-      <li><b>Changed something in Bitwarden?</b> Use <b>Refresh…</b> You see what was added, changed and removed before it is saved.</li>
+    <h2>How it stays safe</h2>
+    <ul class="ticks plain">
+      <li>The command talks to CodeCatch through a socket only you can open on your Mac. Nothing goes over the network.</li>
+      <li>CodeCatch checks the app that asks by its code signature, and the command checks that it is talking to the real CodeCatch.</li>
+      <li>A code only counts when it comes from the site’s own domain. A mail named “GitHub” from another domain is not the GitHub code.</li>
+      <li>One request at a time. Three denials in a row turn agent access off. Rules give out at most 20 codes an hour.</li>
+      <li>Request History shows which app asked for which site, and what happened. It never keeps the code.</li>
     </ul>
+    <p>One honest limit: if a program already has Full Disk Access, it can read Messages and Mail itself. CodeCatch can’t stop that.</p>
 
-    <h2>What CodeCatch keeps, and the trade-off</h2>
-    <ul class="ticks">
-      <li>It saves each login’s name, username, site and authenticator key in your Mac’s login Keychain.</li>
-      <li>Codes are made on your Mac. No connection is needed.</li>
-      <li>Codes stay hidden until you unlock with Touch ID or your Mac password, and lock again on sleep.</li>
-      <li><b>Remove Saved Import</b> deletes the saved keys.</li>
-    </ul>
-    <p>The trade-off is plain: a copy of your authenticator keys now lives on this Mac, outside Bitwarden. If you would rather keep them only in your vault, use one of the first three ways.</p>
+    <h2 id="developers">For developers and scripts</h2>
+    <p>Pass <code>--json</code> to get the code and details as JSON, and <code>--since</code> to skip codes from before you clicked <b>Send code</b>:</p>
+    <pre><code>T=$(date +%s)
+# click "Send code" on the site, then:
+codecatch get github.com --since $T --json</code></pre>
+    <p>The command waits up to 90 seconds for the code, plus time for you to approve. Exit codes tell a script what to do next: 0 ok, 2 you said no, 3 no code arrived, 4 access is off, 5 not approved in time. <code>codecatch --help</code> has the rest.</p>
 
-    <h2>Which one to use</h2>
-    <ul class="ticks">
-      <li><b>Mostly in the browser:</b> the extension.</li>
-      <li><b>Now and then, anywhere:</b> the desktop app.</li>
-      <li><b>In scripts:</b> the command line.</li>
-      <li><b>All day, in any app, with your text and email codes in one place:</b> CodeCatch.</li>
-    </ul>
     <h2>Questions</h2>
     <div class="faq-list">
-      <details><summary>Does CodeCatch save my Bitwarden master password?</summary><p>No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards.</p></details>
-      <details><summary>Do the codes work without an internet connection?</summary><p>Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online.</p></details>
-      <details><summary>Is it safe to keep codes next to my passwords?</summary><p>It is a trade-off. Keeping both in Bitwarden is convenient, but someone who gets into your vault gets both. Many people keep their most important accounts, such as email and banking, in a separate authenticator and use Bitwarden for the rest.</p></details>
-      <details><summary>Why is the code different from the one on my phone?</summary><p>Codes depend on the time. If your Mac’s clock is off, the code is wrong. Turn on <b>Set time and date automatically</b> in System Settings → General → Date &amp; Time.</p></details>
-      <details><summary>A login is missing from CodeCatch. Why?</summary><p>Only logins with an authenticator key in Bitwarden are imported. Add the key to the login in Bitwarden, then use <b>Refresh…</b> in CodeCatch.</p></details>
-      <details><summary>I use Bitwarden’s EU server. Does it work?</summary><p>Yes. The setup checklist has a server step for bitwarden.com or bitwarden.eu. Switching server needs <code>bw logout</code> first.</p></details>
+      <details><summary>Can an agent read all my codes?</summary><p>No. An agent asks for one site at a time and gets one code, after you approve it. It can’t list or search your codes, and it never sees your messages.</p></details>
+      <details><summary>Does it work when I’m away?</summary><p>Only if you allow it. Always Allow a site for an app, or turn on Allow All, and codes go out without a prompt, up to 20 an hour. You still see each one in Request History.</p></details>
+      <details><summary>Which agents work with it?</summary><p>Claude Code, Codex and Cursor connect with one click. Any other agent or script that can run a command can use it too: paste the short instructions into its settings.</p></details>
+      <details><summary>Do I need to keep CodeCatch open?</summary><p>CodeCatch runs in the menu bar. If it isn’t running, the command opens it.</p></details>
+      <details><summary>Can an agent get a password reset link?</summary><p>No. Reset links never go to agents. Sign-in links do only if you turn on Sign-In Links in Settings → Agents.</p></details>
     </div>
   </div>
 </article>
 <section class="cta">
   <img src="/assets/icon-256.png" width="96" height="96" alt="CodeCatch app icon" loading="lazy">
-  <h2>Try CodeCatch.</h2>
-  <p>Your next code, ready to paste.</p>
+  <h2>Let your agent finish the sign-in.</h2>
+  <p>CodeCatch gives it the code, after you say yes.</p>
   <div class="actions">
     <a class="button" href="/download/CodeCatch.dmg" data-download>
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS
@@ -278,6 +243,7 @@
   <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
 </section>
 </main>
+
 
 <footer class="footer">
   <div class="footer-top">
@@ -318,7 +284,7 @@
   </div>
   <div class="footer-bottom">
     <p>© 2026 CodeCatch</p>
-    <p>Bitwarden is a trademark of Bitwarden Inc. CodeCatch is not affiliated with it.</p>
+    <p>CodeCatch is not affiliated with Apple, Anthropic, OpenAI, Cursor or GitHub.</p>
   </div>
 </footer>
 

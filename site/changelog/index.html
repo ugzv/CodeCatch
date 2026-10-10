@@ -106,14 +106,29 @@
 <section class="vs-hero about-hero">
   <p class="eyebrow">Changelog</p>
   <h1>What’s new in CodeCatch</h1>
-  <p class="lede">Newest first. CodeCatch 1.0 is still being finished, so this is what has been built so far.</p>
+  <p class="lede">Every change to CodeCatch, newest first.</p>
 </section>
 
 <section class="releases">
   <article class="release">
     <header>
       <h2><time datetime="2026-10-10">10 October 2026</time></h2>
-      <p class="tag">Latest</p>
+      <p class="tag">2.0 · Latest</p>
+    </header>
+    <div class="release-body">
+      <dl class="points">
+        <div><dt>Your agent can ask for the code</dt><dd>Claude Code, Codex, Cursor and scripts can ask CodeCatch for a code while they sign in for you, with <code>codecatch get github.com</code>. A card shows which app asked, and you approve with Touch ID. <a href="/guides/2fa-codes-for-ai-agents/">How it works</a>.</dd></div>
+        <div><dt>Connect in one click</dt><dd>Settings → Agents lists the agents on your Mac. Connect adds a small skill the agent reads only when it needs a code, so nothing is added to every prompt.</dd></div>
+        <div><dt>You decide how much</dt><dd>Approve each code, always allow a site for an app, or allow all. Sign-in links have their own switch and start off. Password reset links never go to agents.</dd></div>
+        <div><dt>You see every request</dt><dd>Request History shows which app asked for which site, and what happened. It never keeps the code. A banner tells you each time a code goes out without asking.</dd></div>
+        <div><dt>Built to be safe</dt><dd>The tool talks to CodeCatch only on your Mac, never over the network, and each side checks the other’s signature. Three denials in a row turn agent access off.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <article class="release">
+    <header>
+      <h2><time datetime="2026-10-10">10 October 2026</time></h2>
     </header>
     <div class="release-body">
       <dl class="points">
@@ -252,6 +267,7 @@
         <a href="/guides/bitwarden-codes-mac-menu-bar/">Bitwarden codes on Mac</a>
         <a href="/guides/verification-code-autofill-chrome-mac/">Code autofill in Chrome</a>
         <a href="/guides/magic-link-safety/">Is this sign-in link safe?</a>
+        <a href="/guides/2fa-codes-for-ai-agents/">2FA codes for AI agents</a>
       </div>
       <div>
         <h2>Compare</h2>
