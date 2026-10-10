@@ -59,6 +59,8 @@ enum Snapshot {
             render(AnyView(GeneralTab().frame(width: 560, height: 600)), "general-\(scheme)", appearance, dir)
             render(AnyView(PrivacyTab().frame(width: 560, height: 600)), "privacy-\(scheme)", appearance, dir)
             render(AnyView(AddAccountSheet() { _ in }), "add-account-\(scheme)", appearance, dir)
+            render(AnyView(IgnoredSendersSheet()), "ignored-senders-\(scheme)", appearance, dir)
+            render(AnyView(AddIgnoredSender { _ in }), "ignore-sender-\(scheme)", appearance, dir)
             render(AnyView(AccountEditor(account: MailAccount.guess(for: "you@example.com"))), "account-editor-\(scheme)", appearance, dir)
         }
         let blurred = ImageRenderer(content: CodeText(code: "482913", size: 36, concealed: true).padding(12).background(Color.white))

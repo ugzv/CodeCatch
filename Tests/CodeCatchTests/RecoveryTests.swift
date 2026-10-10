@@ -202,7 +202,40 @@ private func missedCode(date: Date = Date(), id: String = "mail-1", source: Stri
         fixture.model.recovery.remove(sourceKey: "first-source")
         #expect(fixture.model.recovery.entries.count == 2)
         #expect(!fixture.model.recovery.entries.contains { $0.message.sourceKey == "first-source" })
-        fixture.model.recovery.remove(sender: "second@example.invalid")
+        fixture.model.recovery.remove(ignored: "second@example.invalid")
         #expect(fixture.model.recovery.entries.map(\.message.messageID) == ["third"])
+    }
+
+    /// Ignoring a domain takes its addresses' candidates with it and keeps earlier choices; an address under it then adds nothing.
+    @Test func ignoringADomainCoversItsAddresses() throws {
+        let fixture = try RecoveryFixture()
+        defer { fixture.cleanUp() }
+        fixture.model.ingest(missedCode(id: "covered", sender: "login@mail.example.invalid"))
+        fixture.model.ingest(missedCode(id: "other", sender: "login@other.invalid"))
+        fixture.model.ignore("Login@Example.invalid")
+        fixture.model.ignore("example.invalid")
+        fixture.model.ignore("security@example.invalid")
+        #expect(fixture.model.ignoredSenders == ["login@example.invalid", "example.invalid"])
+        #expect(fixture.model.recovery.entries.map(\.message.messageID) == ["other"])
+        fixture.model.ingest(missedCode(id: "later", sender: "noreply@example.invalid"))
+        #expect(fixture.model.recovery.entries.map(\.message.messageID) == ["other"])
+    }
+
+    /// Ignored senders must not come back after a relaunch or an upgrade from the old exact-sender format.
+    @Test func ignoredSendersSurviveRelaunchAndLegacyUpgrade() throws {
+        let fixture = try RecoveryFixture()
+        defer { fixture.cleanUp() }
+        fixture.defaults.set(["login@example.invalid"], forKey: "ignoredSenders")
+        fixture.model = fixture.makeModel()
+        #expect(fixture.model.ignoredSenders == ["login@example.invalid"])
+        fixture.model.ingest(missedCode(id: "legacy", sender: "login@example.invalid"))
+        fixture.model.ingest(missedCode(id: "kept", sender: "other@example.invalid"))
+        #expect(fixture.model.recovery.entries.map(\.message.messageID) == ["kept"])
+
+        fixture.model.ignore("acme.invalid")
+        #expect(fixture.makeModel().ignoredSenders == ["login@example.invalid", "acme.invalid"])
+        fixture.model.stopIgnoring(["login@example.invalid"])
+        let reloaded = fixture.makeModel()
+        #expect(reloaded.ignoredSenders == ["acme.invalid"])
     }
 }

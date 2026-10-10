@@ -39,7 +39,7 @@ struct ServiceIcon: View {
 }
 
 /// A site's logo as an app-icon tile.
-private struct LogoTile: View {
+struct LogoTile: View {
     let icon: IconStore.Icon
     let size: CGFloat
 

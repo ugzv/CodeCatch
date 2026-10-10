@@ -36,6 +36,69 @@ public enum ServiceIdentity {
         text.range(of: #"^[a-z0-9-]+(\.[a-z0-9-]+)+$"#, options: [.regularExpression, .caseInsensitive]) != nil
     }
 
+    // MARK: - Ignored senders
+
+    /// Whether an ignore entry covers `sender`: the same address or SMS sender, or, for a domain,
+    /// any mail address at it or under it ("acme.com" covers "alerts@mail.acme.com", not "notacme.com").
+    public static func ignores(_ entry: String, sender: String) -> Bool {
+        let sender = sender.lowercased()
+        guard sender != entry else { return true }
+        guard isHostname(entry), let host = mailHost(sender) else { return false }
+        return host == entry || host.hasSuffix("." + entry)
+    }
+
+    /// Typed text as an ignore entry, stored the way senders arrive: an address, a domain,
+    /// a phone number or short code without spaces, or an SMS sender name. Nil for anything else.
+    public static func ignoreEntry(_ text: String) -> String? {
+        var entry = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if entry.hasPrefix("mailto:") { entry.removeFirst(7) }
+        if entry.hasPrefix("@") { entry.removeFirst() }
+        // "*@acme.com" and "*.acme.com" mean the whole domain, which a domain entry already is.
+        if let wildcard = ["*@*.", "*@", "*."].first(where: entry.hasPrefix) {
+            return domainEntry(String(entry.dropFirst(wildcard.count)))
+        }
+        guard !entry.contains("*") else { return nil }
+        if let host = mailHost(entry) {
+            let user = entry.dropLast(host.count + 1)
+            return !user.isEmpty && !user.contains { $0.isWhitespace || $0 == "@" } && isHostname(host) ? entry : nil
+        }
+        // Before domains: "555.123.456" is a number, not a host.
+        let number = entry.filter { !" -().".contains($0) }
+        if number.range(of: #"^\+?\d{3,15}$"#, options: .regularExpression) != nil { return number }
+        if isHostname(entry) { return domainEntry(entry) }
+        // SMS sender names are at most 11 letters, digits, spaces and hyphens.
+        return entry.range(of: #"^[\p{L}\p{N}][\p{L}\p{N} -]{0,10}$"#, options: .regularExpression) != nil ? entry : nil
+    }
+
+    /// A domain to ignore, but never a public ending: "co.uk" or "github.io" would cover every site under it.
+    private static func domainEntry(_ host: String) -> String? {
+        let labels = host.split(separator: ".")
+        return isHostname(host) && labels.count > PublicSuffix.length(of: labels) ? host : nil
+    }
+
+    /// The domain "Ignore All from…" offers for a mail sender. None for shared mail
+    /// providers: ignoring gmail.com would drop every personal sender.
+    public static func ignorableDomain(of sender: String) -> String? {
+        guard let host = mailHost(sender.lowercased()), isHostname(host) else { return nil }
+        let domain = registrable(host)
+        let brand = String(domain.prefix { $0 != "." })
+        return sharedMailBrands.contains(brand) || sharedMailDomains.contains(domain) ? nil : domain
+    }
+
+    /// The part after the last "@", for a mail address; nil for an SMS sender.
+    private static func mailHost(_ sender: String) -> String? {
+        sender.lastIndex(of: "@").map { String(sender[sender.index(after: $0)...]) }
+    }
+
+    /// Mail providers anyone can sign up to, under any country suffix (hotmail.co.uk, live.de). Matching the
+    /// brand errs safe: a company that shares one only loses the shortcut, never every personal sender…
+    private static let sharedMailBrands: Set<String> = [
+        "gmail", "googlemail", "outlook", "hotmail", "live", "msn", "yahoo", "icloud", "aol", "proton", "protonmail",
+        "gmx", "yandex", "zoho", "fastmail",
+    ]
+    /// …except brands that are common words, matched whole so "web.dev" keeps its option.
+    private static let sharedMailDomains: Set<String> = ["me.com", "mac.com", "pm.me", "web.de", "mail.com", "mail.ru"]
+
     private static let genericSender = try! NSRegularExpression(
         pattern: #"(?i)no.?reply|do.?not.?reply|notifications?|^(info|support|security|accounts?|team|mailer)$"#)
 

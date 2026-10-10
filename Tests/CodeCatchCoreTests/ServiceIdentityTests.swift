@@ -32,3 +32,39 @@ func findsRegistrableDomain(host: String, expected: String) {
 func takesOnlyHostnamesAsMailDomains(address: String, expected: String?) {
     #expect(ServiceIdentity.domain(senderAddress: address, isMail: true, text: "", service: "") == expected)
 }
+
+/// An ignored domain must catch its subdomains' mail and nothing else: "notacme.com" is someone else, an SMS sender is not a host.
+@Test(arguments: [
+    ("security@acme.com", "security@acme.com", true), ("security@acme.com", "Security@ACME.com", true),
+    ("security@acme.com", "noreply@acme.com", false),
+    ("acme.com", "noreply@acme.com", true), ("acme.com", "alerts@mail.acme.com", true), ("acme.com", "mail.acme.com", false),
+    ("acme.com", "noreply@notacme.com", false), ("acme.com", "acme.com@evil.com", false), ("mail.acme.com", "noreply@acme.com", false),
+    ("+38640123456", "+38640123456", true), ("google", "Google", true), ("google", "google.com", false),
+] as [(String, String, Bool)])
+func matchesIgnoredSenders(entry: String, sender: String, expected: Bool) {
+    #expect(ServiceIdentity.ignores(entry, sender: sender) == expected)
+}
+
+/// A typed entry is stored the way senders arrive, or it never matches; text that is no sender, or would cover a whole public ending, is refused.
+@Test(arguments: [
+    (" Security@Acme.com ", "security@acme.com"), ("mailto:a@acme.com", "a@acme.com"), ("@Acme.com", "acme.com"),
+    ("+386 40 123-456", "+38640123456"), ("(555) 123", "555123"), ("555.123.456", "555123456"), ("Google", "google"), ("Acme-Promo", "acme-promo"),
+    // Wildcards people type for a whole domain; any other wildcard is refused.
+    ("*@Acme.com", "acme.com"), ("*.acme.com", "acme.com"), ("*@*.acme.com", "acme.com"), ("sec*@acme.com", nil), ("*", nil), ("*.com", nil),
+    // A public ending would ignore every sender under it.
+    ("co.uk", nil), ("*.co.uk", nil), ("github.io", nil), ("someone.github.io", "someone.github.io"),
+    ("", nil), ("a@", nil), ("@", nil), ("a@@acme.com", nil), ("a\tb@acme.com", nil), ("a@acme.com/x", nil), ("acme.com:8443", nil), ("not a sender at all", nil),
+] as [(String, String?)])
+func readsTypedIgnoreEntries(text: String, expected: String?) {
+    #expect(ServiceIdentity.ignoreEntry(text) == expected)
+}
+
+/// "Ignore All from gmail.com" would drop every personal sender, so shared mail providers get no domain option.
+@Test(arguments: [
+    ("security@mail.acme.com", "acme.com"), ("noreply@id.apple.com", "apple.com"),
+    ("friend@gmail.com", nil), ("someone@outlook.co.uk", nil), ("me@icloud.com", nil), ("you@me.com", nil), ("friend@live.co.uk", nil), ("security@web.dev", "web.dev"),
+    ("+38640123456", nil), ("Google", nil),
+] as [(String, String?)])
+func offersIgnorableDomain(sender: String, expected: String?) {
+    #expect(ServiceIdentity.ignorableDomain(of: sender) == expected)
+}

@@ -7,6 +7,7 @@ struct SourcesTab: View {
     @AppStorage(Prefs.appleMail) private var appleMailEnabled = false
     @Local private var editing: MailAccount?
     @Local private var adding = false
+    @Local private var ignoring = false
     #if DEBUG
     @Local private var importResult: String?
     #endif
@@ -25,6 +26,10 @@ struct SourcesTab: View {
                 SettingRow(symbol: CatchKind.passwordReset.symbol, color: CatchKind.passwordReset.color, title: "Password Reset Links",
                            info: "Links to reset or change a password, read from mail. Links open only when you click them, after you unlock CodeCatch.",
                            isOn: setting(Prefs.resetLinks))
+                SettingRow(symbol: "nosign", color: .gray, title: "Ignored Senders", subtitle: ignoredSummary,
+                           info: "Codes and links from these senders are skipped. To ignore a sender, right-click one of their codes.") {
+                    Button("Edit…") { ignoring = true }
+                }
             } header: {
                 Text("What to Catch")
             } footer: {
@@ -108,24 +113,20 @@ struct SourcesTab: View {
                     WarningText(message: error).font(.caption)
                 }
             }
-
-            if !model.ignoredSenders.isEmpty {
-                Section {
-                    ForEach(model.ignoredSenders, id: \.self) { sender in
-                        SettingRow(symbol: "nosign", color: .gray, title: sender) {
-                            Button("Stop Ignoring") { model.stopIgnoring(sender) }
-                        }
-                    }
-                } header: {
-                    Text("Ignored Senders")
-                        .hoverInfo("Ignored Senders", "Codes from these senders are skipped. To ignore a sender, right-click one of their codes.")
-                }
-            }
         }
         .formStyle(.grouped)
         .sheet(item: $editing) { AccountEditor(account: $0) }
         .sheet(isPresented: $bitwarden) { BitwardenSheet() }
         .sheet(isPresented: $adding) { AddAccountSheet { editing = $0 } }
+        .sheet(isPresented: $ignoring) { IgnoredSendersSheet() }
+    }
+
+    private var ignoredSummary: String {
+        switch model.ignoredSenders.count {
+        case 0: "None"
+        case 1: "1 sender"
+        case let count: "\(count) senders"
+        }
     }
 
     private var aboutBitwarden: String {

@@ -37,7 +37,7 @@ final class RecoveryInbox: ObservableObject {
 
     func removeAll() { remove { _ in true } }
     func remove(sourceKey: String) { remove { $0.message.sourceKey == sourceKey } }
-    func remove(sender: String) { remove { $0.message.senderID.lowercased() == sender.lowercased() } }
+    func remove(ignored entry: String) { remove { ServiceIdentity.ignores(entry, sender: $0.message.senderID) } }
     func remove(messageKey: String) { remove { $0.message.dismissKey == messageKey } }
     func retainSources(_ keys: Set<String>) { remove { !keys.contains($0.message.sourceKey) } }
 

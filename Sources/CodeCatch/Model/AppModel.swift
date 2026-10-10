@@ -23,7 +23,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var now = Date()
     /// Why the last unlock failed; cleared when the next one starts.
     @Published private(set) var unlockError: String?
-    /// Senders whose messages are never read for codes ("Ignore All from…").
+    /// Senders whose messages are never read for codes: addresses, domains and SMS senders.
     @Published private(set) var ignoredSenders: [String]
     let vaultSession: VaultSession
     let monitor: SourceMonitor
@@ -268,7 +268,7 @@ final class AppModel: ObservableObject {
     func ingest(_ message: IncomingMessage) {
         let age = Date().timeIntervalSince(message.date)
         guard age < history, message.date > clearedAt,
-              !ignoredSenders.contains(message.senderID.lowercased()) else { return }
+              !isIgnored(message.senderID) else { return }
         let code = monitoring(Prefs.receivedCodes) ? CodeExtractor.code(in: message.fullText) : nil
         let detectedLink = message.isMail ? SignInLink.find(in: message.links, subject: message.subject ?? "") : nil
         let resets = detectedLink?.kind == .passwordReset
@@ -476,19 +476,22 @@ final class AppModel: ObservableObject {
         items.removeAll(where: gone)
     }
 
-    func ignoreSender(of item: CodeItem) {
-        let sender = item.sender.lowercased()
-        guard !sender.isEmpty, !ignoredSenders.contains(sender) else { return }
-        ignoredSenders.append(sender)
+    func isIgnored(_ sender: String) -> Bool { ignoredSenders.contains { ServiceIdentity.ignores($0, sender: sender) } }
+
+    /// Ignores an address, a domain or an SMS sender, and drops the codes it now covers.
+    func ignore(_ sender: String) {
+        let entry = sender.lowercased()
+        guard !entry.isEmpty, !isIgnored(entry) else { return }
+        ignoredSenders.append(entry)
         defaults.set(ignoredSenders, forKey: Prefs.ignoredSenders)
-        remove { $0.sender.lowercased() == sender }
-        recovery.remove(sender: sender)
+        remove { ServiceIdentity.ignores(entry, sender: $0.sender) }
+        recovery.remove(ignored: entry)
     }
 
-    func stopIgnoring(_ sender: String) {
-        ignoredSenders.removeAll { $0 == sender }
+    func stopIgnoring(_ entries: Set<String>) {
+        ignoredSenders.removeAll { entries.contains($0) }
         defaults.set(ignoredSenders, forKey: Prefs.ignoredSenders)
-        restartMessages()  // re-read the sources so that sender's codes come back
+        restartMessages()  // re-read the sources so those senders' codes come back
         restartMail()
     }
 

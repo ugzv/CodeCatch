@@ -1,3 +1,4 @@
+import CodeCatchCore
 import SwiftUI
 
 struct CodeRow: View {
@@ -204,7 +205,10 @@ struct CodeMenu: View {
         Button("Clear") { model.dismiss(item) }
         Button(!item.isLink ? "Not a Code" : item.resetsPassword ? "Not a Password Reset Link" : "Not a Sign-In Link") { model.dismiss(item) }
         if !item.sender.isEmpty {
-            Button("Ignore All from \(item.sender)") { model.ignoreSender(of: item) }
+            Button("Ignore \(item.sender)") { model.ignore(item.sender) }
+            if let domain = ServiceIdentity.ignorableDomain(of: item.sender) {
+                Button("Ignore All from \(domain)") { model.ignore(domain) }
+            }
         }
     }
 }
