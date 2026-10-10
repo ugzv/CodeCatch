@@ -3,6 +3,15 @@
     <channel>
         <title>CodeCatch</title>
         <item>
+            <title>2.0</title>
+            <pubDate>Sat, 10 Oct 2026 17:36:15 +0200</pubDate>
+            <sparkle:fullReleaseNotesLink>https://codecatch.app/changelog/</sparkle:fullReleaseNotesLink>
+            <sparkle:version>180</sparkle:version>
+            <sparkle:shortVersionString>2.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/ugzv/CodeCatch/releases/download/v2.0.180/CodeCatch.dmg" length="5849949" type="application/octet-stream" sparkle:edSignature="IoQHqyqsQsgErlHthU95sLh67A17UlWchUOpcPU8Jsh5JiGJKnmuLa2lpswRSuu4uNFdt96NfXGSZZTQNx5MBw=="/>
+        </item>
+        <item>
             <title>1.0</title>
             <pubDate>Sat, 10 Oct 2026 14:00:18 +0200</pubDate>
             <sparkle:fullReleaseNotesLink>https://codecatch.app/changelog/</sparkle:fullReleaseNotesLink>
@@ -19,15 +28,6 @@
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
             <enclosure url="https://github.com/ugzv/CodeCatch/releases/download/v1.0.163/CodeCatch.dmg" length="4489269" type="application/octet-stream" sparkle:edSignature="XFW8mmv64LOpI60l638IjfnDYh6P+90OzckHVjPUpk8QO2bflNPij6PLtz1dliicU5fOM1O68vckF3EgLLNnBw=="/>
-        </item>
-        <item>
-            <title>1.0</title>
-            <pubDate>Tue, 06 Oct 2026 15:30:20 +0200</pubDate>
-            <sparkle:fullReleaseNotesLink>https://codecatch.app/changelog/</sparkle:fullReleaseNotesLink>
-            <sparkle:version>157</sparkle:version>
-            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/ugzv/CodeCatch/releases/download/v1.0.157/CodeCatch.dmg" length="4475568" type="application/octet-stream" sparkle:edSignature="n22s1r3W2IjIfDQkpPyo3VKHN4U4dQmu7OfzdL3ASjFiFLJrfUxDklRbaU1vMVEMc7LSQYKJRttcCDYE2EauAQ=="/>
         </item>
     </channel>
 </rss>
