@@ -140,6 +140,7 @@ final class AppModel: ObservableObject {
         agents.restore()
         agents.present = AgentPanel.present
         CLIServer.start(model: self)
+        AgentSkill.refresh(home: FileManager.default.homeDirectoryForCurrentUser, guidance: CommandLineTool.guidance)
         LoginItem.sync()
         Hotkeys.sync()
         monitor.start(accounts: accounts)

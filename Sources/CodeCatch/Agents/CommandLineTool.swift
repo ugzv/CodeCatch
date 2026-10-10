@@ -92,10 +92,11 @@ enum CommandLineTool {
 
     /// For CLAUDE.md or AGENTS.md: that the tool exists, the two things that break a sign-in, and the
     /// one boundary. Flags, JSON and exit codes live in `codecatch --help`, where the agent uses them.
-    static var instructions: String {
-        """
-        ## 2FA codes (CodeCatch)
+    static var instructions: String { "## 2FA codes (CodeCatch)\n\n" + guidance }
 
+    /// The instructions without their heading; a skill wraps them in its own front matter.
+    static var guidance: String {
+        """
         When a site I asked you to sign in to needs a code or a sign-in link, run `codecatch get <site>`. Full path: \(helper.path). Run `codecatch --help` once to see the options.
 
         A code may need my OK in CodeCatch first, so the command can wait up to two minutes. Set your tool timeout to at least 150 seconds.

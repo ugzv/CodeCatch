@@ -12,6 +12,8 @@ struct AgentsTab: View {
     @Local private var toolError: String?
     @Local private var showingRules = false
     @Local private var copiedAt: Date?
+    @Local private var skills: [AgentSkill: AgentSkill.State] = [:]
+    private let home = FileManager.default.homeDirectoryForCurrentUser
     @Local private var showingHistory = false
 
     var body: some View {
@@ -44,8 +46,22 @@ struct AgentsTab: View {
                         }
                     }
                 }
-                SettingRow(symbol: "doc.on.doc.fill", color: .blue, title: "Instructions for Agents",
-                           info: "Paste this into your agent’s CLAUDE.md or AGENTS.md so it knows how to ask, and when not to.") {
+            } header: {
+                Text("Command Line")
+            } footer: {
+                if !access.config.enabled {
+                    Text("Agents can't ask for codes while this is off.").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            // Connect writes a skill the agent loads only when it needs a code; others get the text to paste.
+            Section("Agents") {
+                ForEach(AgentSkill.allCases.filter { $0.isInstalled(home: home) }) { agent in
+                    AgentSkillRow(agent: agent, state: skills[agent] ?? .notConnected) { skillsChanged() }
+                        // Connecting waits for access; removing a skill is cleanup, so Disconnect stays.
+                        .disabled(!access.config.enabled && skills[agent] != .connected)
+                }
+                SettingRow(symbol: "doc.on.doc.fill", color: .blue, title: "Other Agents",
+                           info: "For an agent not listed above: paste this into its instructions, such as AGENTS.md.") {
                     // Says "Copied" for a moment, like a code's Copy button.
                     Button {
                         NSPasteboard.general.clearContents()
@@ -68,8 +84,6 @@ struct AgentsTab: View {
                     .padding(10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(.primary.opacity(0.04)))
-            } header: {
-                Text("Command Line")
             }
             // The same rows as Sources → What to Catch: what agents may get of what CodeCatch catches.
             Section("What to Share") {
@@ -89,11 +103,13 @@ struct AgentsTab: View {
                     Text("Never").foregroundStyle(.secondary)
                 }
             }
+            .disabled(!access.config.enabled)
             Section("Permissions") {
                 SettingRow(symbol: "exclamationmark.shield.fill", color: .red, title: "Allow All Without Asking",
                            subtitle: access.config.allowAll ? "Any agent gets codes without asking." : nil,
                            info: "Like skipping permission prompts in Claude Code. Every code goes to any agent that asks, and sign-in links too if they are on. You still see each one in a banner and in Request History. A text that doesn't name its site still asks. Turning this on asks for \(DeviceAuthentication.unlockMethods).",
                            isOn: Binding(get: { access.config.allowAll }, set: { on in Task { await access.setAllowAll(on) } }))
+                    .disabled(!access.config.enabled)
                 SettingRow(symbol: "checkmark.shield.fill", color: .green, title: "Always Allowed", subtitle: rulesSummary,
                            info: "Apps that get codes without asking you. To add one, choose Always Allow on a request. Rules and Allow All give out at most 20 codes an hour in all. After that, CodeCatch asks again.") {
                     Button("Edit…") { showingRules = true }
@@ -105,7 +121,10 @@ struct AgentsTab: View {
             }
         }
         .formStyle(.grouped)
-        .onAppear { tool = CommandLineTool.state }
+        .onAppear {
+            tool = CommandLineTool.state
+            skillsChanged()
+        }
         .sheet(isPresented: $showingRules) { AgentRulesSheet() }
         .sheet(isPresented: $showingHistory) { AgentHistorySheet() }
     }
@@ -135,6 +154,10 @@ struct AgentsTab: View {
         }
     }
 
+    private func skillsChanged() {
+        skills = Dictionary(uniqueKeysWithValues: AgentSkill.allCases.map { ($0, $0.state(home: home)) })
+    }
+
     private var rulesSummary: String {
         if access.config.allowAll { return "Everything, while Allow All is on" }
         let rules = access.config.rules
@@ -158,6 +181,67 @@ struct AgentsTab: View {
             toolError = error.localizedDescription
         }
         tool = CommandLineTool.state
+    }
+}
+
+/// An agent found on this Mac: Connect writes its skill, Disconnect removes it.
+private struct AgentSkillRow: View {
+    let agent: AgentSkill
+    let state: AgentSkill.State
+    let changed: () -> Void
+    @Local private var error: String?
+
+    var body: some View {
+        HStack(spacing: 10) {
+            SiteIcon(site: agent.domain)
+            VStack(alignment: .leading, spacing: 1) {
+                // The same dot as a source in Settings → Sources: green connected, gray not, orange in the way.
+                HStack(spacing: 6) {
+                    Text(agent.name)
+                    Circle().fill(status.color).frame(width: 6, height: 6).accessibilityLabel(status == .live ? "Connected" : "Not connected")
+                }
+                .accessibilityElement(children: .combine)
+                if let subtitle = error ?? subtitle {
+                    Text(subtitle).font(.subheadline).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .hoverInfo(agent.name, "Connect adds a codecatch skill to \(agent.name). It loads only when \(agent.name) needs a code, so it doesn’t add to every prompt.")
+            Spacer(minLength: 12)
+            switch state {
+            case .notConnected: Button("Connect") { run { try agent.connect(home: home, guidance: CommandLineTool.guidance) } }
+            case .connected: Button("Disconnect") { run { try agent.disconnect(home: home) } }
+            case .connectedThrough, .taken: EmptyView()
+            }
+        }
+    }
+
+    private var home: URL { FileManager.default.homeDirectoryForCurrentUser }
+
+    private var status: SourceStatus {
+        switch state {
+        case .notConnected: .off
+        case .connected, .connectedThrough: .live
+        case .taken: .attention("Not connected")
+        }
+    }
+
+    /// Only what the dot can't say.
+    private var subtitle: String? {
+        switch state {
+        case .notConnected, .connected: nil
+        case .connectedThrough(let other): "Uses \(other.name)’s skill"
+        case .taken: "Has a codecatch skill CodeCatch didn’t add"
+        }
+    }
+
+    private func run(_ action: () throws -> Void) {
+        do {
+            try action()
+            error = nil
+        } catch {
+            self.error = error.localizedDescription
+        }
+        changed()
     }
 }
 

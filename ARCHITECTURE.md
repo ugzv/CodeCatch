@@ -63,7 +63,9 @@ new codes skip auto-copy, auto-type and the banner. Lock and sleep cancel a
 pending card; rules keep working while locked, so unattended runs can finish.
 Three denials in a row turn access off, and rules give out at most 20 codes an
 hour before asking again. The log keeps who asked, the site and the outcome,
-never the code. None of this stops a program that already has Full Disk Access
+never the code. Connect writes `codecatch/SKILL.md` into an agent's
+own skills folder (`~/.claude`, `~/.codex`, `~/.cursor`), marked as CodeCatch's;
+Disconnect and launch-time refresh touch only files with that mark. None of this stops a program that already has Full Disk Access
 from reading Messages or Mail directly.
 
 ## Network boundaries
