@@ -39,6 +39,33 @@ concealed/transient markers. Those markers are requests to other apps, not acces
 control. Timeout and lock cleanup only clear a clipboard value still owned by
 CodeCatch. Auto-type is opt-in; sign-in links open only after a user action.
 
+## Agent access
+
+`codecatch` (`Sources/CodeCatchCLI`, shipped as `Contents/Helpers/codecatch`)
+talks to the running app over a Unix socket in Application Support (folder 0700,
+socket 0600). There is no TCP port, token or URL scheme that gives out codes.
+Each side checks the other. The app accepts only the same user and names the
+caller after the first validly signed app up its parent processes. The process's
+own name is shown as unverified. The CLI sends nothing unless the socket's owner
+is CodeCatch, signed by the CLI's own team.
+
+`AgentAccess` keeps the switch and the "always allow" rules in the login
+Keychain, so `defaults write` can't turn them on. A release needs Touch ID or
+the Mac password on the request's card every time, or a rule: an app (bundle ID
+and team), one site or all. Allow All, turned on with the same authentication,
+releases to any caller; it shares the hourly cap and never covers a text that
+names no site. Sign-in links go to agents only while their own switch is on
+(also behind authentication), then under the same card, rules and Allow All. An approval covers the
+one item the card showed. Mail matches by the sender's registrable domain only.
+Links go out only from verified senders, to the requested site, and never for a
+password reset or a link the lookalike check warns about. While a request waits,
+new codes skip auto-copy, auto-type and the banner. Lock and sleep cancel a
+pending card; rules keep working while locked, so unattended runs can finish.
+Three denials in a row turn access off, and rules give out at most 20 codes an
+hour before asking again. The log keeps who asked, the site and the outcome,
+never the code. None of this stops a program that already has Full Disk Access
+from reading Messages or Mail directly.
+
 ## Network boundaries
 
 | Component | Destination and purpose |

@@ -10,8 +10,9 @@ links and addresses from anything you attach.
 
 In scope: anything that exposes a code, sign-in link, message, mail credential or
 Bitwarden secret to another app, another user, the network or the disk; a way to
-make CodeCatch open, type or send something the user did not ask for; and flaws
-in the update path. What CodeCatch reads, keeps and connects to is listed at
+make CodeCatch open, type or send something the user did not ask for; a way to
+get a code or link through `codecatch` without the user's approval or a rule they
+made; and flaws in the update path. What CodeCatch reads, keeps and connects to is listed at
 <https://codecatch.app/privacy/>; behaviour that contradicts that page is a bug
 worth reporting too.
 
