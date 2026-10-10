@@ -5,14 +5,16 @@ import SwiftUI
 /// never-key banner panel as in a key window (system styles grey out there).
 struct ActionButtonStyle: ButtonStyle {
     var prominent = false
+    /// A list row's button: sized to its title, not stretched across the card.
+    var compact = false
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.body.weight(.semibold))
+            .font(compact ? .subheadline.weight(.medium) : .body.weight(.semibold))
             .labelStyle(.titleAndIcon)
             .contentTransition(.symbolEffect(.replace))
             .lineLimit(1)
-            .frame(maxWidth: .infinity, minHeight: 30)
+            .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? 24 : 30)
             .padding(.horizontal, 10)
             .foregroundStyle(prominent ? Color.white : Color.primary)
             .background {
@@ -49,6 +51,9 @@ extension View {
         modifier(HoverHighlight(shape: shape, outset: outset))
     }
 }
+
+/// Hover eases in and ends at once, so a pointer sweeping down a list leaves no fading trail.
+@MainActor func hoverAnimation(_ on: Bool) -> Animation? { on ? .easeOut(duration: 0.12) : nil }
 
 /// A toolbar-weight glyph: the face of GlyphButton and of the ••• and ? menus.
 struct GlyphLabel: View {
@@ -136,9 +141,6 @@ struct IconTile: View {
     let symbol: String
     let color: Color
 
-    init(symbol: String, color: Color) { self.symbol = symbol; self.color = color }
-    init(_ kind: CatchKind) { self.init(symbol: kind.symbol, color: kind.color) }
-
     var body: some View {
         RoundedRectangle(cornerRadius: 6, style: .continuous)
             .fill(color.gradient)
@@ -155,17 +157,40 @@ extension View {
 }
 
 /// Asks before something that can't be undone. An alert rather than a SwiftUI dialog,
-/// so it works the same from the menu-bar popover as from Settings.
+/// so it works the same from the menu-bar popover as from Settings. `safeDefault` makes
+/// Return cancel, for when going ahead is the risk. `details` sits under the message in small,
+/// selectable text; `also` adds a third button that runs instead of the action.
 @MainActor
-func confirmed(_ title: String, _ message: String, action: String) -> Bool {
+func confirmed(_ title: String, _ message: String, action: String, safeDefault: Bool = false,
+               details: String? = nil, also: (title: String, run: () -> Void)? = nil) -> Bool {
     let alert = NSAlert()
     alert.messageText = title
     alert.informativeText = message
     alert.alertStyle = .warning
-    alert.addButton(withTitle: action).hasDestructiveAction = true
-    alert.addButton(withTitle: "Cancel")
+    // A safe default comes first, as Apple orders them; the risky action last.
+    let go: NSButton
+    var alsoButton: NSButton?
+    if safeDefault {
+        alert.addButton(withTitle: "Cancel")
+        alsoButton = also.map { alert.addButton(withTitle: $0.title) }
+        go = alert.addButton(withTitle: action)
+    } else {
+        go = alert.addButton(withTitle: action)
+        alert.addButton(withTitle: "Cancel")
+    }
+    go.hasDestructiveAction = true
+    if let details {
+        let text = NSTextField(wrappingLabelWithString: details)
+        text.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        text.textColor = .secondaryLabelColor
+        text.preferredMaxLayoutWidth = 220
+        text.frame.size = text.fittingSize
+        alert.accessoryView = text
+    }
     NSApp.activate()
-    return alert.runModal() == .alertFirstButtonReturn
+    let tapped = alert.buttons[alert.runModal().rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue]
+    if tapped == alsoButton { also?.run() }
+    return tapped == go
 }
 
 /// Settings and the menu's Clear History: a clear outlasts restarts, so it asks first.

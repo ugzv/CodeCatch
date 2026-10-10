@@ -38,7 +38,7 @@ struct CodeCard: View {
         }
         .padding(16)
         .onHover { on in
-            withAnimation(.easeOut(duration: 0.15)) { hoveringCard = on }
+            withAnimation(hoverAnimation(on)) { hoveringCard = on }
             if style == .banner { Banner.shared.setHovering(on) }
         }
     }
@@ -54,6 +54,11 @@ struct CodeCard: View {
         .keyboardShortcut(style == .menu ? KeyboardShortcut("c") : nil)
     }
 
+    /// "Password reset", or "work@gmail.com · Sign-in link": a code needs no kind, its digits say it.
+    private var subtitle: String {
+        [model.origination(item), item.isLink ? item.kind.title : ""].filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+
     private var header: some View {
         HStack(spacing: 12) {
             ServiceIcon(item: item, size: 38)
@@ -62,9 +67,8 @@ struct CodeCard: View {
                 // The banner has no footer, so a failed unlock shows here, in the same one line.
                 if style == .banner, locked, let error = model.unlockError {
                     WarningText(message: error, compact: true).font(.subheadline)
-                } else {
-                    Text([item.origination, item.isLink ? item.kind.title : nil].compactMap { $0 }.joined(separator: " · "))
-                        .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
+                } else if !subtitle.isEmpty {
+                    Text(subtitle).font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
             Spacer(minLength: 8)
@@ -84,40 +88,36 @@ struct CodeCard: View {
         let live = model.isFresh(item)
         return HStack(spacing: 10) {
             if item.isLink, let link = item.destination {
-                IconTile(item.kind).help(item.kind.title).accessibilityLabel(item.kind.title)
-                VStack(alignment: .leading, spacing: 1) {
-                    // The site, never truncated: it is what a phishing check reads.
-                    Text(ServiceIdentity.registrable(link.host ?? "")).font(.system(size: 16, weight: .semibold))
-                        .lineLimit(1).minimumScaleFactor(0.6)
-                    Text((link.host ?? "") + (locked ? "" : link.path))
-                        .font(.subheadline).foregroundStyle(.secondary)
-                        .lineLimit(1).truncationMode(.middle)
-                }
-                .opacity(live ? 1 : 0.5)
+                // The site as the hero, as a code's digits are; never truncated: it is what a phishing check
+                // reads. The full address is on hover.
+                Text(ServiceIdentity.registrable(link.host ?? "")).font(.system(size: 20, weight: .semibold))
+                    .lineLimit(1).minimumScaleFactor(0.6)
+                    .foregroundStyle(live ? .primary : .tertiary)
             } else {
                 CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 36, concealed: blurCodes && !hoveringCard)
                     .foregroundStyle(live ? .primary : .tertiary)
             }
             Spacer(minLength: 6)
-            if live {
+            if !live {
+                Label("Expired", systemImage: "clock.badge.xmark")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.red)
+            } else if item.showsCountdown(now: model.now) {
                 HStack(spacing: 8) {
                     Text(item.remaining(now: model.now))
                         .font(.callout.weight(.medium).monospacedDigit())
                         .foregroundStyle(.secondary)
                     ExpiryRing(item: item, now: model.now, size: 22)
                 }
-            } else {
-                Label("Expired", systemImage: "clock.badge.xmark")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(.red)
+                .transition(.opacity)
             }
         }
         .padding(.leading, 16)
         .padding(.trailing, 14)
-        .frame(height: 60)
+        .frame(height: item.isLink ? 48 : 60)  // sized to its hero: a site's name, or a code's larger digits
         .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.hoverFill(hoveringCode, resting: 0.05)))
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .onHover { on in withAnimation(.easeOut(duration: 0.12)) { hoveringCode = on } }
+        .onHover { on in withAnimation(hoverAnimation(on)) { hoveringCode = on } }
         .onTapGesture(perform: item.isLink ? open : copy)
         .help(locked ? "Click to unlock" : item.isLink ? "Click to open \(item.link?.absoluteString ?? "")" : "Click to copy")
     }

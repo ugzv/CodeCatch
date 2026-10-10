@@ -20,6 +20,20 @@ struct CodeRow: View {
     private var copied: Bool { Clipboard.holds(item) }
     private var locked: Bool { !model.isUnlocked }
     private var concealed: Bool { locked || blurCodes && !hovering }
+    /// The row a click or Return acts on.
+    private var active: Bool { hovering || selected }
+
+    /// "codecatch.app", or "work@gmail.com · codecatch.app". A link that goes somewhere the sender can't
+    /// vouch for marks just its site, while it can still be opened; the full warning is on hover and in the card.
+    private var subtitle: Text? {
+        if item.origin == .vault { return Text([item.accountLabel, item.sourceLabel].filter { !$0.isEmpty }.joined(separator: " · ")) }
+        let origination = model.origination(item)
+        guard var host = item.destination?.host else { return origination.isEmpty ? nil : Text(origination) }
+        if host.hasPrefix("www.") { host.removeFirst(4) }  // shown only; the link keeps it
+        let site = live && item.linkNotice?.warns == true
+            ? Text("\(Image(systemName: "exclamationmark.triangle.fill")) \(host)").foregroundStyle(.orange) : Text(host)
+        return origination.isEmpty ? site : Text(origination + " · ") + site
+    }
 
     var body: some View {
         HStack(spacing: 11) {
@@ -39,28 +53,27 @@ struct CodeRow: View {
                         Text("Expired").font(.caption.weight(.medium)).foregroundStyle(.tertiary)
                     }
                 }
-                Text(item.origin == .vault
-                     ? [item.accountLabel, item.sourceLabel].filter { !$0.isEmpty }.joined(separator: " · ")
-                     : [item.origination, item.destination?.host].compactMap { $0 }.joined(separator: " · "))
-                    .font(.subheadline).foregroundStyle(.secondary).lineLimit(1)
-                if let notice = item.linkNotice {
-                    // Never cut short: it is a phishing warning, and its end says what to check.
-                    WarningText(message: notice.text, calm: !notice.warns).font(.caption)
-                } else if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
+                // Cut in the middle: a lookalike site gives itself away at its end.
+                if let subtitle {
+                    subtitle
+                        .font(.subheadline).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                        .help(item.linkNotice?.text ?? "")
+                }
+                if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
                 }
             }
             Spacer(minLength: 8)
             if item.isLink {
                 Button(action: activate) {
-                    Label { Text(locked ? "Unlock" : "Open") } icon: {
-                        Image(systemName: locked ? "lock.fill" : item.kind.symbol).foregroundStyle(locked ? AnyShapeStyle(.secondary) : AnyShapeStyle(item.kind.color))
-                    }
+                    Label(locked ? "Unlock" : "Open", systemImage: locked ? "lock.fill" : item.kind.symbol)
+                        // Faded once expired, like an expired code: still clickable, since the link may still work.
+                        .foregroundStyle(active ? AnyShapeStyle(.white) : AnyShapeStyle(live ? .primary : .tertiary))
                 }
-                    .buttonStyle(.bordered)
+                    // Blue marks what a click or Return does, as Open Link does on the card.
+                    .buttonStyle(ActionButtonStyle(prominent: active, compact: true))
+                    .animation(nil, value: active)  // the row's highlight eases in; the button just switches
                     .accessibilityLabel(locked ? "Unlock" : "Open \(item.kind.title.lowercased())")
-                    .controlSize(.small)
-                    .buttonBorderShape(.capsule)
                     .help(concealed ? item.destination?.host ?? "" : item.link?.absoluteString ?? "")
             }
             if !item.isLink {
@@ -75,22 +88,29 @@ struct CodeRow: View {
                                 .transition(.scale(scale: 0.2).combined(with: .opacity))
                                 .help("On the clipboard")
                                 .accessibilityLabel("Copied")
-                        } else if live {
+                        } else if live && item.showsCountdown(now: model.now) {
                             ExpiryRing(item: item, now: model.now, size: 14).transition(.scale(scale: 0.6).combined(with: .opacity))
                         }
                     }
                     .font(.system(size: 14))
                     .frame(width: 14)
-                    CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
-                        .foregroundStyle(copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
+                    // The same pill as a link's Open, blue on the row a click or Return copies.
+                    Button(action: activate) {
+                        CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
+                            .foregroundStyle(active ? AnyShapeStyle(.white) : copied ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(live ? .primary : .tertiary))
+                    }
+                        .buttonStyle(ActionButtonStyle(prominent: active, compact: true))
+                        .animation(nil, value: active)
+                        .accessibilityLabel("Copy code")
                 }
             }
-            // The right-click actions, findable: in a fixed slot so the code never shifts as it appears.
+            // The right-click actions, findable. Always there, quiet until hovered: the rows end on one
+            // column, in line with the footer's ⋯, and nothing shifts under the pointer.
             Menu { CodeMenu(item: item) } label: { GlyphLabel(symbol: "ellipsis") }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
                 .frame(width: 24, height: 24)
-                .opacity(hovering || selected ? 1 : 0)
+                .opacity(active ? 1 : 0.45)
                 .help("More")
                 .accessibilityLabel("More actions")
         }
@@ -107,9 +127,8 @@ struct CodeRow: View {
         .animation(.snappy(duration: 0.3, extraBounce: 0.2), value: copied)
         .accessibilityAddTraits(selected ? .isSelected : [])
         .contentShape(Rectangle())
-        .onHover { on in withAnimation(.easeOut(duration: 0.12)) { hovering = on } }
+        .onHover { on in withAnimation(hoverAnimation(on)) { hovering = on } }
         .onTapGesture(perform: activate)
-        .help(concealed || !showPreviews ? item.origination : item.snippet)
         .contextMenu { CodeMenu(item: item) }
     }
 
@@ -154,8 +173,8 @@ struct CodeMenu: View {
     @ViewBuilder private var messageActions: some View {
         Button("Copy Message") { Clipboard.copy(item.snippet, id: item.id) }
         Divider()
-        if item.origin != .test {
-            Button(item.origin == .messages ? "Open in Messages" : "Open Mail App") { model.openSource(item) }
+        if let source = model.source(of: item) {
+            Button(source.title) { NSWorkspace.shared.open(source.url) }
             Divider()
         }
         Button("Clear") { model.dismiss(item) }

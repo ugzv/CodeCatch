@@ -30,8 +30,14 @@ struct CodeItem: Identifiable, Equatable {
     var resetsPassword = false
     /// The mail server's DMARC verdict on the sender; nil when it gave none.
     var senderVerified: Bool? = nil
+    /// Where the email itself can be opened; see `AppModel.source(of:)`.
+    var internetMessageID: String? = nil
+    var webURL: URL? = nil
 
     var lifetime: TimeInterval { expires.timeIntervalSince(received) }
+    /// The countdown shows only in the last 10 minutes: a ring for a 24-hour link is noise.
+    var countdown: TimeInterval { min(lifetime, 600) }
+    func showsCountdown(now: Date) -> Bool { expires.timeIntervalSince(now) <= countdown }
     var isLink: Bool { code.isEmpty }
     /// The setting that lets this item's link show.
     var linkSetting: String { resetsPassword ? Prefs.resetLinks : Prefs.signInLinks }
@@ -44,10 +50,10 @@ struct CodeItem: Identifiable, Equatable {
         guard let host = destination?.host else { return nil }
         let target = ServiceIdentity.registrable(host)
         guard target != domain else { return nil }
-        let check = "Check it before you \(resetsPassword ? "change your password" : "sign in")."
-        guard let domain else { return ("Opens \(target), from a sender we can't verify. \(check)", true) }
-        return senderVerified == true ? ("Opens \(target), not \(domain). The sender is verified.", false)
-            : ("Opens \(target), not \(domain). \(check)", true)
+        let check = "Open it only if you trust this site."
+        guard let domain else { return ("CodeCatch can't verify who sent this message. \(check)", true) }
+        return senderVerified == true ? ("This message is from \(domain) and links to \(target). The sender is verified.", false)
+            : ("This message is from \(domain), but the link goes to \(target). \(check)", true)
     }
     /// What Copy puts on the clipboard.
     var copyValue: String { isLink ? link?.absoluteString ?? "" : code }
@@ -71,7 +77,8 @@ extension CodeItem {
                   // A spoofed sender gets neither its logo nor a pass on the link check.
                   domain: message.senderVerified == false ? nil
                       : ServiceIdentity.domain(senderAddress: message.senderID, isMail: message.isMail, text: message.fullText, service: service),
-                  dismissKey: message.dismissKey, resetsPassword: resetsPassword, senderVerified: message.senderVerified)
+                  dismissKey: message.dismissKey, resetsPassword: resetsPassword, senderVerified: message.senderVerified,
+                  internetMessageID: message.internetMessageID, webURL: message.webURL)
     }
 
     /// A vault login's code as it stands at `date`, under the login's own id for a stable row.
@@ -89,17 +96,17 @@ extension CodeItem {
 }
 
 extension CodeItem {
-    /// "Messages · 22000" / "Work" — where it came from, not when.
+    /// "Messages · 22000" / "Work" — where it came from, not when. Shown through `AppModel.origination`.
     var origination: String {
         // A phone number or short code tells SMS senders apart; for mail the account says enough.
         let from = sender.isEmpty || sender == service || sender.contains("@") ? nil : sender
         return [sourceLabel, from].compactMap { $0 }.joined(separator: " · ")
     }
 
-    /// "9:41" / "0:12" / "1 h" until expiry.
+    /// "9:41" / "0:12" until expiry.
     func remaining(now: Date) -> String {
         let s = Int(max(0, expires.timeIntervalSince(now)).rounded(.up))
-        return s >= 3600 ? "\(s / 3600) h" : String(format: "%d:%02d", s / 60, s % 60)
+        return String(format: "%d:%02d", s / 60, s % 60)
     }
 
     func age(now: Date) -> String {

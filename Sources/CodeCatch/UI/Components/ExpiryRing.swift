@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Time left until the code expires: accent, orange in the last quarter, red at the
-/// end (the last 30 s, or the last sixth of a short TOTP period).
+/// Time left in the code's countdown (at most its last 10 minutes): accent, orange in the
+/// last quarter, red at the end (the last 30 s, or the last sixth of a short TOTP period).
 struct ExpiryRing: View {
     let item: CodeItem
     let now: Date
@@ -10,8 +10,8 @@ struct ExpiryRing: View {
 
     var body: some View {
         let left = max(0, item.expires.timeIntervalSince(now))
-        let fraction = item.lifetime > 0 ? left / item.lifetime : 0
-        let color: Color = left < min(30, item.lifetime / 6) ? .red : fraction <= 0.25 ? .orange : .accentColor
+        let fraction = item.countdown > 0 ? min(1, left / item.countdown) : 0
+        let color: Color = left < min(30, item.countdown / 6) ? .red : fraction <= 0.25 ? .orange : .accentColor
         // A visible track and no sweep back to full when a new code starts: at 14 pt a
         // faint track with a moving arc reads as a loading spinner.
         let width = max(2, size * 0.14)

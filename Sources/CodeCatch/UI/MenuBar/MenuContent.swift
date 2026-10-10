@@ -119,7 +119,7 @@ struct MenuContent: View {
             .fixedSize(horizontal: false, vertical: true)
             footer
         }
-        .frame(width: 380)
+        .frame(width: 420)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         .background(TopAnchor(height: contentHeight))
         .hiddenFromCapture()
@@ -251,7 +251,20 @@ struct MenuContent: View {
         .padding(.bottom, 4)
     }
 
-    private var emptyState: some View {
+    /// Codes aren't stored: after a launch they are read again, and until then "no codes" isn't true.
+    private var checking: Bool { model.receiving && model.status.values.contains(.connecting) }
+
+    @ViewBuilder private var emptyState: some View {
+        if checking {
+            ProgressView("Checking your inboxes…")
+                .controlSize(.small).font(.callout).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity).padding(.vertical, 56)
+        } else {
+            emptyNotice
+        }
+    }
+
+    private var emptyNotice: some View {
         ContentUnavailableView {
             Label(!model.receiving && model.vault.isEmpty ? "Catching Paused" : model.vault.isEmpty ? "No Codes Yet" : "Find a Saved Login", systemImage: "key.viewfinder")
         } description: {

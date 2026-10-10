@@ -34,6 +34,10 @@ final class AppModel: ObservableObject {
     private let copyToClipboard: (String, UUID) -> Void
     private let typeCode: (String) -> Void
     private let confirmOwner: @MainActor () async throws -> Void
+    /// Asks before a suspect link opens: (site, warning, details, the email's "Show in …" button) → go ahead.
+    typealias LinkConfirmation = @MainActor (String, String, String, (title: String, run: () -> Void)?) -> Bool
+    private let confirmLink: LinkConfirmation
+    private let openURL: @MainActor (URL) -> Void
 
     var vault: [VaultCode] { monitoring(Prefs.bitwarden) ? vaultSession.codes : [] }
     var isUnlocked: Bool { vaultSession.isUnlocked }
@@ -53,8 +57,14 @@ final class AppModel: ObservableObject {
          accounts: [MailAccount]? = nil,
          copyToClipboard: @escaping (String, UUID) -> Void = { Clipboard.copy($0, id: $1) },
          typeCode: (@MainActor (String) -> Void)? = nil,
-         confirmOwner: (@MainActor () async throws -> Void)? = nil) {
+         confirmOwner: (@MainActor () async throws -> Void)? = nil,
+         confirmLink: LinkConfirmation? = nil,
+         openURL: (@MainActor (URL) -> Void)? = nil) {
         self.defaults = defaults
+        self.confirmLink = confirmLink ?? { site, warning, details, email in
+            confirmed("Open \(site)?", warning, action: "Open", safeDefault: true, details: details, also: email)
+        }
+        self.openURL = openURL ?? { NSWorkspace.shared.open($0) }
         self.accounts = accounts ?? MailAccount.load(from: defaults)
         Prefs.register(in: defaults)
         ignoredSenders = defaults.stringArray(forKey: Prefs.ignoredSenders) ?? []
@@ -181,6 +191,19 @@ final class AppModel: ObservableObject {
     /// The mail sources that are on: all that Recent Emails can show, since it reads only mail.
     var mailSourceKeys: [String] {
         accounts.filter(\.enabled).map { $0.id.uuidString } + (monitoring(Prefs.appleMail) ? [AppleMailStore.sourceKey] : [])
+    }
+
+    /// Where a code came from, in words. A mail account is named only where its icon's badge can't tell
+    /// it apart: by its label, or its address when two share a label.
+    func origination(_ item: CodeItem) -> String {
+        guard item.origin == .mail else { return item.origination }
+        let account = accounts.first { $0.id.uuidString == item.sourceKey }
+        // The badge is the mailbox's logo (Apple Mail: Mail's own icon); with logos off, every mailbox wears the mail app's.
+        let sharingBadge = !defaults.bool(forKey: Prefs.serviceIcons) ? mailSourceKeys.count
+            : account.map { mine in accounts.filter { $0.enabled && $0.iconDomain == mine.iconDomain }.count } ?? 1
+        guard sharingBadge > 1 else { return "" }
+        guard let account else { return item.sourceLabel }
+        return accounts.filter { $0.enabled && $0.label == account.label }.count > 1 ? account.user : account.label
     }
 
     private func retainRecoverySources() { recovery.retainSources(Set(mailSourceKeys)) }
@@ -390,8 +413,19 @@ final class AppModel: ObservableObject {
     /// Only ever on the user's click: links are never opened automatically.
     func open(_ item: CodeItem, leavingMenu: Bool = false) {
         guard isUnlocked, monitoring(item.linkSetting), let link = item.link else { return }
+        // The row only marks a suspect site; the full warning stops the click itself, with what a check
+        // needs (sender, subject, the real address) and a way to read the email first.
+        if let notice = item.linkNotice, notice.warns, let destination = item.destination, let host = destination.host {
+            // Site and path only: the query is a token, noise for the check.
+            let address = host + destination.path
+            let details = ["From: \(item.sender)", "Subject: \(item.preview)",
+                           "Link: \(address.count > 60 ? address.prefix(59) + "…" : address)"].joined(separator: "\n")
+            let email = source(of: item).map { source in (title: source.title, run: { [openURL] in openURL(source.url) }) }
+            guard confirmLink(ServiceIdentity.registrable(host), notice.text, details, email),
+                  isUnlocked else { return }  // the Mac may have locked while the alert was up
+        }
         if leavingMenu { NSApp.hide(nil) }
-        NSWorkspace.shared.open(link)
+        openURL(link)
         markUsed(item)
     }
 
@@ -401,18 +435,32 @@ final class AppModel: ObservableObject {
                                sourceKey: Self.testSourceKey, sourceLabel: "Test", date: Date(), isMail: false))
     }
 
-    /// Opens the Messages thread or the user's default mail app.
-    func openSource(_ item: CodeItem) {
+    /// Where "Show in …" goes: the exact email where macOS allows (its page in Gmail or Outlook, or
+    /// `message://` in Mail), the conversation in Messages, else just the mail app.
+    func source(of item: CodeItem) -> (title: String, url: URL)? {
         switch item.origin {
         case .messages:
-            if let url = URL(string: "sms:\(item.sender.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")") {
-                NSWorkspace.shared.open(url)
+            // A number or an address opens its conversation; a named sender ("Revolut") has neither.
+            if item.sender.contains("@") || item.sender.allSatisfy({ $0.isNumber || "+ ()-".contains($0) }),
+               let link = item.sender.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed).flatMap({ URL(string: "sms:\($0)") }) {
+                return ("Show in Messages", link)
             }
+            return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.MobileSMS").map { ("Open Messages", $0) }
         case .mail:
-            if let url = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "mailto:")!) {
-                NSWorkspace.shared.openApplication(at: url, configuration: .init())
+            let mailApp = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "mailto:")!)
+            let fromMail = item.sourceKey == AppleMailStore.sourceKey
+            // The provider's own page holds the email for sure; Mail only if it was read there.
+            if !fromMail, let web = item.webURL {
+                return ("Show in \(web.host == "mail.google.com" ? "Gmail" : "Outlook")", web)
             }
-        case .test, .vault: break
+            // message:// always opens Mail, so only when Mail is the source, or the user's mail app for IMAP.
+            if let id = item.internetMessageID?.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(.init(charactersIn: "@.-_"))),
+               let link = URL(string: "message://%3C\(id)%3E"), let handler = NSWorkspace.shared.urlForApplication(toOpen: link),
+               fromMail || handler == mailApp {
+                return ("Show in Mail", link)
+            }
+            return mailApp.map { ("Open \(FileManager.default.displayName(atPath: $0.path).replacingOccurrences(of: ".app", with: ""))", $0) }
+        case .test, .vault: return nil
         }
     }
 
