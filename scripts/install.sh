@@ -58,10 +58,14 @@ swift scripts/make-icon.swift "$BUILD/AppIcon.icns"
 
 APP="$BUILD/CodeCatch.app"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$(swift build "${BUILD_ARGS[@]}" --show-bin-path)/CodeCatch" "$APP/Contents/MacOS/"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Helpers"
+BIN="$(swift build "${BUILD_ARGS[@]}" --show-bin-path)"
+cp "$BIN/CodeCatch" "$APP/Contents/MacOS/"
+# Renamed here, never in MacOS/: `codecatch` and `CodeCatch` are one file on a case-insensitive disk.
+cp "$BIN/CodeCatchCLI" "$APP/Contents/Helpers/codecatch"
 for ARCH in arm64 x86_64; do
     lipo "$APP/Contents/MacOS/CodeCatch" -verify_arch "$ARCH"
+    lipo "$APP/Contents/Helpers/codecatch" -verify_arch "$ARCH"
 done
 SPARKLE="$BUILD/artifacts/sparkle/Sparkle"
 FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework"
@@ -85,8 +89,11 @@ SIGN=(codesign --force --options runtime --timestamp --sign "${CODECATCH_IDENTIT
 "${SIGN[@]}" "$FRAMEWORK/Versions/B/XPCServices/Installer.xpc"
 "${SIGN[@]}" --preserve-metadata=entitlements "$FRAMEWORK/Versions/B/XPCServices/Downloader.xpc"
 "${SIGN[@]}" "$FRAMEWORK/Versions/B/Autoupdate" "$FRAMEWORK/Versions/B/Updater.app" "$FRAMEWORK"
+"${SIGN[@]}" --identifier com.uros.codecatch.cli "$APP/Contents/Helpers/codecatch"
 "${SIGN[@]}" --identifier com.uros.codecatch "$APP"
 codesign --verify --strict --deep "$APP"
+# The CLI reads its version from the bundle it sits in.
+"$APP/Contents/Helpers/codecatch" --version | grep -q "($VERSION)"
 if [ "${1:-}" = "--build-only" ]; then
     echo "Built $APP (not yet notarized)"
     exit 0
@@ -101,6 +108,7 @@ if [ "${1:-}" = "--release" ] || [ "${1:-}" = "--publish" ]; then
     xcrun notarytool submit "$DMG" --keychain-profile "${CODECATCH_NOTARY_PROFILE:-codecatch}" --wait
     # The stapled ticket covers the app inside, so Gatekeeper passes it offline too.
     xcrun stapler staple "$DMG"
+    xcrun stapler validate "$DMG"
     # Sparkle feed: signs the DMG with the EdDSA key in the Keychain (generate_keys made it).
     # The DMG is a GitHub release asset; the feed is in git and CI deploys site/ on push.
     TAG="v$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Info.plist).$VERSION"

@@ -33,3 +33,5 @@ jobs:
         run: scripts/test.sh --force-resolved-versions
       - name: Build release
         run: swift build -c release --scratch-path .build-release --force-resolved-versions
+      - name: CLI runs
+        run: '"$(swift build -c release --scratch-path .build-release --show-bin-path)/CodeCatchCLI" --version | grep -q "codecatch dev"'
