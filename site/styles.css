@@ -130,12 +130,14 @@ section[id] { scroll-margin-top: 60px; }
   padding-bottom: 72px !important;
 }
 .hero-copy { display: grid; gap: 22px; }
+.news { justify-self: start; display: inline-flex; align-items: center; gap: 10px; padding: 4px 14px 4px 4px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); font-size: 14px; font-weight: 550; transition: color 0.15s, border-color 0.15s; }
+.news:hover { color: var(--text); border-color: color-mix(in srgb, var(--brand-2) 40%, var(--line)); }
 .hero h1 { font-size: clamp(40px, 5.2vw, 64px); font-weight: 750; letter-spacing: -0.035em; line-height: 1.02; }
 
 /* The stage: a small desktop with a menu bar, a sign-in page and the banner. */
 .stage {
   position: relative;
-  aspect-ratio: 10 / 11;
+  aspect-ratio: 1;
   border-radius: 22px;
   overflow: hidden;
   isolation: isolate;
@@ -401,19 +403,16 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 /* min-width: 0 lets a mockup shrink below its fixed width on the narrowest phones. */
 .feature-art .cc { max-width: 100%; min-width: 0; }
 .ticks { display: grid; gap: 8px; }
-.ticks li { position: relative; padding-left: 28px; }
-/* List bullets are the CodeCatch mark: orange for what CodeCatch does, grey for plain lists. */
-.ticks li::before { content: ""; position: absolute; left: 2px; top: 0.4em; width: 16px; height: 16px; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='208 208 608 608'%3E%3Cpath d='M428 732V292A84 84 0 0 1 596 292V732A84 84 0 0 1 428 732ZM279.5 549.3L660.5 329.3A84 84 0 0 1 744.5 474.7L363.5 694.7A84 84 0 0 1 279.5 549.3ZM363.5 329.3L744.5 549.3A84 84 0 0 1 660.5 694.7L279.5 474.7A84 84 0 0 1 363.5 329.3Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='208 208 608 608'%3E%3Cpath d='M428 732V292A84 84 0 0 1 596 292V732A84 84 0 0 1 428 732ZM279.5 549.3L660.5 329.3A84 84 0 0 1 744.5 474.7L363.5 694.7A84 84 0 0 1 279.5 549.3ZM363.5 329.3L744.5 549.3A84 84 0 0 1 660.5 694.7L279.5 474.7A84 84 0 0 1 363.5 329.3Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.ticks li { position: relative; padding-left: 22px; }
+/* A small dot in the brand gradient, grey for plain lists. The mark itself is kept for CodeCatch. */
+.ticks li::before { content: ""; position: absolute; left: 4px; top: calc(0.775em - 3.5px); width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); }
 .shortcuts { display: grid; gap: 10px; }
 .shortcuts li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
 .shortcuts span { white-space: nowrap; }
 
 /* Privacy: the app's own settings panel (SettingRow.swift) next to the guarantees. */
 .privacy { padding-top: 0 !important; padding-bottom: 104px !important; }
-.points { display: grid; gap: 14px; margin: 6px 0 0; }
-.points div { position: relative; padding-left: 30px; }
-/* The CodeCatch mark as the bullet, in the brand gradient. */
-.points div::before { content: ""; position: absolute; left: 0; top: 0.3em; width: 18px; height: 18px; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='208 208 608 608'%3E%3Cpath d='M428 732V292A84 84 0 0 1 596 292V732A84 84 0 0 1 428 732ZM279.5 549.3L660.5 329.3A84 84 0 0 1 744.5 474.7L363.5 694.7A84 84 0 0 1 279.5 549.3ZM363.5 329.3L744.5 549.3A84 84 0 0 1 660.5 694.7L279.5 474.7A84 84 0 0 1 363.5 329.3Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='208 208 608 608'%3E%3Cpath d='M428 732V292A84 84 0 0 1 596 292V732A84 84 0 0 1 428 732ZM279.5 549.3L660.5 329.3A84 84 0 0 1 744.5 474.7L363.5 694.7A84 84 0 0 1 279.5 549.3ZM363.5 329.3L744.5 549.3A84 84 0 0 1 660.5 694.7L279.5 474.7A84 84 0 0 1 363.5 329.3Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.points { display: grid; gap: 18px; margin: 6px 0 0; }
 .points dt { font-weight: 650; }
 .points dd { margin: 2px 0 0; color: var(--muted); font-size: 16px; }
 
@@ -498,6 +497,52 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 .numbered li::before { content: counter(n); position: absolute; left: 0; top: 0.1em; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); color: #fff; font-size: 13px; font-weight: 700; }
 .search .typed { color: var(--text); }
 
+/* The rail beside an article: where you are in it, and the app it is about. On narrow
+   screens it sits above the text as a closed "On this page" list, and the card is left
+   to the download section at the end. */
+.rail { max-width: 720px; margin-bottom: 32px; }
+.rail .rail-card { display: none; }
+@media (min-width: 1024px) {
+  .article:has(> .rail) { display: grid; grid-template-columns: minmax(0, 720px) 250px; justify-content: space-between; column-gap: 48px; }
+  .article > .vs-hero { grid-column: 1 / -1; }
+  .rail { grid-column: 2; grid-row: 1 / span 2; align-self: start; position: sticky; top: 84px; display: grid; gap: 28px; margin: 0; }
+  .vs-hero ~ .rail { grid-row: 2 / span 2; }
+  .rail .rail-card { display: grid; }
+}
+.toc { font-size: 14px; }
+.toc details { padding: 12px 16px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); }
+.toc summary { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 15px; font-weight: 620; cursor: pointer; list-style: none; }
+.toc summary::-webkit-details-marker { display: none; }
+.toc summary::after { content: "+"; color: var(--faint); font-weight: 400; font-size: 22px; line-height: 1; transition: transform 0.2s; }
+.toc details[open] summary::after { transform: rotate(45deg); }
+.toc ol { position: relative; display: grid; gap: 2px; margin-top: 10px; border-left: 1px solid var(--line); }
+@media (min-width: 1024px) {
+  /* Always open beside the article: the summary is a plain label. */
+  .toc details { padding: 0; border: 0; border-radius: 0; background: none; }
+  .toc summary { color: var(--faint); font-size: 13px; font-weight: 650; cursor: default; pointer-events: none; }
+  .toc summary::after { display: none; }
+}
+/* toc.js moves this bar to the section you are reading. */
+.toc ol[style]::before { content: ""; position: absolute; left: -1px; top: 0; width: 2px; height: var(--h); border-radius: 2px; background: linear-gradient(180deg, var(--brand-1), var(--brand-2)); transform: translateY(var(--y)); transition: transform 0.25s ease, height 0.25s ease; }
+.toc a { display: block; padding: 4px 0 4px 14px; color: var(--muted); line-height: 1.35; transition: color 0.2s; }
+.toc a:hover, .toc a[aria-current] { color: var(--text); }
+.rail-card {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(80% 90% at 100% 0%, color-mix(in srgb, var(--brand-1) 20%, transparent), transparent 70%),
+    radial-gradient(80% 90% at 0% 100%, color-mix(in srgb, var(--brand-2) 14%, transparent), transparent 70%),
+    var(--surface);
+}
+.rail-card img { width: 56px; height: 56px; }
+.rail-card > p:not(.fine) { color: var(--muted); font-size: 15px; line-height: 1.45; }
+.rail-card b { display: block; color: var(--text); font-size: 17px; font-weight: 650; }
+.rail-card .fine { font-size: 13px; }
+
 /* Article blocks: the homepage's feature layout, with the app's settings panel as the visual. */
 .about-hero { padding-bottom: 8px !important; }
 .about-hero .lede { max-width: 700px; }
@@ -531,8 +576,6 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 .release-art .cc { zoom: 1.12; width: 100%; max-width: 330px; }
 .release .points { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 40px; margin: 0; }
 .release .with-icon dt { display: flex; align-items: center; gap: 10px; }
-.release .with-icon { padding-left: 0; }
-.release .with-icon::before { display: none; }
 .release .with-icon dd { margin-left: 38px; }
 
 /* Comparison pages */
@@ -591,8 +634,15 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #34c759; }
 
 /* FAQ */
-.faq { display: grid; gap: 4px; padding-top: 72px !important; padding-bottom: 96px !important; max-width: none; }
-.faq h2 { margin-bottom: 16px; }
+/* The heading and the guides stay beside the questions as they open. */
+.faq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr); gap: 4px 64px; padding-top: 72px !important; padding-bottom: 96px !important; max-width: none; }
+.faq-head { display: grid; gap: 24px; align-content: start; align-self: start; position: sticky; top: 84px; }
+.guide-card { justify-items: stretch; gap: 6px; padding: 14px 12px; }
+.guide-card > b { padding: 4px 8px; }
+.guide-card a { display: flex; align-items: flex-start; gap: 12px; padding: 8px; border-radius: 12px; color: var(--muted); font-size: 14px; line-height: 1.35; text-decoration: none; transition: background 0.15s; }
+.guide-card a:hover { background: var(--tint); }
+.guide-card a b { margin-bottom: 2px; font-size: 15px; font-weight: 600; }
+.guide-card .icon-tile { width: 30px; height: 30px; border-radius: 8px; font-size: 16px; }
 .faq details { border-bottom: 1px solid var(--line); max-width: 820px; }
 .faq summary { display: flex; justify-content: space-between; gap: 16px; padding: 18px 0; font-weight: 620; font-size: 18px; cursor: pointer; list-style: none; }
 .faq summary::-webkit-details-marker { display: none; }
@@ -625,6 +675,7 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 @media (max-width: 900px) {
   .hero, .feature { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .hero { padding-top: 44px !important; padding-bottom: 52px !important; }
+  .stage { aspect-ratio: auto; height: 560px; }  /* fits the sign-in page at any width */
   .feature.flip .feature-copy { order: 0; }
   .features { gap: 72px; padding-top: 72px !important; padding-bottom: 72px !important; }
   .steps ol, .picks, .principles .points, .release, .release .points, .note-grid { grid-template-columns: minmax(0, 1fr); }
@@ -647,6 +698,9 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
   .compare .yes { display: none; }
   .privacy { padding-bottom: 72px !important; }
   .why { padding-top: 72px !important; padding-bottom: 72px !important; }
+  .faq { grid-template-columns: minmax(0, 1fr); }
+  .faq-head { position: static; margin-bottom: 12px; }
+  .guide-card { display: none; }  /* the footer lists the guides */
   .nav nav { display: none; }
   .nav .button { margin-left: auto; }
   .footer-top { grid-template-columns: minmax(0, 1fr); gap: 36px; }
@@ -665,7 +719,6 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
   .lede { font-size: 18px; }
   .cc { zoom: 0.8; }
   .feature-art { padding: 24px 8px; }
-  .stage { aspect-ratio: 2 / 3; }
   .window { right: 5%; top: 38%; }
   .keys { right: auto; left: 12%; bottom: 3%; }  /* beside the page's button, not over it */
   .menubar span:not(.menubar-app):not(.menubar-right):not(.menubar-cc) { display: none; }
@@ -673,7 +726,7 @@ li.copied .tick { display: block; animation: draw-on 0.35s ease-out both; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal, .banner, .keys, .ring .arc, .button { transition: none; }
+  .reveal, .banner, .keys, .ring .arc, .button, .toc ol::before { transition: none; }
   .reveal { opacity: 1; transform: none; }
   li.copied .tick { animation: none; }
 }

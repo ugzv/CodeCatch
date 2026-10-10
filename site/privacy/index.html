@@ -32,7 +32,7 @@
    "description": "What CodeCatch reads, what it keeps and what it connects to. No account, no server, no usage tracking.",
    "url": "https://codecatch.app/privacy/",
    "inLanguage": "en",
-   "dateModified": "2026-10-06",
+   "dateModified": "2026-10-10",
    "author": {
     "@id": "https://codecatch.app/#author"
    },
@@ -107,7 +107,7 @@
   <p class="eyebrow">Privacy</p>
   <h1>What CodeCatch reads, keeps and connects to</h1>
   <p class="lede">CodeCatch has no account and no server. It never sends your codes, messages or mail anywhere.</p>
-  <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-06">Updated 6 October 2026</time></span></p>
+  <p class="byline"><span class="avatar" aria-hidden="true">UG</span><span>By <a href="/#why" rel="author">Uros Gazvoda</a> · <time datetime="2026-10-10">Updated 10 October 2026</time></span></p>
 </section>
 
 <section class="features about-blocks">
@@ -168,7 +168,14 @@
     <div class="feature-copy">
       <p class="eyebrow">What it connects to</p>
       <h2>Five connections, and that is the whole list</h2>
-      <p>There is no usage tracking, no crash reports and no advertising. CodeCatch goes online only for the five things listed here. Update checks contact codecatch.app and send a random install ID, the app version, the macOS version and the Mac model. The server uses your IP address to note your country, city and internet provider, but never stores the address itself. This counts how many Macs run CodeCatch and which version they have. It never includes your codes, messages, mail or what you do in the app. Turn off Update Automatically in Settings → General to stop the daily check. Service logos load through Google's favicon service, or DuckDuckGo's when Google has no clear logo. These see your IP address and the service’s domain. CodeCatch does not contact service websites for logos. Logos are on by default and can be turned off in Privacy.</p>
+      <p>There is no usage tracking, no crash reports and no advertising. CodeCatch goes online for these five things only:</p>
+      <dl class="points">
+        <div><dt>Your mail server</dt><dd>To read your mail, only in the inboxes you turn on.</dd></div>
+        <div><dt>Google or Microsoft</dt><dd>Only if you sign in with them to read Gmail or Outlook.</dd></div>
+        <div><dt>Bitwarden</dt><dd>Through Bitwarden’s own tool, when you import your logins.</dd></div>
+        <div><dt>Service logos</dt><dd>Loaded through Google’s favicon service, or DuckDuckGo’s when Google has no clear logo. These see your IP address and the service’s domain. CodeCatch never contacts the service’s own website. On by default; turn them off in Settings → Privacy.</dd></div>
+        <div><dt>Update checks</dt><dd>Once a day, to codecatch.app. Each check sends a random install ID, the app version, the macOS version and the Mac model. The server uses your IP address to note your country, city and internet provider, but never stores the address. This counts how many Macs run CodeCatch and which version they have, and never includes your codes, messages, mail or what you do in the app. To stop it, turn off Update Automatically in Settings → General.</dd></div>
+      </dl>
     </div>
     <div class="feature-art" aria-hidden="true">
       <div class="cc">

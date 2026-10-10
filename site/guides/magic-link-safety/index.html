@@ -15,10 +15,10 @@
 <meta property="og:url" content="https://codecatch.app/guides/magic-link-safety/">
 <meta property="og:title" content="Is this sign-in link safe? How to check a magic link">
 <meta property="og:description" content="What a magic link is, how to tell a real sign-in link from a fake one before you click, and what to do if you already clicked.">
-<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta property="og:image" content="https://codecatch.app/assets/og/magic-link-safety.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch showing where a sign-in link opens">
+<meta property="og:image:alt" content="“Is this sign-in link safe?” beside CodeCatch warning that a sign-in link opens a different site">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -31,7 +31,7 @@
    "headline": "Is this sign-in link safe? How to check a magic link",
    "name": "How to check a magic link",
    "description": "What a magic link is, how to tell a real sign-in link from a fake one before you click, and what to do if you already clicked.",
-   "image": "https://codecatch.app/assets/og.png",
+   "image": "https://codecatch.app/assets/og/magic-link-safety.png",
    "datePublished": "2026-10-06",
    "dateModified": "2026-10-06",
    "inLanguage": "en",
@@ -174,12 +174,32 @@
       </div>
     </div>
   </div>
+  <aside class="rail">
+    <nav class="toc" aria-label="On this page"><details open>
+      <summary>On this page</summary>
+      <ol>
+        <li><a href="#what-is-a-magic-link">What a magic link is</a></li>
+        <li><a href="#why-fakes-work">Why fake ones work</a></li>
+        <li><a href="#five-steps">Check a link in five steps</a></li>
+        <li><a href="#reading-a-link">Reading a link</a></li>
+        <li><a href="#already-clicked">If you already clicked</a></li>
+        <li><a href="#codecatch">How CodeCatch helps</a></li>
+        <li><a href="#questions">Questions</a></li>
+      </ol>
+    </details></nav>
+    <div class="rail-card">
+      <img src="/assets/icon-256.png" width="56" height="56" alt="" loading="lazy">
+      <p><b>CodeCatch</b> Sign-in codes from Messages and mail, copied the moment they arrive.</p>
+      <a class="button small" href="/download/CodeCatch.dmg" data-download><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS</a>
+      <p class="fine">Free · macOS 15+</p>
+    </div>
+  </aside>
   <div class="prose">
     <p>You type your email, and the site says “Check your inbox.” A moment later an email arrives with a button: <b>Sign in</b>, <b>Log in to Slack</b> or <b>Confirm it’s you</b>. That button is a magic link. Click it, and you are in.</p>
 
     <p class="callout"><b>Short answer:</b> only click a sign-in link you just asked for. Before you click, check that it opens the site you are signing in to. If either is off, don’t click. Go to the site yourself and ask for a new link.</p>
 
-    <h2>What a magic link is</h2>
+    <h2 id="what-is-a-magic-link">What a magic link is</h2>
     <p>A magic link is a sign-in link with a secret, one-time key inside it. Only your inbox gets the email, so opening the link proves the inbox is yours. That replaces the password.</p>
     <ul class="ticks plain">
       <li>It usually works once.</li>
@@ -188,10 +208,10 @@
     </ul>
     <p>Sites call them different things: magic links, sign-in links, login links, “one-time links” or “Is this you?” emails. They all work the same way.</p>
 
-    <h2>Why fake ones work</h2>
+    <h2 id="why-fakes-work">Why fake ones work</h2>
     <p>People expect these emails and click them fast. A fake one looks the same, but its button opens a copy of the real site. That copy asks for your password, a code or your card. Whatever you type goes to whoever made it.</p>
 
-    <h2>How to check a sign-in link in five steps</h2>
+    <h2 id="five-steps">How to check a sign-in link in five steps</h2>
     <ol class="numbered">
       <li><b>Did you just ask for it?</b> If you did not just try to sign in, don’t click. Someone typed your email address, by mistake or on purpose. Without the link they can’t get in, so ignore the email.</li>
       <li><b>Check the sender’s address, not the name.</b> The name can say anything. Look at the address after the @.</li>
@@ -200,7 +220,7 @@
       <li><b>After you click, look before you type.</b> A real magic link signs you in. If the page asks for your password or card instead, close it.</li>
     </ol>
 
-    <h2>Reading a link: real or not?</h2>
+    <h2 id="reading-a-link">Reading a link: real or not?</h2>
     <p>The site is the last two parts of the name before the first single slash. For addresses like <code>bank.co.uk</code>, it is the last three.</p>
     <p>Say you asked Notion for a sign-in link:</p>
     <ul class="ticks plain">
@@ -211,7 +231,7 @@
     </ul>
     <p>One honest catch: some real emails send links through a mailing service first, so the address can look unrelated even when the email is genuine. You can’t tell these apart by looking. When you are not sure, open the site yourself and ask for a new link.</p>
 
-    <h2>If you already clicked</h2>
+    <h2 id="already-clicked">If you already clicked</h2>
     <ul class="ticks plain">
       <li><b>You typed nothing:</b> close the page. Opening a page alone rarely does harm.</li>
       <li><b>You typed a password:</b> change it on the real site now, and anywhere else you use it. Turn on two-step sign-in.</li>
@@ -229,7 +249,7 @@
     </ul>
     <p>It is a hint, not a guarantee. The warning compares the link with the sender’s address, and a sender’s address can be faked. Step 1 still matters most: only click links you asked for.</p>
 
-    <h2>Questions</h2>
+    <h2 id="questions">Questions</h2>
     <div class="faq-list">
       <details><summary>Are magic links safer than passwords?</summary><p>In one way, yes: there is no password to guess, reuse or leak. But your email inbox becomes the key to the account. Protect your email with a strong password and two-step sign-in.</p></details>
       <details><summary>Why did I get a sign-in link I didn’t ask for?</summary><p>Someone entered your email address on that site, by mistake or on purpose. They can’t sign in without opening the link in your inbox. Don’t click it. Just delete the email.</p></details>
@@ -249,7 +269,7 @@
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
 </section>
 </main>
 
@@ -323,5 +343,6 @@
     <g id="i-eye-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.600 6.200A9.800 9.800 0 0 1 12 6c5.500 0 9 6 9 6a15.600 15.600 0 0 1-2.800 3.500M6.500 7.600A15 15 0 0 0 3 12s3.500 6 9 6a9 9 0 0 0 3.600-.8M9.900 9.900a3 3 0 0 0 4.200 4.200"/></g>
   </defs>
 </svg>
+<script src="/toc.js" defer></script>
 </body>
 </html>

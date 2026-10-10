@@ -15,10 +15,10 @@
 <meta property="og:url" content="https://codecatch.app/guides/2fa-codes-for-ai-agents/">
 <meta property="og:title" content="Let Claude Code, Codex and Cursor get 2FA codes on your Mac">
 <meta property="og:description" content="AI agents get stuck when a site sends a verification code. CodeCatch lets Claude Code, Codex, Cursor and scripts ask for the code, and you approve each one with Touch ID.">
-<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta property="og:image" content="https://codecatch.app/assets/og/2fa-codes-for-ai-agents.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch asking you to approve a code for an agent">
+<meta property="og:image:alt" content="“Let Claude Code, Codex and Cursor get 2FA codes on your Mac” beside CodeCatch asking you to approve a code for an agent">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -31,7 +31,7 @@
    "headline": "Let Claude Code, Codex and Cursor get 2FA codes on your Mac",
    "name": "2FA codes for AI agents",
    "description": "AI agents get stuck when a site sends a verification code. CodeCatch lets Claude Code, Codex, Cursor and scripts ask for the code, and you approve each one with Touch ID.",
-   "image": "https://codecatch.app/assets/og.png",
+   "image": "https://codecatch.app/assets/og/2fa-codes-for-ai-agents.png",
    "datePublished": "2026-10-10",
    "dateModified": "2026-10-10",
    "inLanguage": "en",
@@ -174,20 +174,40 @@
       </div>
     </div>
   </div>
+  <aside class="rail">
+    <nav class="toc" aria-label="On this page"><details open>
+      <summary>On this page</summary>
+      <ol>
+        <li><a href="#why-agents-get-stuck">Why agents get stuck</a></li>
+        <li><a href="#how-codecatch-helps">How CodeCatch helps</a></li>
+        <li><a href="#setup">Set it up</a></li>
+        <li><a href="#what-you-control">What you control</a></li>
+        <li><a href="#how-it-stays-safe">How it stays safe</a></li>
+        <li><a href="#developers">For developers</a></li>
+        <li><a href="#questions">Questions</a></li>
+      </ol>
+    </details></nav>
+    <div class="rail-card">
+      <img src="/assets/icon-256.png" width="56" height="56" alt="" loading="lazy">
+      <p><b>CodeCatch</b> Sign-in codes from Messages and mail, copied the moment they arrive.</p>
+      <a class="button small" href="/download/CodeCatch.dmg" data-download><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS</a>
+      <p class="fine">Free · macOS 15+</p>
+    </div>
+  </aside>
   <div class="prose">
     <p>You ask Claude Code to sign in to a site and check something. It finds the page, types your email, clicks <b>Send code</b>, and stops. The code is on your phone, and the agent can’t read it.</p>
 
     <p class="callout"><b>Short answer:</b> install CodeCatch, turn on <b>Let Agents Ask for Codes</b> in Settings → Agents, and click <b>Connect</b> next to your agent. When a site sends a code, the agent asks CodeCatch for it, and you approve with Touch ID.</p>
 
-    <h2>Why agents get stuck at 2FA</h2>
+    <h2 id="why-agents-get-stuck">Why agents get stuck at 2FA</h2>
     <p>Two-step sign-in is built to stop anyone who only has your password. An agent is in that spot: it can use the browser, but the code goes to your Messages or your inbox. So it waits for you to type the code, or gives up.</p>
 
-    <h2>How CodeCatch helps</h2>
+    <h2 id="how-codecatch-helps">How CodeCatch helps</h2>
     <p>CodeCatch already catches codes from Messages and mail on your Mac. Now an agent can ask it for one with a short command:</p>
     <pre><code>codecatch get github.com</code></pre>
     <p>CodeCatch waits for the github.com code, then shows a card with the app that asked, the sender and the time. You click <b>Allow</b> and confirm with Touch ID. The agent gets the code and types it in.</p>
 
-    <h2>Set it up in three steps</h2>
+    <h2 id="setup">Set it up in three steps</h2>
     <ol class="numbered">
       <li><b>Install CodeCatch</b> and let it read Messages and your mail, as usual.</li>
       <li><b>Open Settings → Agents</b> and turn on <b>Let Agents Ask for Codes</b>. This also installs the <code>codecatch</code> command.</li>
@@ -223,7 +243,7 @@
     </div>
     <p>A green dot means the agent is connected. Cursor also reads Claude Code’s and Codex’s skills, so it is covered once either one is connected. While <b>Let Agents Ask for Codes</b> is off, the rest of the page is dimmed and agents can’t ask.</p>
 
-    <h2>What you control</h2>
+    <h2 id="what-you-control">What you control</h2>
     <ul class="ticks">
       <li><b>Every code asks first.</b> Allow takes Touch ID or your Mac password each time.</li>
       <li><b>Always Allow</b> skips the prompt for one site, or for all sites, from one app.</li>
@@ -232,7 +252,7 @@
       <li><b>Password reset links</b> never go to agents.</li>
     </ul>
 
-    <h2>How it stays safe</h2>
+    <h2 id="how-it-stays-safe">How it stays safe</h2>
     <ul class="ticks plain">
       <li>The command talks to CodeCatch through a socket only you can open on your Mac. Nothing goes over the network.</li>
       <li>CodeCatch checks the app that asks by its code signature, and the command checks that it is talking to the real CodeCatch.</li>
@@ -249,7 +269,7 @@
 codecatch get github.com --since $T --json</code></pre>
     <p>The command waits up to 90 seconds for the code, plus time for you to approve. Exit codes tell a script what to do next: 0 ok, 2 you said no, 3 no code arrived, 4 access is off, 5 not approved in time. <code>codecatch --help</code> has the rest.</p>
 
-    <h2>Questions</h2>
+    <h2 id="questions">Questions</h2>
     <div class="faq-list">
       <details><summary>Can an agent read all my codes?</summary><p>No. An agent asks for one site at a time and gets one code, after you approve it. It can’t list or search your codes, and it never sees your messages.</p></details>
       <details><summary>Does it work when I’m away?</summary><p>Only if you allow it. Always Allow a site for an app, or turn on Allow All, and codes go out without a prompt, up to 20 an hour. You still see each one in Request History.</p></details>
@@ -269,7 +289,7 @@ codecatch get github.com --since $T --json</code></pre>
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
 </section>
 </main>
 
@@ -346,5 +366,6 @@ codecatch get github.com --since $T --json</code></pre>
     <g id="i-shield" fill="currentColor"><path d="M12 2.500 4.500 5.300v6c0 4.700 3.200 8.900 7.500 10.200 4.300-1.300 7.500-5.500 7.500-10.200v-6L12 2.500Zm-1.200 13.300-3.400-3.400 1.400-1.400 2 2 4.400-4.400 1.400 1.400-5.800 5.800Z"/></g>
   </defs>
 </svg>
+<script src="/toc.js" defer></script>
 </body>
 </html>

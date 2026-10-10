@@ -194,7 +194,7 @@
 
 <section class="hero">
   <div class="hero-copy">
-    <p class="eyebrow">For macOS · <a href="#agents">New: AI agents can ask for codes</a></p>
+    <a class="news" href="#agents"><span class="tag">2.0</span>Claude Code, Codex and Cursor can now ask for codes</a>
     <h1>Sign-in codes, caught the moment they arrive.</h1>
     <p class="lede">A menu bar app that copies each code from your texts and email, and shows sign-in links too. Press <kbd>⌘</kbd><kbd>V</kbd> and you’re in, in any browser or app.</p>
     <div class="actions">
@@ -203,7 +203,7 @@
       </a>
       <a class="button quiet" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>View the source</a>
     </div>
-    <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+    <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
   </div>
 
   <!-- The app's own banner and menu bar label, ported from CodeCard.swift and MenuBarLabel.swift. -->
@@ -559,7 +559,19 @@
 </section>
 
 <section id="faq" class="faq">
-  <h2>Questions</h2>
+  <div class="faq-head">
+    <h2>Questions</h2>
+    <nav class="rail-card guide-card" aria-label="Guides">
+      <b>Guides and tips</b>
+      <ul>
+        <li><a href="/guides/2fa-codes-for-ai-agents/"><span class="icon-tile" style="--c:#5856d6"><svg viewBox="0 0 24 24"><use href="#i-terminal"/></svg></span><span><b>2FA codes for AI agents</b>Let Claude Code or Codex ask for a code</span></a></li>
+        <li><a href="/guides/magic-link-safety/"><span class="icon-tile" style="--c:#ff9500"><svg viewBox="0 0 24 24"><use href="#i-link"/></svg></span><span><b>Is this sign-in link safe?</b>Check a magic link before you click</span></a></li>
+        <li><a href="/guides/verification-code-autofill-chrome-mac/"><span class="icon-tile" style="--c:#0a7aff"><svg viewBox="0 0 24 24"><use href="#i-compass"/></svg></span><span><b>Code autofill in Chrome</b>Why it fails, and what works</span></a></li>
+        <li><a href="/guides/bitwarden-codes-mac-menu-bar/"><span class="icon-tile" style="--c:#30b0c7"><svg viewBox="0 0 24 24"><use href="#i-key"/></svg></span><span><b>Bitwarden codes on Mac</b>Four ways to get your codes</span></a></li>
+      </ul>
+    </nav>
+  </div>
+  <div>
   <details open>
     <summary>Does CodeCatch work in Chrome, Arc and Firefox?</summary>
     <p>Yes. Each new code is copied, so you can paste it in any browser or app with <kbd>⌘</kbd><kbd>V</kbd>.</p>
@@ -596,6 +608,7 @@
     <summary>What if CodeCatch misses a code?</summary>
     <p><a href="https://github.com/ugzv/CodeCatch/issues/new?template=bug_report.yml" rel="noopener">Report it on GitHub</a>. Send the message with the code replaced by another number. It becomes a test, so the next version catches it.</p>
   </details>
+  </div>
 </section>
 
 <section class="cta">
@@ -608,7 +621,7 @@
     </a>
     <a class="button quiet" href="https://github.com/ugzv/CodeCatch"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>View the source</a>
   </div>
-  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
 </section>
 
 </main>

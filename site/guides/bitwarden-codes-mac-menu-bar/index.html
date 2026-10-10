@@ -15,10 +15,10 @@
 <meta property="og:url" content="https://codecatch.app/guides/bitwarden-codes-mac-menu-bar/">
 <meta property="og:title" content="Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them">
 <meta property="og:description" content="Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.">
-<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta property="og:image" content="https://codecatch.app/assets/og/bitwarden-codes-mac-menu-bar.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch banner showing a verification code ready to paste">
+<meta property="og:image:alt" content="“Bitwarden TOTP codes in your Mac menu bar” beside the CodeCatch menu showing a GitHub code from Bitwarden">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -31,7 +31,7 @@
    "headline": "Bitwarden TOTP codes in your Mac menu bar: 4 ways to get them",
    "name": "Bitwarden TOTP codes in your Mac menu bar",
    "description": "Four ways to get your Bitwarden two-step (TOTP) codes on a Mac: the browser extension, the desktop app, the command line, and the menu bar with CodeCatch.",
-   "image": "https://codecatch.app/assets/og.png",
+   "image": "https://codecatch.app/assets/og/bitwarden-codes-mac-menu-bar.png",
    "datePublished": "2026-10-03",
    "dateModified": "2026-10-03",
    "inLanguage": "en",
@@ -184,11 +184,34 @@
       </div>
     </div>
   </div>
+  <aside class="rail">
+    <nav class="toc" aria-label="On this page"><details open>
+      <summary>On this page</summary>
+      <ol>
+        <li><a href="#at-a-glance">At a glance</a></li>
+        <li><a href="#how-codes-work">How these codes work</a></li>
+        <li><a href="#extension">The browser extension</a></li>
+        <li><a href="#desktop-app">The desktop app</a></li>
+        <li><a href="#command-line">The command line</a></li>
+        <li><a href="#menu-bar">The menu bar</a></li>
+        <li><a href="#setup-stuck">If setup gets stuck</a></li>
+        <li><a href="#trade-off">The trade-off</a></li>
+        <li><a href="#which-one">Which one to use</a></li>
+        <li><a href="#questions">Questions</a></li>
+      </ol>
+    </details></nav>
+    <div class="rail-card">
+      <img src="/assets/icon-256.png" width="56" height="56" alt="" loading="lazy">
+      <p><b>CodeCatch</b> Sign-in codes from Messages and mail, copied the moment they arrive.</p>
+      <a class="button small" href="/download/CodeCatch.dmg" data-download><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS</a>
+      <p class="fine">Free · macOS 15+</p>
+    </div>
+  </aside>
   <div class="prose">
     <p>Bitwarden can hold the keys for your two-step codes and make the six-digit codes for you. On a Mac there are four ways to get at them. The first three need nothing but Bitwarden.</p>
     <p class="callout">Bitwarden stores authenticator keys on every plan. Showing the codes needs Premium or a paid organisation plan, according to <a href="https://bitwarden.com/help/integrated-authenticator/" rel="noopener">Bitwarden’s help page</a>.</p>
 
-    <h2>At a glance</h2>
+    <h2 id="at-a-glance">At a glance</h2>
     <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">Extension</th><th scope="col">Desktop app</th><th scope="col">Command line</th><th scope="col">CodeCatch</th></tr></thead><tbody>
 <tr><th scope="row">Works in</th><td>The browser</td><td>Any app</td><td>Terminal</td><td>Any app</td></tr>
 <tr><th scope="row">Steps per code</th><td>None, it copies as it fills</td><td>Open app, find login, copy</td><td>Type a command</td><td>Shortcut, type a name, Return</td></tr>
@@ -196,23 +219,23 @@
 <tr><th scope="row">Works offline</th><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>If the vault is unlocked</td><td>Yes</td></tr>
 </tbody></table></div>
 
-    <h2>How these codes work</h2>
+    <h2 id="how-codes-work">How these codes work</h2>
     <p>When you turn on two-step sign-in, the service gives you a secret key, usually as a QR code. An authenticator mixes that key with the current time and gets a six-digit code that changes every 30 seconds. Anything that holds the key can make the code: your phone, Bitwarden, or CodeCatch.</p>
 
-    <h2>1. The browser extension</h2>
+    <h2 id="extension">1. The browser extension</h2>
     <p>This is the least work. When the extension fills your username and password, it also copies the code. Press <kbd>⌘</kbd><kbd>V</kbd> in the code field.</p>
     <p>If nothing is copied, open the extension and check <b>Settings → Autofill → Copy TOTP automatically</b>. Bitwarden says it is on by default.</p>
 
-    <h2>2. The desktop app</h2>
+    <h2 id="desktop-app">2. The desktop app</h2>
     <p>Open the login in the Bitwarden app. The code is shown inside the item, counting down. Click it to copy.</p>
     <p>This works for sign-ins outside the browser, but it means switching apps and searching each time.</p>
 
-    <h2>3. The command line</h2>
+    <h2 id="command-line">3. The command line</h2>
     <p>With the <a href="https://bitwarden.com/help/cli/" rel="noopener">Bitwarden CLI</a> installed and unlocked:</p>
     <pre><code>bw get totp github.com</code></pre>
     <p>It prints the current code. Useful in scripts, less so when a code expires in 30 seconds.</p>
 
-    <h2>4. The menu bar, with CodeCatch</h2>
+    <h2 id="menu-bar">4. The menu bar, with CodeCatch</h2>
     <p>CodeCatch puts your Bitwarden codes in the menu bar next to the codes you get by text and email. Press <kbd>⌃</kbd><kbd>⌥</kbd><kbd>⌘</kbd><kbd>F</kbd>, type a name, press Return, and the code is copied.</p>
     <ol class="numbered">
       <li>Install the Bitwarden CLI: <code>brew install bitwarden-cli</code></li>
@@ -230,7 +253,7 @@
       <li><b>Steam codes</b> work too.</li>
     </ul>
 
-    <h2>If setup gets stuck</h2>
+    <h2 id="setup-stuck">If setup gets stuck</h2>
     <ul class="ticks">
       <li><b>“bw: command not found”.</b> The Bitwarden CLI is not installed. Run <code>brew install bitwarden-cli</code>, or get it from Bitwarden’s site.</li>
       <li><b>“You are not logged in”.</b> Run <code>bw login</code> in Terminal. It also handles your two-step login for Bitwarden itself.</li>
@@ -238,7 +261,7 @@
       <li><b>Changed something in Bitwarden?</b> Use <b>Refresh…</b> You see what was added, changed and removed before it is saved.</li>
     </ul>
 
-    <h2>What CodeCatch keeps, and the trade-off</h2>
+    <h2 id="trade-off">What CodeCatch keeps, and the trade-off</h2>
     <ul class="ticks">
       <li>It saves each login’s name, username, site and authenticator key in your Mac’s login Keychain.</li>
       <li>Codes are made on your Mac. No connection is needed.</li>
@@ -247,14 +270,14 @@
     </ul>
     <p>The trade-off is plain: a copy of your authenticator keys now lives on this Mac, outside Bitwarden. If you would rather keep them only in your vault, use one of the first three ways.</p>
 
-    <h2>Which one to use</h2>
+    <h2 id="which-one">Which one to use</h2>
     <ul class="ticks">
       <li><b>Mostly in the browser:</b> the extension.</li>
       <li><b>Now and then, anywhere:</b> the desktop app.</li>
       <li><b>In scripts:</b> the command line.</li>
       <li><b>All day, in any app, with your text and email codes in one place:</b> CodeCatch.</li>
     </ul>
-    <h2>Questions</h2>
+    <h2 id="questions">Questions</h2>
     <div class="faq-list">
       <details><summary>Does CodeCatch save my Bitwarden master password?</summary><p>No. It is passed once to Bitwarden’s own command-line tool to unlock the vault for the import, and it is not kept. The vault is locked again afterwards.</p></details>
       <details><summary>Do the codes work without an internet connection?</summary><p>Yes. A code is worked out from the saved key and the current time, on your Mac. Nothing is looked up online.</p></details>
@@ -275,7 +298,7 @@
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
 </section>
 </main>
 
@@ -348,5 +371,6 @@
     <g id="i-eye-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.600 6.200A9.800 9.800 0 0 1 12 6c5.500 0 9 6 9 6a15.600 15.600 0 0 1-2.800 3.500M6.500 7.600A15 15 0 0 0 3 12s3.500 6 9 6a9 9 0 0 0 3.600-.8M9.900 9.900a3 3 0 0 0 4.200 4.200"/></g>
   </defs>
 </svg>
+<script src="/toc.js" defer></script>
 </body>
 </html>

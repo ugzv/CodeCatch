@@ -15,10 +15,10 @@
 <meta property="og:url" content="https://codecatch.app/guides/verification-code-autofill-chrome-mac/">
 <meta property="og:title" content="Verification code autofill not working in Chrome on Mac">
 <meta property="og:description" content="Why text message codes stopped autofilling in Chrome, Firefox and other browsers on Mac, what fixes it on macOS 26, and a way that works on any version.">
-<meta property="og:image" content="https://codecatch.app/assets/og.png">
+<meta property="og:image" content="https://codecatch.app/assets/og/verification-code-autofill-chrome-mac.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="CodeCatch banner showing a verification code ready to paste">
+<meta property="og:image:alt" content="“Code autofill not working in Chrome on Mac” beside a Google code that CodeCatch has copied">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
@@ -31,7 +31,7 @@
    "headline": "Verification code autofill not working in Chrome on Mac",
    "name": "Code autofill not working in Chrome on Mac",
    "description": "Why text message codes stopped autofilling in Chrome, Firefox and other browsers on Mac, what fixes it on macOS 26, and a way that works on any version.",
-   "image": "https://codecatch.app/assets/og.png",
+   "image": "https://codecatch.app/assets/og/verification-code-autofill-chrome-mac.png",
    "datePublished": "2026-10-03",
    "dateModified": "2026-10-06",
    "inLanguage": "en",
@@ -174,12 +174,33 @@
       </div>
     </div>
   </div>
+  <aside class="rail">
+    <nav class="toc" aria-label="On this page"><details open>
+      <summary>On this page</summary>
+      <ol>
+        <li><a href="#what-works-where">What works where</a></li>
+        <li><a href="#which-macos">Which macOS you have</a></li>
+        <li><a href="#sms-codes">Check the code reaches your Mac</a></li>
+        <li><a href="#update-macos">Update macOS 26</a></li>
+        <li><a href="#reported-fixes">Things people report</a></li>
+        <li><a href="#why-no-code">Why some pages never offer it</a></li>
+        <li><a href="#any-version">The way that works on any version</a></li>
+        <li><a href="#questions">Questions</a></li>
+      </ol>
+    </details></nav>
+    <div class="rail-card">
+      <img src="/assets/icon-256.png" width="56" height="56" alt="" loading="lazy">
+      <p><b>CodeCatch</b> Sign-in codes from Messages and mail, copied the moment they arrive.</p>
+      <a class="button small" href="/download/CodeCatch.dmg" data-download><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-download"/></svg>Download for macOS</a>
+      <p class="fine">Free · macOS 15+</p>
+    </div>
+  </aside>
   <div class="prose">
     <p>On an iPhone, a code from a text message appears above the keyboard. On a Mac it is less dependable, and in Chrome it often does not appear at all. Here is what is going on and what to do.</p>
 
     <p class="callout"><b>Short answer:</b> before macOS 26, codes only autofill in Safari. On macOS 26, update to the latest version. Or skip autofill and paste the code, which works everywhere.</p>
 
-    <h2>What works where</h2>
+    <h2 id="what-works-where">What works where</h2>
     <div class="prose-table"><table><thead><tr><th scope="col"></th><th scope="col">Safari</th><th scope="col">Chrome, Firefox, Arc, Edge</th></tr></thead><tbody>
 <tr><th scope="row">macOS 15 and earlier</th><td>Yes</td><td>No</td></tr>
 <tr><th scope="row">macOS 26.0 and 26.1</th><td>Yes</td><td>Broken for many people</td></tr>
@@ -187,7 +208,7 @@
 </tbody></table></div>
     <p>The last two rows come from user reports, linked below. Your version may behave differently.</p>
 
-    <h2>First: which macOS do you have?</h2>
+    <h2 id="which-macos">First: which macOS do you have?</h2>
     <p>Open <b>Apple menu → About This Mac</b>.</p>
     <ul class="ticks">
       <li><b>macOS 15 or earlier:</b> codes autofill in Safari only. Chrome, Firefox, Arc and Edge never offered them, so nothing is broken. Skip to <a href="#any-version">the way that works on any version</a>.</li>
@@ -209,25 +230,25 @@
     </ul>
     <p class="fine">From Apple Support: <a href="https://support.apple.com/en-us/102545" rel="noopener">Forward text messages from your iPhone to other devices</a>.</p>
 
-    <h2>2. Update macOS 26</h2>
+    <h2 id="update-macos">2. Update macOS 26</h2>
     <p>In late 2025, people on <a href="https://discussions.apple.com/thread/256153253" rel="noopener">Apple’s support forum</a> found that codes had stopped appearing in Chrome, Firefox, Brave and Opera on macOS 26, while Safari kept working. They later reported it fixed in a newer release, and a <a href="https://forums.macrumors.com/threads/google-chrome-sms-totp-autofill.2467686/" rel="noopener">MacRumors forum thread</a> says codes came back in Chrome with macOS 26.2.</p>
     <p>So: <b>System Settings → General → Software Update</b>, and install what is offered.</p>
 
-    <h2>3. Things people report, with a warning</h2>
+    <h2 id="reported-fixes">3. Things people report, with a warning</h2>
     <ul class="ticks">
       <li><b>Siri and Apple Intelligence.</b> Some people say suggestions stopped when these were off, and returned when they turned them back on.</li>
       <li><b>A Terminal setting.</b> The forum thread names a hidden setting that brings autofill back on affected versions. The same thread says it caused slowdowns and crashes in Chrome-based apps, so we do not recommend it. Updating is the safer fix.</li>
     </ul>
     <p class="callout">I have not tested these on every version. They come from the threads linked above.</p>
 
-    <h2>Why some pages never offer the code</h2>
+    <h2 id="why-no-code">Why some pages never offer the code</h2>
     <p>Even when everything is set up, the browser only offers a code in a field it recognises as a code field. Websites mark such a field for the browser. Many do not, and then no suggestion appears, in Safari or anywhere else. There is nothing you can change on your side.</p>
 
     <h2 id="any-version">4. The way that works on any version</h2>
     <p>Autofill depends on your macOS version, your browser and the page. Pasting does not. If the code is already on your clipboard, <kbd>⌘</kbd><kbd>V</kbd> works in every browser and every app.</p>
     <p>That is what CodeCatch does. It reads the code from Messages or your email as it arrives, copies it, and shows it in a small banner. It works on macOS 15 and later.</p>
     <p>Without CodeCatch, you can do the same by hand: open Messages on your Mac, double-click the code, copy, switch back and paste.</p>
-    <h2>Questions</h2>
+    <h2 id="questions">Questions</h2>
     <div class="faq-list">
       <details><summary>Why does Safari fill the code when Chrome doesn’t?</summary><p>Code autofill is a macOS feature that Apple built into Safari first. Other browsers only got access with macOS 26, and it has been unreliable there.</p></details>
       <details><summary>Do I need an iPhone?</summary><p>For codes sent by SMS, yes. The iPhone receives the text and forwards it to your Mac. With an Android phone the text never reaches Messages on the Mac, so neither autofill nor CodeCatch can see it.</p></details>
@@ -247,7 +268,7 @@
     </a>
     <a class="button quiet" href="/">See how it works</a>
   </div>
-  <p class="fine">Free · macOS 15 or later · Apple silicon and Intel</p>
+  <p class="fine">Free · macOS 15+ · Apple silicon and Intel</p>
 </section>
 </main>
 
@@ -320,5 +341,6 @@
     <g id="i-eye-off" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.600 6.200A9.800 9.800 0 0 1 12 6c5.500 0 9 6 9 6a15.600 15.600 0 0 1-2.800 3.500M6.500 7.600A15 15 0 0 0 3 12s3.500 6 9 6a9 9 0 0 0 3.600-.8M9.900 9.900a3 3 0 0 0 4.200 4.200"/></g>
   </defs>
 </svg>
+<script src="/toc.js" defer></script>
 </body>
 </html>
