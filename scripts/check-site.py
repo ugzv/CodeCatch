@@ -9,7 +9,9 @@
 - every link within the site, and its #anchor, leads somewhere;
 - a page links to the version of another page in its own language, where there is one
   (the language switcher is the exception);
-- the sitemap lists exactly the indexed pages.
+- the sitemap lists exactly the indexed pages;
+- a page that shows dates (<time datetime>) gives its newest one as its dateModified
+  and its sitemap lastmod.
 """
 
 import glob
@@ -29,9 +31,11 @@ class Page(HTMLParser):
     def __init__(self, path):
         super().__init__()
         self.lang, self.canonical, self.og_url, self.noindex = None, None, None, False
-        self.alternates, self.switcher, self.links, self.ids = {}, {}, [], set()
+        self.alternates, self.switcher, self.links, self.ids, self.dates = {}, {}, [], set(), []
         with open(path) as file:
-            self.feed(file.read())
+            text = file.read()
+        self.modified = set(re.findall(r'"dateModified": "(.*?)"', text))
+        self.feed(text)
 
     def handle_starttag(self, tag, attrs):
         a = {key: value or "" for key, value in attrs}
@@ -47,6 +51,8 @@ class Page(HTMLParser):
             self.og_url = a["content"]
         elif tag == "meta" and a.get("name") == "robots":
             self.noindex = "noindex" in a["content"]
+        elif tag == "time" and "datetime" in a:
+            self.dates.append(a["datetime"])
         elif tag == "a" and "href" in a:
             self.links.append((a["href"], "hreflang" in a))
             if "hreflang" in a:
@@ -70,6 +76,8 @@ def main():
     pages = {url_of(p): Page(p) for p in paths}
     with open(os.path.join(SITE, "_redirects")) as file:
         redirects = {line.split()[0] for line in file if line.strip()}
+    with open(os.path.join(SITE, "sitemap.xml")) as file:
+        lastmod = dict(re.findall(r"<loc>(.*?)</loc>(?:<lastmod>(.*?)</lastmod>)?", file.read()))
 
     for url, page in pages.items():
 
@@ -86,6 +94,12 @@ def main():
                 say(f"canonical is {page.canonical}")
             if page.og_url != url:
                 say(f"og:url is {page.og_url}")
+        if page.dates:
+            newest = max(page.dates)
+            if page.modified != {newest}:
+                say(f"dateModified is {', '.join(sorted(page.modified)) or 'missing'}, but the newest date is {newest}")
+            if lastmod.get(url, newest) != newest:
+                say(f"sitemap lastmod is {lastmod[url] or 'missing'}, but the newest date is {newest}")
 
         if page.alternates or (indexed and lang != "en"):
             for code in sorted({lang, "en", "x-default"} - page.alternates.keys()):
@@ -119,8 +133,7 @@ def main():
             elif twin and not switcher and twin.lang != lang and lang in twin.alternates:
                 say(f"links to {href}; link to {twin.alternates[lang].removeprefix(ORIGIN)} instead")
 
-    with open(os.path.join(SITE, "sitemap.xml")) as file:
-        sitemap = set(re.findall(r"<loc>(.*?)</loc>", file.read()))
+    sitemap = set(lastmod)
     listed = {url for url, page in pages.items() if not page.noindex and not url.endswith("404.html")}
     errors += [f"sitemap.xml: missing {url}" for url in sorted(listed - sitemap)]
     errors += [f"sitemap.xml: {url} is not an indexed page" for url in sorted(sitemap - listed)]
