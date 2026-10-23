@@ -34,6 +34,7 @@ TEMPLATE = """<!doctype html>
   .og-brand svg {{ width: 42px; height: 42px; fill: #fff; }}
   .og-kind {{ margin-bottom: 14px; font-size: 26px; font-weight: 600; opacity: 0.85; }}
   .og h1 {{ font-size: 60px; font-weight: 750; letter-spacing: -0.03em; line-height: 1.05; }}
+  .og .og-copy h1 {{ hyphens: manual; }}  /* outranks German pages' hyphens: auto, meant for narrow screens */
   .og .cc {{ zoom: 1.35; }}
 {style}
 </style></head>
