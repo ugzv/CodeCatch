@@ -8,7 +8,10 @@
     <img src="https://img.shields.io/badge/macOS-15%2B-black?style=flat-square" alt="macOS 15 or later">
   </p>
   <p><a href="https://codecatch.app/download/CodeCatch.dmg"><b>Download for Mac</b></a> · <a href="https://codecatch.app">codecatch.app</a> · <a href="https://codecatch.app/privacy/">Privacy</a> · <a href="https://codecatch.app/changelog/">Changelog</a></p>
-  <img src="site/assets/og.png" alt="CodeCatch banner showing a verification code ready to paste" width="720">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/demo-dark.gif">
+    <img src=".github/demo-light.gif" alt="A code arrives by text, then by email, then a sign-in link. CodeCatch copies each one, and ⌘V pastes it into the sign-in page." width="600">
+  </picture>
 </div>
 
 CodeCatch is a Mac menu bar app. When a 2FA verification code or sign-in link
