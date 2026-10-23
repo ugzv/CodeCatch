@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Make each guide's and comparison's share image (site/assets/og/<page>.png, 1200x630;
-site/assets/og/<lang>/<page>.png for a page in another language).
+"""Make the share images, 1200x630: each home page's (the file its og:image names) and
+each guide's and comparison's (site/assets/og/<page>.png; site/assets/og/<lang>/<page>.png
+for a page in another language).
 
 The image is the page's own heading next to its own app picture, drawn with the site's
-styles by headless Chrome, so it changes when the page does. Run it after editing a
-page's heading or picture:  python3 scripts/make-og.py
+styles by headless Chrome, so it changes when the page does. On the home page that
+picture is the hero, stopped once the text code is copied and pasted. Run it after
+editing a page's heading or picture:  python3 scripts/make-og.py
 """
 
 import glob
@@ -33,18 +35,57 @@ TEMPLATE = """<!doctype html>
   .og-kind {{ margin-bottom: 14px; font-size: 26px; font-weight: 600; opacity: 0.85; }}
   .og h1 {{ font-size: 60px; font-weight: 750; letter-spacing: -0.03em; line-height: 1.05; }}
   .og .cc {{ zoom: 1.35; }}
+{style}
 </style></head>
 <body>
 <main class="og">
   <div class="og-copy">
     <div class="og-brand"><svg viewBox="208 208 608 608"><use href="#mark"/></svg>CodeCatch</div>
-    <div><p class="og-kind">{kind}</p><h1>{title}</h1></div>
+    <div>{kind}<h1>{title}</h1></div>
   </div>
   {art}
 </main>
 {sprite}
 </body></html>
 """
+
+# The hero stage stands at the right and runs off the bottom; its chips are enlarged
+# so the three kinds of message stay readable in a small link preview.
+HOME_STYLE = """
+  .og { position: relative; display: block; }
+  .og-copy { width: 460px; }
+  .og .stage { position: absolute; right: 40px; top: 52px; width: 600px; height: 600px; aspect-ratio: auto;
+    color: var(--text); box-shadow: 0 30px 80px rgba(60, 10, 40, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.35); }
+  .og .banner { zoom: 1; }
+  .og .types { zoom: 1.3; top: 34px; }
+  .og .types button { opacity: 0.8; }
+  .og .types button.on { opacity: 1; }
+  /* Still, or a late web font can catch the hidden link banner sliding into view. */
+  .og .stage * { transition: none; animation: none; }
+"""
+
+
+def still(stage, page):
+    """The hero's text scene at its end: the banner in, its code copied and pasted."""
+    code = grab(r'id="banner-code">([^<]+)<', stage, page)
+    for old, new in [
+        ('class="cc banner" id="banner"', 'class="cc banner on" id="banner"'),
+        ('<b id="menubar-code"></b>', f'<b id="menubar-code">{code}</b>'),
+        ('class="page-input" id="otp"', 'class="page-input on" id="otp"'),
+        ('<span id="otp-text"></span><i class="caret"></i>', f'<span id="otp-text">{code.replace(" ", "")}</span>'),
+        ('class="keys" id="keys"', 'class="keys on" id="keys"'),
+        ('class="pill prominent" id="banner-copy"', 'class="pill prominent copied" id="banner-copy"'),
+        ('<use href="#i-copy"/></svg><span>Copy</span>', '<use href="#i-check"/></svg><span>Copied</span>'),
+    ]:
+        if old not in stage:
+            sys.exit(f"{page}: the hero has no {old}")
+        stage = stage.replace(old, new)
+    stage, lit = re.subn(
+        r'(<div class="types" id="types" aria-hidden="true">\s*<button)', r'\1 class="on"', stage, count=1
+    )
+    if not lit:
+        sys.exit(f"{page}: the hero has no chips")
+    return stage
 
 
 def grab(pattern, html, page):
@@ -56,35 +97,46 @@ def grab(pattern, html, page):
 
 def main():
     out_dir = os.path.join(SITE, "assets", "og")
-    os.makedirs(out_dir, exist_ok=True)
     work = tempfile.mkdtemp()
     try:
         for page in sorted(glob.glob(os.path.join(SITE, "**/index.html"), recursive=True)):
             with open(page) as file:
                 html = file.read()
-            if 'class="feature-art article-art"' not in html:
-                continue
-            name = os.path.basename(os.path.dirname(page))
             lang = grab(r'<html lang="([a-z-]+)"', html, page)
             folder = out_dir if lang == "en" else os.path.join(out_dir, lang)
-            os.makedirs(folder, exist_ok=True)
-            art = grab(
-                r'<div class="feature-art article-art" aria-hidden="true">\s*(<div class="cc">.*?)\n  </div>\n',
-                html,
-                page,
-            )
+            if 'id="stage"' in html:
+                # Each home page names its own image (og.png, og/de/start.png, og/fr/accueil.png...).
+                image = os.path.join(
+                    SITE, grab(r'<meta property="og:image" content="https://codecatch.app/([^"]+)"', html, page)
+                )
+                name, style, kind = "home", HOME_STYLE, ""
+                title = grab(r'<section class="hero">.*?<h1>(.*?)</h1>', html, page)
+                art = still(grab(r'(<div class="stage" id="stage".*?)\n</section>', html, page), page)
+            elif 'class="feature-art article-art"' in html:
+                name, style = os.path.basename(os.path.dirname(page)), ""
+                image = os.path.join(folder, name + ".png")
+                kind = '<p class="og-kind">' + grab(r'<p class="eyebrow">(.*?)</p>', html, page) + "</p>"
+                title = grab(r"<h1>(.*?)</h1>", html, page)
+                art = grab(
+                    r'<div class="feature-art article-art" aria-hidden="true">\s*(<div class="cc">.*?)\n  </div>\n',
+                    html,
+                    page,
+                )
+            else:
+                continue
+            os.makedirs(os.path.dirname(image), exist_ok=True)
             source = TEMPLATE.format(
                 lang=lang,
                 site="file://" + SITE,
-                kind=grab(r'<p class="eyebrow">(.*?)</p>', html, page),
-                title=grab(r"<h1>(.*?)</h1>", html, page),
+                style=style,
+                kind=kind,
+                title=title,
                 art=art.replace('src="/assets/', f'src="file://{SITE}/assets/').replace(' loading="lazy"', ""),
                 sprite=grab(r'(<svg width="0" height="0".*?</svg>)\s*(?:<script|</body>)', html, page),
             )
             draft = os.path.join(work, lang + "-" + name + ".html")
             with open(draft, "w") as file:
                 file.write(source)
-            image = os.path.join(folder, name + ".png")
             subprocess.run(
                 [
                     CHROME,
