@@ -1,10 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// MenuBarExtra's window grows with its content but never shrinks back (macOS 27), and
-/// AppKit resizes it from the bottom-left: the popover kept its tallest size with the
-/// content floating in the middle, and slid away from the menu bar. This sizes the window
-/// to the content's `height`, keeping its top edge where it opened.
+/// Sizes the popover to its content and keeps its top edge on the display.
 struct TopAnchor: NSViewRepresentable {
     let height: CGFloat
 
@@ -15,14 +12,17 @@ struct TopAnchor: NSViewRepresentable {
         private var top: CGFloat?
         private var height: CGFloat = 0
         private var observers: [NSObjectProtocol] = []
+        private var placing = false
 
         func fit(_ height: CGFloat) {
-            let height = height.rounded(.up)  // the window has whole-point heights
-            self.height = height
-            // A closed popover is left alone: opening fits it. Resizing it while closed could fight SwiftUI's
-            // own sizing of the window, back and forth forever.
-            guard let window, window.isVisible, let top, height > 0, window.frame.height != height || window.frame.maxY != top else { return }
-            window.setFrame(NSRect(x: window.frame.minX, y: top - height, width: window.frame.width, height: height), display: true)
+            self.height = height.rounded(.up)  // the window has whole-point heights
+            place()
+        }
+
+        /// AppKit lays out before it draws, so a corrected frame is never seen.
+        override func layout() {
+            super.layout()
+            place()
         }
 
         override func viewDidMoveToWindow() {
@@ -38,13 +38,46 @@ struct TopAnchor: NSViewRepresentable {
                     MainActor.assumeIsolated {
                         guard let self else { return }
                         self.top = self.window?.frame.maxY
-                        self.fit(self.height)
+                        self.place()
                     }
                 })
+            // A restored frame arrives without a resize, so moves are checked too.
+            for name in [
+                NSWindow.didResizeNotification, NSWindow.didChangeScreenNotification,
+                NSApplication.didChangeScreenParametersNotification,
+            ] {
+                observers.append(
+                    center.addObserver(
+                        forName: name,
+                        object: name == NSApplication.didChangeScreenParametersNotification ? nil : window,
+                        queue: .main
+                    ) { [weak self] _ in
+                        MainActor.assumeIsolated { self.map { $0.place() } }
+                    })
+            }
             observers.append(
-                center.addObserver(forName: NSWindow.didResizeNotification, object: window, queue: .main) { [weak self] _ in
-                    MainActor.assumeIsolated { self.map { $0.fit($0.height) } }
+                NSWorkspace.shared.notificationCenter.addObserver(
+                    forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main
+                ) { [weak self] _ in
+                    MainActor.assumeIsolated { self.map { $0.place() } }
                 })
+            place()
+        }
+
+        private func place() {
+            // A closed popover is left alone: resizing it could fight SwiftUI's own sizing.
+            guard !placing, height > 0, let window, window.isVisible else { return }
+            let frame = window.frame
+            var top = top ?? frame.maxY
+            // A panel restored off the display has no screen; the menu bar is on the main one.
+            if let screen = window.screen ?? NSScreen.main {
+                top = min(top, screen.frame.maxY)  // never above the top of the display
+                top = max(top, screen.visibleFrame.minY + height)  // never below the Dock
+            }
+            guard frame.height != height || abs(frame.maxY - top) > 0.5 else { return }
+            placing = true
+            defer { placing = false }
+            window.setFrame(NSRect(x: frame.minX, y: top - height, width: frame.width, height: height), display: true)
         }
     }
 }
