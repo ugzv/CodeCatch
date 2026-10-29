@@ -32,7 +32,7 @@
    "description": "What changed in CodeCatch, newest first.",
    "url": "https://codecatch.app/changelog/",
    "inLanguage": "en",
-   "dateModified": "2026-10-28",
+   "dateModified": "2026-10-29",
    "author": {
     "@id": "https://codecatch.app/#author"
    },
@@ -110,8 +110,21 @@
 <section class="releases">
   <article class="release">
     <header>
-      <h2><time datetime="2026-10-28">28 October 2026</time></h2>
+      <h2><time datetime="2026-10-29">29 October 2026</time></h2>
       <p class="tag">Latest</p>
+    </header>
+    <div class="release-body">
+      <dl class="points">
+        <div><dt>The menu stays on screen</dt><dd>With a full-screen app in front or the menu bar hidden, the menu could open with its top above the screen, cutting off the search field. It now stays on the screen, also after you switch Spaces or displays. Reported and fixed by <a href="https://github.com/parichay28" rel="noopener">Parichay Agrawal</a>. Thank you!</dd></div>
+        <div><dt>Hidden codes show dots</dt><dd>With Hide Codes Until Hover on, a hidden code shows a dot for each digit until you point at it, as Passwords does. It used to be blurred. Pointing at a code no longer moves the rows below it, the card no longer blurs its own dots while the vault is locked, and an expired hidden code no longer looks empty. Thanks to <a href="https://github.com/parichay28" rel="noopener">Parichay Agrawal</a> for reporting all three.</dd></div>
+        <div><dt>Why Full Disk Access</dt><dd>When CodeCatch asks for Full Disk Access, it now says why: macOS lets apps read Messages only with it. CodeCatch reads Messages and Apple Mail, nothing else, never changes them, and codes stay on your Mac. If you’d rather not, turn Messages off. Gmail, Outlook and other mail work without it.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <article class="release">
+    <header>
+      <h2><time datetime="2026-10-28">28 October 2026</time></h2>
     </header>
     <div class="release-body">
       <dl class="points">
