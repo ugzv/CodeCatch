@@ -25,7 +25,7 @@ struct PrivacyTab: View {
                     symbol: "rectangle.dashed.badge.record", color: .red, title: "Hide from Screen Capture",
                     info: "Helps hide CodeCatch windows from screen capture. Some apps may still capture them.", isOn: $hideFromCapture)
                 SettingRow(
-                    symbol: "eye.slash.fill", color: .indigo, title: "Blur Codes Until Hover",
+                    symbol: "eye.slash.fill", color: .indigo, title: "Hide Codes Until Hover",
                     info: "Point at a code to read it. The menu bar shows only the app icon.", isOn: $blurCodes)
                 SettingRow(
                     symbol: "menubar.rectangle", color: .gray, title: "Show Code in Menu Bar",

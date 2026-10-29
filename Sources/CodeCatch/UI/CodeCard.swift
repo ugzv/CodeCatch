@@ -95,7 +95,7 @@ struct CodeCard: View {
                     .lineLimit(1).minimumScaleFactor(0.6)
                     .foregroundStyle(live ? .primary : .tertiary)
             } else {
-                CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 36, concealed: blurCodes && !hoveringCard)
+                CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 36, concealed: locked || blurCodes && !hoveringCard)
                     .foregroundStyle(live ? .primary : .tertiary)
             }
             Spacer(minLength: 6)

@@ -15,16 +15,32 @@ struct CodeText: View {
     let code: String
     var size: CGFloat = 38
     var weight: Font.Weight = .semibold
+    /// A dot in each digit's place, as Passwords hides a password until hover. Unlike a blur, dots carry nothing
+    /// of the digits, and revealing the code moves nothing. Hide Codes Until Hover passes the code, for VoiceOver;
+    /// a locked app passes `hiddenCode`, and looks the same.
     var concealed = false
 
     var body: some View {
-        Text(groupedCode(code, wide: true))
-            .font(.system(size: size, weight: weight).monospacedDigit())
-            .blur(radius: concealed ? max(4, size * 0.2) : 0)  // at least 4, or a small row code stays legible
-            .animation(.easeOut(duration: 0.15), value: concealed)
-            .tracking(size * 0.05)
-            .lineLimit(1)
-            .minimumScaleFactor(0.45)
-            .accessibilityLabel("Code \(code.map(String.init).joined(separator: " "))")
+        ZStack {
+            if concealed {
+                // Zeros that are never drawn hold each digit's width.
+                let slots = groupedCode(String(code.map { $0.isLetter ? $0 : "0" }), wide: true)
+                HStack(spacing: 0) {
+                    ForEach(Array(slots.enumerated()), id: \.offset) { _, slot in
+                        Text(String(slot)).hidden()
+                            .overlay { if !slot.isWhitespace { Circle().frame(width: size * 0.3, height: size * 0.3) } }
+                    }
+                }
+            } else {
+                Text(groupedCode(code, wide: true))
+            }
+        }
+        .animation(.easeOut(duration: 0.15), value: concealed)
+        .font(.system(size: size, weight: weight).monospacedDigit())
+        .tracking(size * 0.05)
+        .lineLimit(1)
+        .minimumScaleFactor(0.45)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Code \(code.map(String.init).joined(separator: " "))")
     }
 }

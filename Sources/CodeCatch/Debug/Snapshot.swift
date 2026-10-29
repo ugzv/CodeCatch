@@ -94,10 +94,6 @@
             }
             model.agents.preview(nil, config: AgentConfig(), log: [])  // access off: the rest dims
             render(AnyView(AgentsTab().frame(width: 560, height: 1000)), "agents-off", .aqua, dir)
-            let blurred = ImageRenderer(content: CodeText(code: "482913", size: 36, concealed: true).padding(12).background(Color.white))
-            blurred.scale = 2
-            try? blurred.nsImage?.tiffRepresentation.flatMap { NSBitmapImageRep(data: $0)?.representation(using: .png, properties: [:]) }?
-                .write(to: URL(fileURLWithPath: "\(dir)/code-blurred.png"))
             let empty = AnyView(MenuContent())
             model.clearHistory()
             render(empty, "menu-empty", .aqua, dir)

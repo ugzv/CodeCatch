@@ -61,8 +61,12 @@ struct CodeRow: View {
                         .font(.subheadline).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                         .help(item.linkNotice?.text ?? "")
                 }
-                if item.origin != .vault, showPreviews, !concealed, !context.isEmpty {
+                // Blurred while the code is hidden, not dropped: the row keeps its height, so a hover moves no row below.
+                // A blur, not dots: the code can sit anywhere in the text, written any way. A locked row drops it.
+                if item.origin != .vault, showPreviews, !locked, !context.isEmpty {
                     Text(context).font(.caption).foregroundStyle(.tertiary).lineLimit(1)
+                        .blur(radius: concealed ? 4 : 0)
+                        .animation(.easeOut(duration: 0.15), value: concealed)
                 }
             }
             Spacer(minLength: 8)
@@ -99,7 +103,7 @@ struct CodeRow: View {
                             if clickedAt != nil && copied {
                                 Text("Copied").font(.system(size: 15, weight: .medium)).transition(.opacity)
                             } else {
-                                CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed && !locked)
+                                CodeText(code: locked ? hiddenCode(item.code) : item.code, size: 15, weight: .medium, concealed: concealed)
                                     .transition(.opacity)
                             }
                         }
