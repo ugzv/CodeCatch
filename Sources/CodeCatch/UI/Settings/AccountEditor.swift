@@ -78,11 +78,18 @@ struct AccountEditor: View {
                 // Outlook and Microsoft 365 turned off IMAP passwords; signing in is the only way.
                 if !usesSignIn && !account.isOutlook {
                     SecureField(
-                        "App password", text: $password,
+                        account.isNetEase ? "Client authorization code" : "App password", text: $password,
                         prompt: Text(!hasPassword ? "Required" : "Saved (leave empty to keep it)"))
                     if account.isGmail {
                         Link("How to create a Google app password", destination: MailAccount.appPasswordHelp)
                             .font(.caption)
+                    } else if account.isNetEase {
+                        Link("How to get a NetEase client authorization code", destination: MailAccount.netEaseHelp)
+                            .font(.caption)
+                        Text(
+                            "NetEase needs a client authorization code made in the mailbox's web settings, with IMAP turned on there. Your password for the website won't work."
+                        )
+                        .font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 Toggle("Enabled", isOn: $account.enabled)

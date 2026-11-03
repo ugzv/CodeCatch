@@ -7,11 +7,20 @@ struct AddAccountSheet: View {
     @ObservedObject private var icons = IconStore.shared
     @Environment(\.dismiss) private var dismiss
 
-    private struct Provider {
+    struct Provider {
         let name: String, label: String, detail: String, host: String, symbol: String, color: Color
     }
 
-    private let others = [
+    /// The servers offered below Microsoft. Each fills in its host, so the editor asks for the
+    /// address and credential only. NetEase is listed where its addresses are, as 163 and 126
+    /// share a platform but not a host name.
+    static let others = [
+        Provider(
+            name: "163 Mail", label: "163", detail: "NetEase · with a client authorization code, not your password",
+            host: MailAccount.netEase163Host, symbol: "envelope.fill", color: .red),
+        Provider(
+            name: "126 Mail", label: "126", detail: "NetEase · with a client authorization code, not your password",
+            host: MailAccount.netEase126Host, symbol: "envelope.fill", color: .red),
         Provider(
             name: "iCloud Mail", label: "iCloud", detail: "With an app-specific password from account.apple.com",
             host: "imap.mail.me.com", symbol: "icloud.fill", color: .blue),
@@ -42,7 +51,7 @@ struct AddAccountSheet: View {
                     dismiss()
                     edit(MailAccount(label: "Outlook", host: MailAccount.outlookHost, user: ""))
                 }
-                ForEach(others, id: \.name) { provider in
+                ForEach(Self.others, id: \.name) { provider in
                     Divider().padding(.leading, 52)
                     row(
                         icon: AnyView(IconTile(symbol: provider.symbol, color: provider.color).scaleEffect(1.3)),
