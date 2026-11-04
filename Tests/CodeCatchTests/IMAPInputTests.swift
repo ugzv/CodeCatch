@@ -119,6 +119,133 @@ struct IMAPInputTests {
         let error = IMAPError.rejected("tag NO \(token)")
         #expect(!error.localizedDescription.contains(token))
     }
+
+    // MARK: - ID (RFC 2971)
+
+    @Test func identificationNamesCodeCatchAtItsOwnVersion() throws {
+        #expect(
+            IMAPIdentification.command(capabilities: ["IMAP4REV1", "ID"], version: "2.0 (417)")
+                == #"ID ("name" "CodeCatch" "version" "2.0 (417)" "vendor" "CodeCatch")"#)
+    }
+
+    @Test(arguments: [Set<String>(), ["IMAP4rev1"], ["IMAP4rev1", "IDLE"]])
+    func serversThatDoNotAdvertiseIDAreNotSentIt(_ capabilities: Set<String>) {
+        #expect(IMAPIdentification.command(capabilities: capabilities) == nil)
+    }
+
+    @Test func identificationValuesAreQuotedAndBounded() {
+        #expect(IMAPIdentification.quoted(##"a"b\c"##) == #""a\"b\\c""#)
+        #expect(IMAPIdentification.quoted("two\r\nlines") == #""twolines""#)
+        #expect(IMAPIdentification.quoted(String(repeating: "x", count: 2000)).count == 1026)
+    }
+
+    @Test func identificationIsSentAfterLoginAndBeforeTheMailbox() async throws {
+        let id = try #require(IMAPIdentification.command(capabilities: ["ID"]))
+        #expect(id.hasPrefix(#"ID ("name" "CodeCatch" "version" "#))
+        try await withScriptedServer([
+            ("C1 LOGIN \"test\" \"test\"", "C1 OK authenticated\r\n"),
+            ("C2 CAPABILITY", "* CAPABILITY IMAP4rev1 XLIST ID LITERAL+\r\nC2 OK capability\r\n"),
+            ("C3 " + id, "* ID (\"name\" \"Coremail\")\r\nC3 OK ID completed\r\n"),
+            ("C4 EXAMINE INBOX", "* OK [UIDVALIDITY 7] UIDs valid\r\nC4 OK [READ-ONLY] examined\r\n"),
+        ]) { client in
+            try await client.open(user: "test", password: "test")
+            let examine = try await client.command("EXAMINE INBOX")
+            #expect(examine.compactMap { $0.number(after: "UIDVALIDITY ") } == [7])
+        }
+    }
+
+    @Test func identificationIsNotSentWhenTheServerDoesNotOfferIt() async throws {
+        try await withScriptedServer([
+            ("C1 LOGIN \"test\" \"test\"", "C1 OK authenticated\r\n"),
+            ("C2 CAPABILITY", "* CAPABILITY IMAP4rev1 IDLE\r\nC2 OK capability\r\n"),
+            ("C3 EXAMINE INBOX", "* OK [UIDVALIDITY 7] UIDs valid\r\nC3 OK [READ-ONLY] examined\r\n"),
+        ]) { client in
+            try await client.open(user: "test", password: "test")
+            try await client.command("EXAMINE INBOX")
+        }
+    }
+
+    @Test(arguments: ["* ID NIL\r\nC3 OK ID completed\r\n", "* ID (\"name\" \"Coremail\")\r\nC3 OK ID completed\r\n", "C3 OK ID completed\r\n"])
+    func identificationAnswersAreAllAccepted(_ answer: String) async throws {
+        let id = try #require(IMAPIdentification.command(capabilities: ["ID"]))
+        try await withScriptedServer([
+            ("C1 LOGIN \"test\" \"test\"", "C1 OK authenticated\r\n"),
+            ("C2 CAPABILITY", "* CAPABILITY IMAP4rev1 ID\r\nC2 OK capability\r\n"),
+            ("C3 " + id, answer),
+            ("C4 EXAMINE INBOX", "C4 OK [READ-ONLY] examined\r\n"),
+        ]) { client in
+            try await client.open(user: "test", password: "test")
+            try await client.command("EXAMINE INBOX")
+        }
+    }
+
+    @Test(arguments: ["NO", "BAD"])
+    func aRefusedIdentificationDoesNotEndTheSession(_ status: String) async throws {
+        let id = try #require(IMAPIdentification.command(capabilities: ["ID"]))
+        try await withScriptedServer([
+            ("C1 LOGIN \"test\" \"test\"", "C1 OK authenticated\r\n"),
+            ("C2 CAPABILITY", "* CAPABILITY IMAP4rev1 ID\r\nC2 OK capability\r\n"),
+            ("C3 " + id, "C3 \(status) ID unsupported\r\n"),
+            ("C4 EXAMINE INBOX", "C4 OK [READ-ONLY] examined\r\n"),
+        ]) { client in
+            try await client.open(user: "test", password: "test")
+            try await client.command("EXAMINE INBOX")
+        }
+    }
+}
+
+/// A loopback IMAP server for one session: it greets, then for each step records the client's
+/// line, checks it against the script, and sends the reply. `body` drives the client through them.
+private func withScriptedServer(
+    _ steps: [(line: String, reply: String)],
+    _ body: @escaping @Sendable (IMAPConnection) async throws -> Void
+) async throws {
+    let parameters = NWParameters.tcp
+    parameters.requiredLocalEndpoint = .hostPort(host: "127.0.0.1", port: .any)
+    let listener = try NWListener(using: parameters)
+    let ready = AsyncThrowingStream<Void, Error>.makeStream()
+    let accepted = AsyncStream<NWConnection>.makeStream()
+    listener.stateUpdateHandler = { state in
+        switch state {
+        case .ready:
+            ready.continuation.yield(())
+            ready.continuation.finish()
+        case .failed(let error): ready.continuation.finish(throwing: error)
+        default: break
+        }
+    }
+    listener.newConnectionHandler = {
+        accepted.continuation.yield($0)
+        accepted.continuation.finish()
+    }
+    listener.start(queue: DispatchQueue(label: "imap-test-listener"))
+    defer { listener.cancel() }
+    for try await _ in ready.stream { break }
+    let port = try #require(listener.port)
+    let client = IMAPConnection(connection: NWConnection(host: "127.0.0.1", port: port, using: .tcp))
+    let server = Task {
+        for await connection in accepted.stream {
+            connection.start(queue: DispatchQueue(label: "imap-test-server"))
+            defer { connection.cancel() }
+            let wire = IMAPTestWire(connection: connection)
+            try await wire.send("* OK ready\r\n")
+            for step in steps {
+                let line = try await wire.line()
+                #expect(line == step.line)
+                try await wire.send(step.reply)
+            }
+            return
+        }
+    }
+    do {
+        try await body(client)
+        try await server.value
+    } catch {
+        await client.close()
+        _ = await server.result
+        throw error
+    }
+    await client.close()
 }
 
 private actor IMAPTestWire {

@@ -70,6 +70,20 @@ actor IMAPConnection {
         _ = try await command("LOGIN \(quote(user)) \(quote(password))")
         let caps = try await command("CAPABILITY")
         capabilities = Set(caps.flatMap { $0.text.uppercased().split(separator: " ").map(String.init) })
+        try await identify()
+    }
+
+    /// RFC 2971: after signing in and before naming a mailbox, say who this client is. NetEase's
+    /// 163 and 126 answer `EXAMINE` with "Unsafe Login" until they have it. Servers that don't
+    /// advertise ID never see the command, and one that turns it down is no reason to stop:
+    /// RFC 2971 §3 forbids changing what the client does based on the reply.
+    private func identify() async throws {
+        guard let line = IMAPIdentification.command(capabilities: capabilities) else { return }
+        do {
+            try await command(line)
+        } catch IMAPError.rejected(_) {
+            // NO or BAD: the session carries on, as the server's answer is only informational.
+        }
     }
 
     func close() { connection.cancel() }
