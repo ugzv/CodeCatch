@@ -23,6 +23,8 @@ extension AppModel {
         var account = account
         if let refreshToken {
             try keychain.write(refreshToken, account.refreshTokenKey)
+            // The cached access token belongs to the old sign-in and its permissions.
+            OAuth.forgetAccessToken(tokenKey: account.refreshTokenKey)
             account.signedIn = true
         } else if !account.usesSignIn {
             if !password.isEmpty { try keychain.write(password, account.secretKey) }
