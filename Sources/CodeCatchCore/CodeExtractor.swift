@@ -35,6 +35,9 @@ public enum CodeExtractor {
         let keywords = keyword.matches(in: text, range: NSRange(location: 0, length: ns.length)).map(\.range)
         guard !keywords.isEmpty else { return nil }
 
+        // Asked of the whole text, so once: a long mail has thousands of candidates.
+        lazy var hasBooking = matches(bookingNumber, text)
+        lazy var hasTransaction = matches(transactionNumber, text)
         var best: (code: String, score: Double, range: NSRange, context: NSRange)?
         for (regex, isNumeric) in [(numeric, true), (alphanumeric, false)] {
             for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
@@ -43,8 +46,9 @@ public enum CodeExtractor {
                 if !isNumeric, !plausibleAlphanumeric(raw) { continue }
                 let code = isNumeric ? raw.filter(\.isNumber) : raw
 
-                let before = ns.substring(to: range.location).suffix(40)
-                let after = ns.substring(from: range.location + range.length).prefix(40)
+                // Cut from a window, not from everything on that side: copying the rest of a long mail per candidate stalled it.
+                let before = ns.substring(with: NSRange(location: max(0, range.location - 640), length: min(640, range.location))).suffix(40)
+                let after = ns.substring(with: NSRange(location: range.upperBound, length: min(640, ns.length - range.upperBound))).prefix(40)
                 let line = ns.lineRange(for: range)
                 // A letters-only word set straight after the keyword is just the next word ("KODE RAHASIA utk",
                 // "NEW API TOKEN CREATED"); "YOUR CODE IS SZBPM", "code: SZBPM" and "SZBPM is your code" name one.
@@ -54,8 +58,8 @@ public enum CodeExtractor {
                 // A PIN beside a booking's confirmation number ("Confirmation: 5984715426 / PIN: 0260")
                 // manages that booking, and an auth code beside a transaction ID ("Transaction ID: 121875559327 /
                 // Auth Code: 051115") is a receipt's card approval: neither is one-time.
-                if matches(pinLabel, String(before)), matches(bookingNumber, text) { continue }
-                if matches(approvalLabel, String(before)), matches(transactionNumber, text) { continue }
+                if matches(pinLabel, String(before)), hasBooking { continue }
+                if matches(approvalLabel, String(before)), hasTransaction { continue }
                 let explicit = matches(explicitBefore, String(before)) || matches(explicitAfter, String(after))
                 // Introduced on the keyword's line ("… Moj A1: 30718264", "Enkratno geslo … je 318842"),
                 // or on the line above a code standing alone ("… Steam Guard code you need …:" over "6VCC5").
@@ -84,7 +88,14 @@ public enum CodeExtractor {
                     matches(codeNoun, ns.substring(with: NSRange(location: line.upperBound, length: below - line.upperBound)))
                     ? below : line.upperBound
                 let context = NSRange(location: leadStart, length: end - leadStart)
-                let near = keywords.filter { NSIntersectionRange($0, context).length > 0 }.map { k in
+                // Keywords are in text order: search for the first one reaching into the context, stop at the first past it.
+                var first = 0
+                var past = keywords.count
+                while first < past {
+                    let mid = (first + past) / 2
+                    if keywords[mid].upperBound <= context.location { first = mid + 1 } else { past = mid }
+                }
+                let near = keywords[first...].prefix { $0.location < context.upperBound }.map { k in
                     k.upperBound <= range.location
                         ? range.location - k.upperBound
                         : k.location >= range.upperBound ? k.location - range.upperBound : 0
