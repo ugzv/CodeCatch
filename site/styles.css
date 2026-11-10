@@ -790,7 +790,7 @@ li.copied .tick, button.copied > svg { display: block; stroke-dasharray: 21; ani
   html { scroll-behavior: auto; }
   .reveal, .banner, .keys, .ring .arc, .row .ring, .button, .toc ol::before { transition: none; }
   .reveal { opacity: 1; transform: none; }
-  li.copied .tick, button.copied > svg { animation: none; }
+  li.copied .tick, button.copied > svg, .caret { animation: none; }
 }
 
 /* AgentCard.swift and AgentsTab.swift: an agent's request for a code, and Settings → Agents. */
