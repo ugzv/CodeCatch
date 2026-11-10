@@ -151,7 +151,9 @@ public enum MIME {
         var html: String?
         collect(headers: headers, body: body, plain: &plain, html: &html, depth: 0)
         let parsedHTML = html.map(readHTML)
-        let links = parsedHTML?.links ?? plain.map(bareLinks) ?? []
+        // An HTML part without anchors can sit beside a plain part that spells the link out.
+        let htmlLinks = parsedHTML?.links ?? []
+        let links = htmlLinks.isEmpty ? plain.map(bareLinks) ?? [] : htmlLinks
         if let plain, !plain.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return (plain, links) }
         return (parsedHTML?.text ?? "", links)
     }

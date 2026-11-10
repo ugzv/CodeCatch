@@ -54,6 +54,12 @@ import Testing
         "Content-Type: text/plain\r\nContent-Transfer-Encoding: base64\r\n\r\n" + Data("Your code: 482913. Thanks!".utf8).base64EncodedString().dropLast(3)
     #expect(MIME.parse(Data(cut.utf8)).text.hasPrefix("Your code: 482913"))
 
+    // An HTML part with no anchors must not hide the link the plain part spells out.
+    let alt =
+        "Content-Type: multipart/alternative; boundary=XX\r\n\r\n--XX\r\nContent-Type: text/plain\r\n\r\nSign in: https://a.com/login?t=abc\r\n"
+        + "--XX\r\nContent-Type: text/html\r\n\r\n<p>Sign in with the link</p>\r\n--XX--"
+    #expect(MIME.parse(Data(alt.utf8)).links == [MailLink(url: "https://a.com/login?t=abc", label: "Sign in")])
+
     let bare = "Subject: Vaša koda\r\nContent-Type: multipart/mixed; boundary=XX\r\n\r\n--XX\r\n\r\nYour code: 482913\r\n--XX--"
     #expect(MIME.parse(Data(bare.utf8)) == MailMessage(fromName: "", fromAddress: "", subject: "Vaša koda", text: "Your code: 482913\n"))
 }
