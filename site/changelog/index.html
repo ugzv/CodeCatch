@@ -32,7 +32,7 @@
    "description": "What changed in CodeCatch, newest first.",
    "url": "https://codecatch.app/changelog/",
    "inLanguage": "en",
-   "dateModified": "2026-10-29",
+   "dateModified": "2026-11-10",
    "author": {
     "@id": "https://codecatch.app/#author"
    },
@@ -110,8 +110,22 @@
 <section class="releases">
   <article class="release">
     <header>
-      <h2><time datetime="2026-10-29">29 October 2026</time></h2>
+      <h2><time datetime="2026-11-10">10 November 2026</time></h2>
       <p class="tag">Latest</p>
+    </header>
+    <div class="release-body">
+      <dl class="points">
+        <div><dt>Long mails no longer freeze the app</dt><dd>A very long mail full of numbers could freeze CodeCatch while it looked for a code: about ten seconds, or close to a minute when the mail was one long line. It now takes about a second.</dd></div>
+        <div><dt>Gmail and Outlook while offline</dt><dd>With your Mac offline, a Gmail or Outlook account showed as working and tried again every five seconds. It now shows the problem and waits longer between tries. And when you sign in again to allow reading mail, reading starts right away. It could take up to an hour.</dd></div>
+        <div><dt>Sign-in links in plain-text mail</dt><dd>A sign-in link written out in a mail’s plain-text part was missed when its HTML part had no links. CodeCatch now finds it.</dd></div>
+        <div><dt>Smaller fixes</dt><dd>The search field no longer disappears while you type in it. <code>codecatch get --timeout inf</code> now says what is wrong.</dd></div>
+      </dl>
+    </div>
+  </article>
+
+  <article class="release">
+    <header>
+      <h2><time datetime="2026-10-29">29 October 2026</time></h2>
     </header>
     <div class="release-body">
       <dl class="points">
