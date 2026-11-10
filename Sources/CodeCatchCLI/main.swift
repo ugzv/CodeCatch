@@ -117,7 +117,7 @@ case "get":
     }
     var timeout: TimeInterval?
     if let text = option("--timeout") {
-        guard let seconds = Double(text), seconds > 0 else { usage("--timeout takes a number of seconds.") }
+        guard let seconds = Double(text), seconds > 0, seconds.isFinite else { usage("--timeout takes a number of seconds.") }
         timeout = seconds
     }
     guard args.count == 2, !args[1].hasPrefix("-") else {
