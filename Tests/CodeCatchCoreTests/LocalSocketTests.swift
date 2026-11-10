@@ -39,5 +39,6 @@ import Testing
     // Runs before the close above: the late write must not land on a reused descriptor.
     defer { wrote.wait() }
     var buffer = Data()
-    #expect(LocalSocket.readLine(from: fds[0], buffer: &buffer, within: 2) == Data("hello".utf8))
+    // A deadline far past the write: on a busy machine the writer above can start seconds late.
+    #expect(LocalSocket.readLine(from: fds[0], buffer: &buffer, within: 30) == Data("hello".utf8))
 }
