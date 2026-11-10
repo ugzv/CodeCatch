@@ -146,9 +146,11 @@ private actor FakeGmail: MailAPI {
     var historyChecks = 0
     var backfills = 0
     var fetched: [String] = []
-    init(expireHistoryOnce: Bool = false, signInRevoked: Bool = false) {
+    let unreachable: Bool
+    init(expireHistoryOnce: Bool = false, signInRevoked: Bool = false, unreachable: Bool = false) {
         self.expireHistoryOnce = expireHistoryOnce
         self.signInRevoked = signInRevoked
+        self.unreachable = unreachable
     }
     func cursor() throws -> String {
         if signInRevoked { throw OAuth.Failure.token("invalid_grant") }
@@ -160,6 +162,7 @@ private actor FakeGmail: MailAPI {
     }
     func added(since cursor: String) throws -> (ids: [String], cursor: String) {
         historyChecks += 1
+        if unreachable { throw URLError(.notConnectedToInternet) }
         if expireHistoryOnce && historyChecks == 1 { throw MailAPIError.cursorExpired }
         // The backfilled mail also shows up in the first history check, as it can when it lands mid-backfill.
         return (fetched.contains("new") ? [] : ["backfilled", "new"], "101")
@@ -213,6 +216,26 @@ private actor FakeGmail: MailAPI {
     watcher.cancel()
     await watcher.value
     #expect(reported == .failed(SourceStatus.signInExpired))
+}
+
+/// A resumed account makes no call before its first check: shown as working there, an unreachable
+/// provider flickered between working and failed, and each failed try reset the retry backoff.
+@Test @MainActor func resumedAccountIsNotLiveBeforeItsProviderAnswers() async {
+    let statuses = AsyncStream<SourceStatus>.makeStream()
+    let watcher = Task {
+        await APIWatcher.watch(
+            MailAccount(label: "Gmail", host: MailAccount.gmailHost, user: "test@gmail.com"), from: .cursor("100"),
+            status: { statuses.continuation.yield($0) }, deliver: { _ in },
+            mailbox: FakeGmail(unreachable: true))
+    }
+    var reported: SourceStatus?
+    for await status in statuses.stream where status != .connecting {
+        reported = status
+        break
+    }
+    watcher.cancel()
+    await watcher.value
+    #expect(reported != .live)
 }
 
 /// The status shows in the menu's banner: a system error's own text there reads as gibberish.
