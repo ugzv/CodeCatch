@@ -45,3 +45,4 @@ p.executableURL = URL(fileURLWithPath: "/usr/bin/iconutil")
 p.arguments = ["-c", "icns", iconset, "-o", out]
 try! p.run()
 p.waitUntilExit()
+exit(p.terminationStatus)
