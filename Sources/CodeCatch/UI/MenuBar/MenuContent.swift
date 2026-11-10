@@ -66,7 +66,7 @@ struct MenuContent: View {
                 attention("All sources off", "Turn on a source in Settings.", fix: ("Open Settings", { openSettings(at: .sources) }))
                     .padding(.horizontal, 10).padding(.bottom, 10)
             }
-            if model.items.count > Self.recent || hasLogins || searchRequested { searchField }
+            if model.items.count > Self.recent || hasLogins || searchRequested || !query.isEmpty { searchField }
             ScrollViewReader { scroll in
                 ScrollView {
                     VStack(spacing: 0) {
