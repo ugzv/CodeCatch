@@ -65,18 +65,29 @@ enum APIWatcher {
                     try await MailWatcher.hand(messages, event: event, deliver: deliver)
                 }
 
+                // Live once the provider has answered: a resumed account makes no call before its first check,
+                // and counting it as working there also reset the backoff on every failed try.
+                var live = false
+                func answered() async {
+                    guard !live else { return }
+                    live = true
+                    await status(.live)
+                    backoff = retryDelay
+                }
+
                 if cursor == nil {
                     let start = try await mailbox.cursor()
                     try await receive(try await mailbox.inbox(since: Date().addingTimeInterval(-lookback), limit: MailWatcher.backfill))
                     cursor = start
                     await event(.read(.cursor(start)))
                     resuming = false
+                    try Task.checkCancellation()
+                    await answered()
                 }
                 try Task.checkCancellation()
-                await status(.live)
-                backoff = retryDelay
                 while !Task.isCancelled {
                     let (added, next) = try await mailbox.added(since: cursor!)
+                    await answered()
                     // The same newest few on a retry, so a failed fetch can't widen the window to older mail.
                     let pending = (resuming ? added.suffix(MailWatcher.backfill) : added[...]).filter { !seen.contains($0) }
                     if pending.isEmpty { try await receive([]) }
