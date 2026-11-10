@@ -35,8 +35,8 @@ in any browser or app.
 - **Can type the code for you** (off by default).
 - **Works from the keyboard.** ⌃⌥⌘C copies the latest code. ⌃⌥⌘F opens search.
 - **Reads about 35 languages.**
-- **Stays private.** Hidden from screen sharing, with optional blur and
-  clearing when the Mac locks.
+- **Stays private.** Hidden from screen sharing, and can hide codes until
+  you point at them and clear them when the Mac locks.
 
 ## Install
 
