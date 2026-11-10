@@ -49,7 +49,7 @@ public enum CodeExtractor {
                 // Cut from a window, not from everything on that side: copying the rest of a long mail per candidate stalled it.
                 let before = ns.substring(with: NSRange(location: max(0, range.location - 640), length: min(640, range.location))).suffix(40)
                 let after = ns.substring(with: NSRange(location: range.upperBound, length: min(640, ns.length - range.upperBound))).prefix(40)
-                let line = ns.lineRange(for: range)
+                let line = line(around: range, in: ns)
                 // A letters-only word set straight after the keyword is just the next word ("KODE RAHASIA utk",
                 // "NEW API TOKEN CREATED"); "YOUR CODE IS SZBPM", "code: SZBPM" and "SZBPM is your code" name one.
                 if !isNumeric, !raw.contains(where: \.isNumber), !matches(introducer, String(before)), !matches(explicitAfter, String(after)) {
@@ -310,7 +310,7 @@ public enum CodeExtractor {
     private static func previousLineStart(_ location: Int, in ns: NSString) -> Int {
         var p = location
         while p > 0 {
-            let prev = ns.lineRange(for: NSRange(location: p - 1, length: 0))
+            let prev = line(around: NSRange(location: p - 1, length: 0), in: ns)
             p = prev.location
             if !ns.substring(with: prev).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { break }
         }
@@ -321,15 +321,29 @@ public enum CodeExtractor {
     private static func nextLineEnd(_ location: Int, in ns: NSString) -> Int {
         var p = location
         while p < ns.length {
-            let next = ns.lineRange(for: NSRange(location: p, length: 0))
+            let next = line(around: NSRange(location: p, length: 0), in: ns)
             p = next.upperBound
             if !ns.substring(with: next).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { break }
         }
         return p
     }
 
+    /// The line around `range` as `lineRange(for:)` gives it, looking at most `reach` UTF-16 units each way:
+    /// a mail that is one very long line was read whole for every candidate, which froze detection.
+    private static func line(around range: NSRange, in ns: NSString, reach: Int = 1000) -> NSRange {
+        let from = max(0, range.location - reach)
+        let to = min(ns.length, range.upperBound + reach)
+        let before = ns.rangeOfCharacter(from: .newlines, options: .backwards, range: NSRange(location: from, length: range.location - from))
+        let start = before.location == NSNotFound ? from : before.upperBound
+        let after = ns.rangeOfCharacter(from: .newlines, range: NSRange(location: range.upperBound, length: to - range.upperBound))
+        guard after.location != NSNotFound else { return NSRange(location: start, length: to - start) }
+        // "\r\n" ends a line as one.
+        let crlf = ns.character(at: after.location) == 13 && after.upperBound < ns.length && ns.character(at: after.upperBound) == 10
+        return NSRange(location: start, length: after.upperBound + (crlf ? 1 : 0) - start)
+    }
+
     private static func aloneOnLine(_ range: NSRange, in ns: NSString) -> Bool {
-        let line = ns.substring(with: ns.lineRange(for: range))
+        let line = ns.substring(with: line(around: range, in: ns))
         let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
         return trimmed == ns.substring(with: range)
     }
