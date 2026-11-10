@@ -16,6 +16,22 @@ import Testing
     }
 }
 
+/// Detection runs on the main thread: work that grew with the square of a mail's candidates froze
+/// the app for about ten seconds on one long mail.
+@Test func longMailCannotStallDetection() {
+    // This thread's CPU time: other tests running beside this one can't stretch it.
+    func cost(_ count: Int) -> UInt64 {
+        let text = String(repeating: "Your code: 123456\n", count: count)
+        let start = clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID)
+        #expect(CodeExtractor.code(in: text) == "123456")
+        return clock_gettime_nsec_np(CLOCK_THREAD_CPUTIME_ID) - start
+    }
+    // Sixteen times the mail may cost about sixteen times as much, not fifty or more; seconds alone depend on the machine.
+    _ = cost(10)  // the patterns compile on first use
+    let short = cost(300)
+    #expect(cost(4_800) < short * 32)
+}
+
 /// The card's title: a wrong or missing service makes codes indistinguishable.
 @Test(
     arguments: [
