@@ -5623,7 +5623,9 @@ net.vi
 org.vi
 vn
 ac.vn
+ad.vn
 ai.vn
+ap.vn
 biz.vn
 com.vn
 edu.vn
@@ -5635,6 +5637,7 @@ int.vn
 io.vn
 name.vn
 net.vn
+on.vn
 org.vn
 pro.vn
 angiang.vn
@@ -6266,7 +6269,6 @@ hdfcbank
 health
 healthcare
 help
-helsinki
 here
 hermes
 hiphop
@@ -7917,7 +7919,6 @@ antagonist.cloud
 claude.app
 claudeusercontent.com
 frame.claudeusercontent.com
-*.cursorusercontent.com
 apigee.io
 panel.dev
 siiites.com
@@ -7982,8 +7983,10 @@ bearblog.dev
 pages.gay
 bnr.la
 bitbucket.io
+ship.place
 blackbaudcdn.net
 of.je
+prod.page
 square.site
 bluebite.io
 boomla.net
@@ -8009,6 +8012,7 @@ radio.am
 radio.fm
 cdn.bubble.io
 bubbleapps.io
+manus.space
 *.bwcloud-os-instance.de
 cafjs.com
 canva-apps.cn
@@ -8262,6 +8266,7 @@ dnshome.it
 dyn.now
 heimdns.online
 ddns.wtf
+docsflowy.site
 online.th
 shop.th
 co.scot
@@ -9284,6 +9289,7 @@ co.place
 co.technology
 linkyard-cloud.ch
 linkyard.cloud
+linkyhost.page
 members.linode.com
 *.nodebalancer.linode.com
 *.linodeobjects.com
@@ -9307,6 +9313,7 @@ loginline.services
 loginline.site
 lohmus.me
 lovable.app
+auth.lovable.app
 lovableproject.com
 lovable.run
 lovable.sh
@@ -9790,6 +9797,7 @@ own.pm
 *.owo.codes
 ox.rs
 oy.lc
+pagelemon.dev
 pgfog.com
 gotpantheon.com
 pantheonsite.io
@@ -9991,6 +9999,8 @@ sakura.tv
 *.we.crm.dev
 *.wf.crm.dev
 sandcats.io
+sanity.run
+sanity.studio
 sav.case
 logoip.com
 logoip.de
@@ -10087,6 +10097,7 @@ applinzi.com
 sinaapp.com
 vipsinaapp.com
 siteleaf.net
+sliplane.app
 small-web.org
 aeroport.fr
 avocat.fr
@@ -10115,6 +10126,10 @@ my.at
 my.de
 *.nxa.eu
 nx.gw
+*.apps.grok.bot
+*.pages.grok.bot
+*.cursorusercontent.com
+grok.me
 spawnbase.app
 customer.speedpartner.de
 myspreadshop.at
@@ -10370,7 +10385,6 @@ raffleentry.org.uk
 weeklylottery.org.uk
 wpenginepowered.com
 js.wpenginepowered.com
-grok.me
 *.xenonconnect.de
 half.host
 cistron.nl
